@@ -1,5 +1,7 @@
 package team375;
 
+import java.util.Random;
+
 public class Message {
 	private int mode;
 	private int object;
@@ -10,6 +12,34 @@ public class Message {
 	private int destID;
 	private int typeControl;
 	private int idControl;
+	
+	static int GO_TO = 0;
+	static int GET_OUT = 1;
+	static int FOUND = 2;
+	static int ESCAPE = 3;
+	static int POSITION = 4;
+	
+	static int MY_ARCHON = 1;
+	static int ENEMY_ARCHON = 2;
+	static int NEUTRAL_ARCHON = 3;
+	static int DEN = 4;
+	static int BIG_ZOMBIE = 5;
+	
+	static int NONE = 0;
+	static int ARCHON = 1;
+	static int SOLDIER = 2; 
+	static int SCOUT = 3;
+	static int GUARD = 4;
+	static int VIPER = 5;
+	static int TURRET = 6;
+	static int TTM = 7;
+	static int SOLDIER_VIPER = 8;
+	static int TURRET_TTM = 9;
+	static int SOLDIER_GUARD_VIPER = 10;
+	static int SOLDIER_SCOUT_GUARD_VIPER = 11;
+	static int ALL_EXCEPT_ARCHON = 12;
+	static int ALL = 15;
+	
 	
 	/*
 	 * DISTRIBUCIO DE BITS:
@@ -26,40 +56,6 @@ public class Message {
 	 * b30-b16: message id
 	 * b15: id control
 	 * b14-b0: dest id
-	 */
-	
-	/*
-	 * MODE: 
-	 * 0: go to (x,y)
-	 * 1: get out of (x,y)
-	 * 2: found object in (x,y)
-	 * 3: run away from (x,y)
-	 */
-	
-	/*
-	 * OBJECT:
-	 * 0: friendly archon
-	 * 1: enemy archon
-	 * 2: neutral archon
-	 * 3: zombie den
-	 * 4: big zombie
-	 */
-	
-	/*
-	 * ROBOTTYPE:
-	 * 0: none
-	 * 1: archon
-	 * 2: soldier
-	 * 3: scout
-	 * 4: guard
-	 * 5: viper
-	 * 6: turret
-	 * 7: TTM
-	 * 8: soldier & viper
-	 * 9: turret & TTM
-	 * 10: soldier & guard & viper
-	 * 11: soldier & scout & guard & viper
-	 * 15: all robots
 	 */
 	
 	/*
@@ -92,6 +88,19 @@ public class Message {
 		idControl = i2 % 2;
 		i2 = i2/2;
 		messageID = i2 % 32768;
+	}
+	
+	public Message(int mode2, int object2, int robotType2, int x2, int y2, int destID2, int typeControl2, int idControl2){
+		mode = mode2 % 16;
+		object = object2 % 16;
+		robotType = robotType2 % 16;
+		x = x2 % 128;
+		y = y2 % 128;
+		destID = destID2 % 32768;
+		typeControl = typeControl2 % 2;
+		idControl = idControl2 % 2;
+		Random rand = new Random(mode+object+robotType+x+y+destID+typeControl+idControl);
+		messageID = rand.nextInt(32768);
 	}
 	
 	public Message(int mode2, int object2, int robotType2, int x2, int y2, int messageID2, int destID2, int typeControl2, int idControl2){

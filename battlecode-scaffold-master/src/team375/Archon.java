@@ -16,6 +16,8 @@ public class Archon extends RobotPlayer{
     static RobotInfo[] nearbyNeutrals;
     static int[][] danger;
     static final int DANGER_THRESHHOLD = 1;
+    static Boolean leader;
+    static RobotType nextRobotType;
     
     //Retorna true si l'archon detecta enemics que li poden disparar, i cap enemic li pot disparar a un enemic seu
     public static int getDanger(MapLocation loc){
@@ -37,25 +39,38 @@ public class Archon extends RobotPlayer{
     }
     
     public static void calculateDanger(){
-    	for (int i = -1; i < 2; i++){
-    		for (int j = -1; j < 2; j++){
-    			danger[i+1][j+1] = getDanger(rc.getLocation().add(i,j));
+    	for (RobotInfo info: nearbyEnemies){
+    		RobotInfo[] friendlyTargets = rc.senseNearbyRobots(info.location, info.type.attackRadiusSquared, myTeam);
+    		for (int i = -1; i < 2; i++){
+    			for (int j = -1; j<2; j++){
+    				MapLocation loc = rc.getLocation().add(i, j);
+    				if (info.type.attackRadiusSquared < info.location.distanceSquaredTo(loc)) continue;
+    				if (friendlyTargets.length <= 1) danger[i+1][j+1]++;
+    			}
+    		}
+    	}
+    	for (RobotInfo info: nearbyZombies){
+    		for (int i = -1; i < 2; i++){
+    			for (int j = -1; j<2; j++){
+    				MapLocation loc = rc.getLocation().add(i, j);
+    				if (info.type.attackRadiusSquared < info.location.distanceSquaredTo(loc)) continue;
+    				danger[i+1][j+1]++;
+    			}
     		}
     	}
     }
     
+    //De les 8 direccions retorna la que tingui menys perill
     public static Direction safestDirection(){
     	Direction dir = Direction.NORTH;
     	int safeDir = -1;
     	int lowestDanger = 100;
     	for (int i = 0; i < 8; i++){
-    		MapLocation loc = rc.getLocation().add(dir);
     		if (!rc.canMove(dir)) {
     			dir = dir.rotateLeft();
     			continue;
     		}
-    		if (safeDir == -1) safeDir = -2;
-    		int aux = getDanger(loc);
+    		int aux = danger[dir.dx+1][dir.dy+1];
     		if (aux < lowestDanger){
     			lowestDanger = aux;
     			safeDir = i;
@@ -69,10 +84,47 @@ public class Archon extends RobotPlayer{
     	return bestDir;
     }
     
-	
 	public static void playArchon(){
 		try {
             // Any code here gets executed exactly once at the beginning of the game.
+			Signal[] signals = rc.emptySignalQueue();
+			Signal found = null;
+			for (Signal i: signals){
+				if (i.getTeam() == myTeam && i.getMessage() != null){
+					found = i;
+					break;
+				}
+			}
+			
+			if (found == null){
+				leader = true;
+				rc.setIndicatorString(0, "Soc el lider");
+				MapLocation[] initArchons = rc.getInitialArchonLocations(myTeam);
+				int maxdist = 0;
+				for (MapLocation i: initArchons){
+					if (rc.getLocation().distanceSquaredTo(i) > maxdist){
+						maxdist = rc.getLocation().distanceSquaredTo(i);
+					}
+				}
+				if (maxdist > 0){
+					int mode = Message.GO_TO;
+					int object = Message.NONE;
+					int robotType = Message.ARCHON;
+					int x = rc.getLocation().x;
+					int y = rc.getLocation().y;
+					int destID = 0;
+					int typeControl = 1;
+					int idControl = 0;
+					Message m = new Message(mode, object,robotType,x, y, destID, typeControl, idControl);
+					int[] coded = m.encode();
+					rc.broadcastMessageSignal(coded[0], coded[1], maxdist);
+				}
+			}else{
+				leader = false;
+				int[] coded = found.getMessage();
+				Message m= new Message(coded[0], coded[1]);
+				targetLocation = new MapLocation(m.getX(), m.getY());
+			}
         } catch (Exception e) {
             // Throwing an uncaught exception makes the robot die, so we need to catch exceptions.
             // Caught exceptions will result in a bytecode penalty.
@@ -99,12 +151,14 @@ public class Archon extends RobotPlayer{
                 	 * 2. Si pot fabricar un robot, el fabrica
                 	 * 3. Si esta en perill, fuig
                 	 * 4. Recull parts adjacents
+                	 * 5. Va a la target location (si no hi es ja)
                 	 * 5. Neteja rubble adjacent
                 	 * Sempre: intenta reparar soldats propers	
                 	 */
                 	Boolean hasMoved = false;
                 	RobotInfo[] adjacentNeutrals = rc.senseNearbyRobots(2, Team.NEUTRAL);
-                    
+                    //if (targetLocation != null) System.out.println("TargetLocation = "+targetLocation.x+" "+targetLocation.y);
+                	
                 	if (adjacentNeutrals.length != 0){
                     	rc.activate(adjacentNeutrals[0].location);
                     	rc.setIndicatorString(0,"Ha activat un robot neutral");
@@ -132,7 +186,7 @@ public class Archon extends RobotPlayer{
                     	Direction dir = safestDirection();
                     	if (dir != Direction.NONE){
                     		hasMoved = true;
-                    		rc.move(safestDirection());
+                    		rc.move(dir);
                         	rc.setIndicatorString(0,"Hi havia perill i ha fugit");
                     	}/*
                     	System.out.println("Danger: ");
@@ -156,6 +210,17 @@ public class Archon extends RobotPlayer{
                     			break;
                     		}
                     		dir = dir.rotateLeft();
+                    	}
+                    }
+                    
+                    if (!hasMoved){
+                    	if (targetLocation != null && targetLocation != rc.getLocation()){
+                    		Direction dir = rc.getLocation().directionTo(targetLocation);
+                    		if (rc.canMove(dir)) {
+                    			rc.move(dir);
+                    			rc.setIndicatorString(0, "Ha anat a la target location");
+                    			hasMoved = true;
+                    		}
                     	}
                     }
                     

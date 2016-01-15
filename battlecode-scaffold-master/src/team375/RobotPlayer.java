@@ -20,9 +20,9 @@ public class RobotPlayer {
     static int visionRange;
     static Team myTeam;
     static Team enemyTeam;
+    static MapLocation targetLocation;
     
     
-	
 	
     public static void run(RobotController rc2) {
         // You can instantiate variables here.
