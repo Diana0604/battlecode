@@ -16,10 +16,6 @@ public class Archon extends RobotPlayer{
     static RobotInfo[] nearbyNeutrals;
     static int[][] danger;
     static final int DANGER_THRESHHOLD = 1;
-	
-
-    
-    
     
     //Retorna true si l'archon detecta enemics que li poden disparar, i cap enemic li pot disparar a un enemic seu
     public static int getDanger(MapLocation loc){
