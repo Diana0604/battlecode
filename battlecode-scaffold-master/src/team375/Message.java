@@ -4,6 +4,7 @@ import java.util.Random;
 import battlecode.common.*;
 
 public class Message {
+	private long array;
 	private MapLocation sender;
 	private int mode;
 	private int object;
@@ -38,7 +39,7 @@ public class Message {
 	
 	/*
 	 * Constants del robotType
-	 */
+	 */	
 	static int NONE = 0;
 	static int ARCHON = 1;
 	static int SOLDIER = 2; 
@@ -58,13 +59,13 @@ public class Message {
 	/*
 	 * DISTRIBUCIO DE BITS:
 	 * i1:
-	 * b31-b29: unused
-	 * b28-b25: mode
-	 * b24-b21: object
-	 * b20: type control
-	 * b19-b16: robot type
-	 * b15-b8: x
-	 * b7-b0: y
+	 * b63-b61: unused
+	 * b60-b57: mode
+	 * b56-b53: object
+	 * b52: type control
+	 * b51-b48: robot type
+	 * b47-b40: x
+	 * b39-b32: y
 	 * 
 	 * i2:
 	 * b30-b16: message id
@@ -78,29 +79,23 @@ public class Message {
 	 * Diferencia entre mode = 1 i mode = 3: mode= 1 es quan p. ex. l'archon no es pot moure i diu 
 	 * als soldats que s'apartin del cami. mode = 3 es quan esta ple de zombies i els soldats s'han d'allunyar d'alla
 	 */
-	
-	
-	public Message(MapLocation sender, int i1, int i2){
-		y = i1 % 256;
-		i1 = i1 /256;
-		x = i1 % 256;
-		i1 = i1 / 256;
-		robotType = i1%16;
-		i1 = i1 / 16;
-		typeControl = i1%2;
-		i1 = i1 / 2;
-		object = i1 % 16;
-		i1 = i1/16;
-		mode = i1 % 16;
-		
-		destID = i2 % 32768;
-		i2 = i2/32768;
-		idControl = i2 % 2;
-		i2 = i2/2;
-		messageID = i2 % 32768;
+
+	public Message(MapLocation sender2, int i1, int i2){
+		sender = sender2;
+		array = intsToLong(i1, i2);
+		destID = selectBits(array, 0, 14);
+		idControl = selectBits(array, 15, 15);
+		messageID = selectBits(array, 16, 30);
+		y = selectBits(array, 32, 39);
+		x = selectBits(array, 40, 47);
+		robotType = selectBits(array, 48, 51);
+		typeControl = selectBits(array, 52, 52);
+		object = selectBits(array, 53, 56);
+		mode = selectBits(array, 57, 60);
 	}
 	
-	public Message(MapLocation sender, int mode2, int object2, int robotType2, int x2, int y2, int destID2, int typeControl2, int idControl2){
+	public Message(MapLocation sender2, int mode2, int object2, int robotType2, int x2, int y2, int destID2, int typeControl2, int idControl2){
+		sender = sender2;
 		mode = mode2 % 16;
 		object = object2 % 16;
 		robotType = robotType2 % 16;
@@ -111,9 +106,11 @@ public class Message {
 		idControl = idControl2 % 2;
 		Random rand = new Random(mode+object+robotType+x+y+destID+typeControl+idControl);
 		messageID = rand.nextInt(32768);
+		computeArray();
 	}
 	
-	public Message(MapLocation sender, int mode2, int object2, int robotType2, int x2, int y2, int messageID2, int destID2, int typeControl2, int idControl2){
+	public Message(MapLocation sender2, int mode2, int object2, int robotType2, int x2, int y2, int messageID2, int destID2, int typeControl2, int idControl2){
+		sender = sender2;
 		mode = mode2 % 16;
 		object = object2 % 16;
 		robotType = robotType2 % 16;
@@ -123,32 +120,61 @@ public class Message {
 		destID = destID2 % 32768;
 		typeControl = typeControl2 % 2;
 		idControl = idControl2 % 2;
+		computeArray();
+	}
+	
+	
+	//agafa els bits de x entre start i end, tots dos inclosos. start indica el bit de menor pes, i end el de major
+	//Per exemple, si x = 0b10110010, start = 2, end = 5, retornaria 0b1100 (10110010 -> 10 1100 10 -> 1100)
+	private int selectBits(long x, int start, int end){
+		if (start > end) return 0;
+		if (start < 0) return 0;
+		if (end > 63) return 0;
+		long shifted = x >> start;
+		long masked = shifted & (1 << (end-start+1) - 1);
+		return (int) masked;
+	}
+	
+	private long setBits(long l, int start, int end, long val){
+		for (int i = start; i <= end; i++){
+			l = l & ~(1 << i); //posa a 0 el bit i
+		}
+		
+		long v2 = val % (1 << end-start+1);
+		
+		l += v2 << start;		 
+		return l;
+	}
+	
+	public long intsToLong(int i1, int i2){
+		long ret = i1;
+		ret = ret << 32;
+		ret += i2;
+		return ret;
+	}
+	
+	public int[] longToInts(long l){
+		int[] ret = new int[2];
+		ret[0] = selectBits(l, 32, 63);
+		ret[1] = selectBits(l, 0, 31);
+		return ret;
+	}
+	
+	public void computeArray(){
+		array = 0;
+		array = setBits(array,0,14,destID);
+		array = setBits(array,15,15,idControl);
+		array = setBits(array,16,30,messageID);
+		array = setBits(array,32,39,y);
+		array = setBits(array,40,47,x);
+		array = setBits(array,48,51,robotType);
+		array = setBits(array,52,52,typeControl);
+		array = setBits(array,53,56,object);
+		array = setBits(array,57,60,mode);		
 	}
 	
 	public int[] encode(){
-		int i1, i2;
-		i1 = i2 = 0;
-		i1+=mode;
-		i1*=16;
-		i1+=object;
-		i1*=2;
-		i1+=typeControl;
-		i1*=16;
-		i1+=robotType;
-		i1*=256;
-		i1+=x;
-		i1*=256;
-		i1+=y;
-		
-		i2+=messageID;
-		i2*=2;
-		i2+=idControl;
-		i2*=32768;
-		i2+=destID;
-		
-		
-		int[] ret = {i1, i2};
-		return ret;
+		return longToInts(array);
 	}
 	
 	public int getMode() {return mode;}

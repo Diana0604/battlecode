@@ -74,14 +74,13 @@ public class Archon extends RobotPlayer{
     }
     
     public static void chooseNextRobotType(){
-    	int n = rand.nextInt(12); // 1 de cada 8 robots seran scouts
+    	int n = rand.nextInt(12); // 1 de cada 12 robots seran scouts
     	if (n == 0) nextRobotType = RobotType.SCOUT;
     	else nextRobotType = RobotType.SOLDIER;
     }
     
 	public static void playArchon(){
 		try {
-            // Any code here gets executed exactly once at the beginning of the game.
 			Signal[] signals = rc.emptySignalQueue();
 			Signal found = null;
 			for (Signal i: signals){
