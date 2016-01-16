@@ -136,6 +136,8 @@ public class Archon extends RobotPlayer{
                 danger = new int[3][3];
                 calculateDanger();
                 
+                
+                
                 if (rc.isCoreReady()) {
                 	/*
                 	 * Ordre d'importancia:

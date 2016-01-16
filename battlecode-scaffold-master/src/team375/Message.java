@@ -107,6 +107,7 @@ public class Message {
 		Random rand = new Random(mode+object+robotType+x+y+destID+typeControl+idControl);
 		messageID = rand.nextInt(32768);
 		computeArray();
+		System.out.println("L'array val "+array);
 	}
 	
 	public Message(MapLocation sender2, int mode2, int object2, int robotType2, int x2, int y2, int messageID2, int destID2, int typeControl2, int idControl2){
@@ -131,17 +132,17 @@ public class Message {
 		if (start < 0) return 0;
 		if (end > 63) return 0;
 		long shifted = x >> start;
-		long masked = shifted & (1 << (end-start+1) - 1);
+		long masked = shifted & (((long) 1 << (end-start+1)) - (long)1);
 		return (int) masked;
 	}
 	
 	private long setBits(long l, int start, int end, long val){
 		for (int i = start; i <= end; i++){
-			l = l & ~(1 << i); //posa a 0 el bit i
+			l = l & ~((long)1 << i); //posa a 0 el bit i
+			//System.out.println("ara array val "+l+", start = "+start+", end = "+end+", i = "+i);
 		}
 		
 		long v2 = val % (1 << end-start+1);
-		
 		l += v2 << start;		 
 		return l;
 	}
@@ -161,16 +162,27 @@ public class Message {
 	}
 	
 	public void computeArray(){
+		//System.out.println("L'array val "+array);
 		array = 0;
+		//System.out.println("L'array val "+array);
 		array = setBits(array,0,14,destID);
+		//System.out.println("L'array val "+array);
 		array = setBits(array,15,15,idControl);
+		//System.out.println("L'array val "+array);
 		array = setBits(array,16,30,messageID);
+		//System.out.println("L'array val "+array);
 		array = setBits(array,32,39,y);
+		//System.out.println("L'array val "+array);
 		array = setBits(array,40,47,x);
+		//System.out.println("L'array val "+array);
 		array = setBits(array,48,51,robotType);
+		//System.out.println("L'array val "+array);
 		array = setBits(array,52,52,typeControl);
+		//System.out.println("L'array val "+array);
 		array = setBits(array,53,56,object);
+		//System.out.println("L'array val "+array);
 		array = setBits(array,57,60,mode);		
+		//System.out.println("L'array val "+array);
 	}
 	
 	public int[] encode(){
@@ -194,4 +206,6 @@ public class Message {
 	public int getidControl() {return idControl;}
 	
 	public int getid() {return destID;}
+	
+	public long getArray() {return array;}
 }
