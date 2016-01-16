@@ -7,7 +7,7 @@ import battlecode.common.RobotInfo;
 import battlecode.common.Team;
 
 public class Guard extends RobotPlayer{
-
+// el david ja és aqui!
 	public static void playGuard() {
 		try {
             // Any code here gets executed exactly once at the beginning of the game.
