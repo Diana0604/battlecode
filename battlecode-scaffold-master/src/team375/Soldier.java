@@ -24,12 +24,6 @@ public class Soldier extends RobotPlayer {
             // at the end of it, the loop will iterate once per game round.
             try {
                 int fate = rand.nextInt(1000);
-
-                if (fate % 5 == 3) {
-                    // Send a normal signal
-                    rc.broadcastSignal(80);
-                }
-
                 boolean shouldAttack = false;
 
                 // If this robot type can attack, check for enemies within range and attack one

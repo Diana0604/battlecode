@@ -1,29 +1,18 @@
 package team375;
 
-import battlecode.common.Clock;
-import battlecode.common.Direction;
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
-import battlecode.common.Signal;
-import battlecode.common.Team;
+import battlecode.common.*;
 
 public class Archon extends RobotPlayer{
-	static RobotInfo[] nearbyFriends;
-    static RobotInfo[] nearbyEnemies;
-    static RobotInfo[] nearbyZombies;
-    static RobotInfo[] nearbyNeutrals;
     static int[][] danger;
     static final int DANGER_THRESHHOLD = 1;
     static Boolean leader;
-    static RobotType nextRobotType;
+    static RobotType nextRobotType = RobotType.SCOUT;
     
     //Retorna true si l'archon detecta enemics que li poden disparar, i cap enemic li pot disparar a un enemic seu
     public static int getDanger(MapLocation loc){
     	int ret = 0;
     	for (RobotInfo i: nearbyEnemies){
-    		if (i.type.attackRadiusSquared < Utils.squareDist(i.location, loc)) continue; //canviar el radi a la visio?
+    		if (i.type.attackRadiusSquared < i.location.distanceSquaredTo(loc)) continue; //canviar el radi a la visio?
     		if (rc.senseNearbyRobots(i.location, i.type.attackRadiusSquared, myTeam).length == 1) {
     			//arreglar-ho per torretes
     			//si l'unica unitat del meu equip que veuen es l'archon, posar-hi perill
@@ -31,7 +20,7 @@ public class Archon extends RobotPlayer{
     		}
     	}
     	for (RobotInfo i: nearbyZombies){
-    		if (i.type.attackRadiusSquared < Utils.squareDist(i.location, loc)) continue;
+    		if (i.type.attackRadiusSquared < i.location.distanceSquaredTo(loc)) continue;
     		//si em poden disparar els zombies, posar-hi perill
     		ret++;
     	}
@@ -84,6 +73,12 @@ public class Archon extends RobotPlayer{
     	return bestDir;
     }
     
+    public static void chooseNextRobotType(){
+    	int n = rand.nextInt(12); // 1 de cada 8 robots seran scouts
+    	if (n == 0) nextRobotType = RobotType.SCOUT;
+    	else nextRobotType = RobotType.SOLDIER;
+    }
+    
 	public static void playArchon(){
 		try {
             // Any code here gets executed exactly once at the beginning of the game.
@@ -110,20 +105,18 @@ public class Archon extends RobotPlayer{
 					int mode = Message.GO_TO;
 					int object = Message.NONE;
 					int robotType = Message.ARCHON;
-					int x = rc.getLocation().x;
-					int y = rc.getLocation().y;
 					int destID = 0;
 					int typeControl = 1;
 					int idControl = 0;
-					Message m = new Message(mode, object,robotType,x, y, destID, typeControl, idControl);
+					Message m = new Message(rc.getLocation(),mode, object,robotType,128, 128, destID, typeControl, idControl);
 					int[] coded = m.encode();
 					rc.broadcastMessageSignal(coded[0], coded[1], maxdist);
 				}
 			}else{
 				leader = false;
 				int[] coded = found.getMessage();
-				Message m= new Message(coded[0], coded[1]);
-				targetLocation = new MapLocation(m.getX(), m.getY());
+				Message m= new Message(found.getLocation(),coded[0], coded[1]);
+				targetLocation = new MapLocation(found.getLocation().x, found.getLocation().y);//canviar-ho quan arregli lo de la x i y
 			}
         } catch (Exception e) {
             // Throwing an uncaught exception makes the robot die, so we need to catch exceptions.
@@ -137,7 +130,7 @@ public class Archon extends RobotPlayer{
             // at the end of it, the loop will iterate once per game round.
             try {               
                 Signal[] signals = rc.emptySignalQueue();
-                nearbyFriends = rc.senseNearbyRobots(visionRange,myTeam);
+                //nearbyFriends = rc.senseNearbyRobots(visionRange,myTeam);
                 nearbyEnemies = rc.senseNearbyRobots(visionRange,enemyTeam);
                 nearbyZombies = rc.senseNearbyRobots(visionRange,Team.ZOMBIE);
                 nearbyNeutrals = rc.senseNearbyRobots(visionRange,Team.NEUTRAL);
@@ -165,13 +158,14 @@ public class Archon extends RobotPlayer{
                     	hasMoved = true;
                     }
                     
-                    if (!hasMoved && rc.hasBuildRequirements(RobotType.SOLDIER)) {
+                    if (!hasMoved && rc.hasBuildRequirements(nextRobotType)) {
                     	//De moment nomes fabrica soldiers
                         Direction dirToBuild = directions[rand.nextInt(8)];
                         for (int i = 0; i < 8; i++) {
                             // If possible, build in this direction
-                            if (rc.canBuild(dirToBuild, RobotType.SOLDIER)) {
-                                rc.build(dirToBuild, RobotType.SOLDIER);
+                            if (rc.canBuild(dirToBuild, nextRobotType)) {
+                                rc.build(dirToBuild, nextRobotType);
+                                chooseNextRobotType();
                             	rc.setIndicatorString(0,"Ha construit un soldat");
                                 hasMoved = true;
                                 break;

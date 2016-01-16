@@ -21,6 +21,10 @@ public class RobotPlayer {
     static Team myTeam;
     static Team enemyTeam;
     static MapLocation targetLocation;
+	static RobotInfo[] nearbyFriends;
+    static RobotInfo[] nearbyEnemies;
+    static RobotInfo[] nearbyZombies;
+    static RobotInfo[] nearbyNeutrals;
     
     
 	
