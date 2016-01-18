@@ -5,9 +5,16 @@ import battlecode.common.Direction;
 import battlecode.common.GameConstants;
 import battlecode.common.RobotInfo;
 import battlecode.common.Team;
+import battlecode.common.MapLocation;
 
 public class Soldier extends RobotPlayer {
 
+	
+	private static int taxista (MapLocation a, MapLocation b) {
+		return Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y));
+	}
+	
+	
 	public static void playSoldier() {
 		try {
             // Any code here gets executed exactly once at the beginning of the game.
@@ -20,9 +27,62 @@ public class Soldier extends RobotPlayer {
         }
 
         while (true) {
+        	/**
+        	 * Coses a tenir en compte:
+        	 * * Quan una torre ataca i no la veiem
+        	 * * Quan una rubble ens barra el pas al camí recte
+        	 * * Quan esta a poca vida en combat, retirar-se (si no esta infectat, almenys)
+        	 */
+        	
+        	
             // This is a loop to prevent the run() method from returning. Because of the Clock.yield()
             // at the end of it, the loop will iterate once per game round.
             try {
+            	RobotInfo[] robots = rc.senseNearbyRobots();
+            	RobotInfo[] allies = new RobotInfo[robots.length];
+            	RobotInfo[] enemies = new RobotInfo[robots.length];
+            	RobotInfo[] zombies = new RobotInfo[robots.length];
+            	int nallies = 0, nenemies = 0, nzombies = 0;
+            	for (int i = 0; i < robots.length; ++i) {
+            		if (robots[i].team == myTeam) allies[nallies++] = robots[i];
+            		else if (robots[i].team == enemyTeam) enemies[nenemies++] = robots[i];
+            		else if (robots[i].team == Team.ZOMBIE) zombies[nzombies++] = robots[i];
+            	}
+            	if (nenemies > 0) rc.broadcastSignal(visionRange);
+            	if (rc.isWeaponReady() && nenemies > 0) {
+            		RobotInfo obj;
+            		int proper = 0, debil = 0, dist = 2*visionRange;
+            		double vida = 1000000;
+            		for (int i = 0; i < enemies.length; ++i) {
+            			if (enemies[i].health < vida) {
+            				vida = enemies[i].health;
+            				debil = i;
+            			}
+            			if (taxista(rc.getLocation(),enemies[i].location) < dist) {
+            				dist = taxista(rc.getLocation(),enemies[i].location);
+            				proper = i;
+            			}
+            		}
+            		if (dist == 1) obj = enemies[proper];
+            		else obj = enemies[debil];
+            		rc.attackLocation(obj.location);
+            	}
+            	
+            	if (rc.isCoreReady()) {
+            		int[] M = new int[8];
+	            	for (int i = 0; i < 8; ++i) {
+	            		M[i] = 0;
+	            		MapLocation ml = rc.getLocation().add(directions[i]);
+	            		for (int j = 0; j < robots.length; ++i) {
+	            			/**
+	            			 * Per cada robot a prop fer
+	            			 */
+	            		}
+	            	}
+            	}
+            	
+            	
+            	/*
                 int fate = rand.nextInt(1000);
 
                 if (fate % 5 == 3) {
@@ -68,6 +128,7 @@ public class Soldier extends RobotPlayer {
                         }
                     }
                 }
+                */
 
                 Clock.yield();
             } catch (Exception e) {
