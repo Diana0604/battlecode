@@ -8,23 +8,8 @@ public class Archon extends RobotPlayer{
     static Boolean leader;
     static RobotType nextRobotType = RobotType.SCOUT;
     
-    //Retorna true si l'archon detecta enemics que li poden disparar, i cap enemic li pot disparar a un enemic seu
-    public static int getDanger(MapLocation loc){
-    	int ret = 0;
-    	for (RobotInfo i: nearbyEnemies){
-    		if (i.type.attackRadiusSquared < i.location.distanceSquaredTo(loc)) continue; //canviar el radi a la visio?
-    		if (rc.senseNearbyRobots(i.location, i.type.attackRadiusSquared, myTeam).length == 1) {
-    			//arreglar-ho per torretes
-    			//si l'unica unitat del meu equip que veuen es l'archon, posar-hi perill
-    			ret++;
-    		}
-    	}
-    	for (RobotInfo i: nearbyZombies){
-    		if (i.type.attackRadiusSquared < i.location.distanceSquaredTo(loc)) continue;
-    		//si em poden disparar els zombies, posar-hi perill
-    		ret++;
-    	}
-    	return ret;
+    private static int directionDanger(Direction dir){
+    	return danger[dir.dx+1][dir.dy+1];
     }
     
     public static void calculateDanger(){
@@ -34,7 +19,7 @@ public class Archon extends RobotPlayer{
     			for (int j = -1; j<2; j++){
     				MapLocation loc = rc.getLocation().add(i, j);
     				if (info.type.attackRadiusSquared < info.location.distanceSquaredTo(loc)) continue;
-    				if (friendlyTargets.length <= 1) danger[i+1][j+1]++;
+    				if (friendlyTargets.length <= 1) danger[i+1][j+1] += info.attackPower/info.type.attackDelay;
     			}
     		}
     	}
@@ -42,9 +27,15 @@ public class Archon extends RobotPlayer{
     		for (int i = -1; i < 2; i++){
     			for (int j = -1; j<2; j++){
     				MapLocation loc = rc.getLocation().add(i, j);
-    				if (info.type.attackRadiusSquared < info.location.distanceSquaredTo(loc)) continue;
-    				danger[i+1][j+1]++;
+    				if (info.type.attackRadiusSquared < info.location.distanceSquaredTo(loc) && info.location.distanceSquaredTo(loc) > 8) continue;
+    				danger[i+1][j+1] += info.attackPower/info.type.attackDelay;
     			}
+    		}
+    	}
+    	
+    	for (int i = 0; i < 3; i++){
+    		for (int j = 0; j < 3; j++){
+    			//if (rc.senseRubble(rc.getLocation().add(i-1,j-1)) > GameConstants.RUBBLE_SLOW_THRESH) danger[i][j] *= 2;
     		}
     	}
     }
@@ -179,20 +170,11 @@ public class Archon extends RobotPlayer{
                     
                     if (!hasMoved && danger[1][1] >= DANGER_THRESHHOLD){
                     	Direction dir = safestDirection();
-                    	if (dir != Direction.NONE){
+                    	if (dir != Direction.NONE && danger[dir.dx+1][dir.dy+1] < danger[1][1]){
                     		hasMoved = true;
                     		rc.move(dir);
                         	rc.setIndicatorString(0,"Hi havia perill i ha fugit");
-                    	}/*
-                    	System.out.println("Danger: ");
-                        for (int i2 = 0; i2 < 3; i2++){
-                        	for (int j = 0; j < 3; j++){
-                        		System.out.print(danger[i2][j] + " ");
-                        	}
-                        	System.out.println("");
-                        }
-                        System.out.println("");*/
-                        
+                    	}
                     }
                     
                     if (!hasMoved){
@@ -211,7 +193,9 @@ public class Archon extends RobotPlayer{
                     if (!hasMoved){
                     	if (targetLocation != null && targetLocation != rc.getLocation()){
                     		Direction dir = rc.getLocation().directionTo(targetLocation);
-                    		if (rc.canMove(dir)) {
+                    		if (directionDanger(dir) > 0) dir = dir.rotateLeft();
+                    		if (directionDanger(dir) > 0) dir = dir.rotateRight().rotateRight();
+                    		if (rc.canMove(dir) && directionDanger(dir) == 0) {
                     			rc.move(dir);
                     			rc.setIndicatorString(0, "Ha anat a la target location");
                     			hasMoved = true;

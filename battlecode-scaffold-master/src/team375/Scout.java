@@ -24,7 +24,7 @@ public class Scout  extends RobotPlayer{
     			for (int j = -1; j<2; j++){
     				MapLocation loc = rc.getLocation().add(i, j);
     				if (info.type.attackRadiusSquared < info.location.distanceSquaredTo(loc)) continue;
-    				if (friendlyTargets.length <= 1) danger[i+1][j+1]++;
+    				if (friendlyTargets.length <= 1) danger[i+1][j+1] += info.attackPower/info.type.attackDelay;
     			}
     		}
     	}
@@ -32,8 +32,8 @@ public class Scout  extends RobotPlayer{
     		for (int i = -1; i < 2; i++){
     			for (int j = -1; j<2; j++){
     				MapLocation loc = rc.getLocation().add(i, j);
-    				if (info.type.attackRadiusSquared < info.location.distanceSquaredTo(loc)) continue;
-    				danger[i+1][j+1]++;
+    				if (info.type.attackRadiusSquared < info.location.distanceSquaredTo(loc)&& info.location.distanceSquaredTo(loc) > 8) continue;
+    				danger[i+1][j+1] += info.attackPower/info.type.attackDelay;
     			}
     		}
     	}
@@ -62,7 +62,7 @@ public class Scout  extends RobotPlayer{
     	return bestDir;
     }
 	
-	private static void selectDirection(){
+	private static void selectDirection() throws GameActionException{
 		int mindanger = 999;
 		for (int i = 0; i < 3; i++){
 			for (int j = 0; j < 3; j++){
@@ -74,6 +74,13 @@ public class Scout  extends RobotPlayer{
 			currentDir = directions[rand.nextInt(8)];
 			turnsLeft = MAX_TURNS;
 		}
+		
+		if (!rc.canMove(currentDir) && rc.onTheMap(rc.getLocation().add(currentDir))) {
+			currentDir = currentDir.rotateLeft();
+			if (!rc.canMove(currentDir) && rc.onTheMap(rc.getLocation().add(currentDir))) currentDir = currentDir.rotateRight().rotateRight();
+		}
+		
+		
 		while (!rc.canMove(currentDir) || turnsLeft <= 0 || danger[currentDir.dx+1][currentDir.dy+1] > mindanger){
 			currentDir = directions[rand.nextInt(8)];
 			turnsLeft = MAX_TURNS;
