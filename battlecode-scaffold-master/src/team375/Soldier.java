@@ -48,7 +48,7 @@ public class Soldier extends RobotPlayer {
         	/**
         	 * Coses a tenir en compte:
         	 * * Quan una torre ataca i no la veiem
-        	 * * Quan una rubble ens barra el pas al camí recte
+        	 * * Quan una rubble ens barra el pas al camioner recte
         	 * * Quan esta a poca vida en combat, retirar-se (si no esta infectat, almenys)
         	 */
         	
