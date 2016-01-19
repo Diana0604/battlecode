@@ -7,8 +7,9 @@ import java.util.ArrayList;
 public class Scout  extends RobotPlayer{
 
 	static ArrayList<Integer> seenUnits = new ArrayList<>();
-	static ArrayList<MapLocation> myArchons = new ArrayList<>();
-	static int lastUnitSeen;
+	static ArrayList<MapLocation> myArchonsLocation = new ArrayList<>();
+	static ArrayList<Integer> myArchonsID = new ArrayList<>();
+	static ArrayList<Integer> myArchonsLastSeen = new ArrayList<>();
 	static Direction currentDir;
 	static int turnsLeft;
 	static Boolean hasMoved;
@@ -157,7 +158,13 @@ public class Scout  extends RobotPlayer{
 				rc.broadcastMessageSignal(coded[0], coded[1], BROADCAST_DISTANCE);
 			}
 		}
-		
+		for (RobotInfo ri: nearbyFriends){
+			if (ri.type == RobotType.ARCHON){
+				if (!myArchonsID.contains(ri.ID)){
+					
+				}
+			}
+		}
 		
 	}
 	
@@ -176,6 +183,7 @@ public class Scout  extends RobotPlayer{
                 nearbyEnemies = rc.senseNearbyRobots(visionRange,enemyTeam);
                 nearbyZombies = rc.senseNearbyRobots(visionRange,Team.ZOMBIE);
                 nearbyNeutrals = rc.senseNearbyRobots(visionRange,Team.NEUTRAL);
+                nearbyFriends = rc.senseNearbyRobots(visionRange,myTeam);
                 if (rc.isCoreReady()) {
                 	hasMoved = false;
                 	danger = new int[3][3];
