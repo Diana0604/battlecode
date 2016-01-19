@@ -284,14 +284,20 @@ public class Soldier extends RobotPlayer {
     	            }
     	            */
 
-            			int BC2 = Clock.getBytecodeNum();
+            			/*int BC2 = Clock.getBytecodeNum();
     	            	++compt_no;
     	            	if (compt_no < 50) {
     	            		compt_bc += BC2-BC1;
     	            		System.out.printf("\nDiferencia de bc: %d\n", BC2-BC1);
     		            }
     	            	else if (compt_no == 50) System.out.printf("\nMitjana de diferencia de bc: %f\n", (double)compt_bc/compt_no);
-    	            	
+    	            	*/
+            		
+            		M[8] -= rc.senseRubble(rc.getLocation());
+            		for (int k = 0; k < 8; ++k) {
+            			M[k] -= rc.senseRubble(rc.getLocation().add(directions[k]));
+            		}
+            		
 	            	
 	            	millor = 8;
             		for (int i = 0; i < 8; i++) {
