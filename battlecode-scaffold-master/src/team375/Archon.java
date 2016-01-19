@@ -82,6 +82,7 @@ public class Archon extends RobotPlayer{
 			int robotType = m.getRobotType();
 			int x = m.getX();
 			int y = m.getY();
+			System.out.println(x+"  "+y+"  my pos = "+rc.getLocation().x+","+rc.getLocation().y);
 			int idControl = m.getidControl();
 			int id = m.getid();
 			
@@ -99,6 +100,8 @@ public class Archon extends RobotPlayer{
     			}
     		}else{
     			//L'ha enviat un scout
+    			//System.out.println("rep missatge de scout");
+    			//System.out.println(mode+" "+object+" "+typeControl+" "+x+" "+y);
     			if (mode == Message.FOUND){
     				if (object == Message.DEN){
     					if (!dens.contains(object)){
@@ -131,22 +134,47 @@ public class Archon extends RobotPlayer{
     	}
     }
     
-    private static void updateTargetLocation(){
+    private static void updateTargetLocation() throws GameActionException{
     	//ESBORRAR LOCS
+    	if (dens == null) System.out.println("dens null");
+    	else for (int i = 0; i < dens.size(); i++){
+    		MapLocation m = dens.get(i);
+    		//System.out.print(m.x+","+m.y+"  ");
+    		if (rc.canSense(m)){
+    			if (rc.senseRobotAtLocation(m) == null) dens.remove(m);
+    			else if (rc.senseRobotAtLocation(m).type != RobotType.ZOMBIEDEN) dens.remove(m);
+    		}
+    	}
+    	//System.out.println("aaa");
+    	
+    	if (neutralArchons == null) System.out.println("neutrals null");
+    	else for (int i = 0; i < neutralArchons.size(); i++){
+    		MapLocation m = neutralArchons.get(i);
+    		//System.out.print(m.x+","+m.y+"  ");
+    		if (rc.canSense(m)){
+    			if (rc.senseRobotAtLocation(m) == null) neutralArchons.remove(m);
+    			else if (rc.senseRobotAtLocation(m).type != RobotType.ARCHON) neutralArchons.remove(m);
+    		}
+    	}
+    	//System.out.println("bbb");
+    	
     	
     	
     	MapLocation closestDen = null;
     	int dist = 1000000;
-    	for (MapLocation m: dens){
-    		if (rc.getLocation().distanceSquaredTo(m) > dist){
+    	for (int i = 0; i < dens.size(); i++){
+    		MapLocation m = dens.get(i);
+    		if (rc.getLocation().distanceSquaredTo(m) < dist){
     			dist = rc.getLocation().distanceSquaredTo(m);
     			closestDen = m;
     		}
     	}
+    	
     	MapLocation closestNeutralArchon = null;
     	dist = 1000000;
-    	for (MapLocation m: neutralArchons){
-    		if (rc.getLocation().distanceSquaredTo(m) > dist){
+    	for (int i = 0; i < neutralArchons.size(); i++){
+    		MapLocation m = neutralArchons.get(i);
+    		if (rc.getLocation().distanceSquaredTo(m) < dist){
     			dist = rc.getLocation().distanceSquaredTo(m);
     			closestNeutralArchon = m;
     		}
@@ -164,7 +192,7 @@ public class Archon extends RobotPlayer{
     			}else targetLocation = closestNeutralArchon;
     		}
     	}
-    	
+    	//if (targetLocation != null) System.out.println(targetLocation.x+" "+targetLocation.y);
     }
     
 	public static void playArchon(){
@@ -220,10 +248,8 @@ public class Archon extends RobotPlayer{
                 danger = new int[3][3];
                 calculateDanger();
                 readSignals();
-                if (leader) {
-                	updateTargetLocation();
-                	sendSignals();
-                }
+                updateTargetLocation();
+                if (leader)	sendSignals();
                 
                 
                 if (rc.isCoreReady()) {
@@ -286,12 +312,14 @@ public class Archon extends RobotPlayer{
                     		dir = dir.rotateLeft();
                     	}
                     }
-                    
+                    //if (targetLocation == null) System.out.println("target null");
                     if (!hasMoved){
                     	if (targetLocation != null && targetLocation != rc.getLocation()){
+                    		
+                    		
                     		Direction dir = rc.getLocation().directionTo(targetLocation);
-                    		if (directionDanger(dir) > 0) dir = dir.rotateLeft();
-                    		if (directionDanger(dir) > 0) dir = dir.rotateRight().rotateRight();
+                    		if (directionDanger(dir) > 0 || !rc.canMove(dir)) dir = dir.rotateLeft();
+                    		if (directionDanger(dir) > 0 || !rc.canMove(dir)) dir = dir.rotateRight().rotateRight();
                     		if (rc.canMove(dir) && directionDanger(dir) == 0) {
                     			rc.move(dir);
                     			rc.setIndicatorString(0, "Ha anat a la target location");

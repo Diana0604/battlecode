@@ -134,6 +134,7 @@ public class Scout  extends RobotPlayer{
 				int robotType = Message.ARCHON;
 				int x = rc.getLocation().x - ri.location.x + 128;
 				int y = rc.getLocation().y - ri.location.y + 128;
+				System.out.println("Envia den a "+x+","+y);
 				int destID = 0;
 				int typeControl = 1;
 				int idControl = 0;

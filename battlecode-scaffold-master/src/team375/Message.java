@@ -173,9 +173,9 @@ public class Message {
 							           robotType == SOLDIER_SCOUT_GUARD_VIPER || robotType == ALL_EXCEPT_ARCHON || robotType == ALL_EXCEPT_SCOUT ||
 							           robotType == ALL;}
 	
-	public int getX() {return sender.x + x - 128;}
+	public int getX() {return sender.x - x + 128;}
 	
-	public int getY() {return sender.y + y - 128;}
+	public int getY() {return sender.y - y + 128;}
 	
 	public int getidControl() {return idControl;}
 	

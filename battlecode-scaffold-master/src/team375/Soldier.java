@@ -73,9 +73,7 @@ public class Soldier extends RobotPlayer {
             // at the end of it, the loop will iterate once per game round.
             try {
             	
-            	String sortida = "";
             	
-            	int torn = rc.getRoundNum();
             	RobotInfo[] robots = rc.senseNearbyRobots();
             	RobotInfo[] allies = new RobotInfo[robots.length];
             	RobotInfo[] enemies = new RobotInfo[robots.length];
