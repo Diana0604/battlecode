@@ -5,6 +5,7 @@ import battlecode.common.Direction;
 import battlecode.common.GameConstants;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.Signal;
 import battlecode.common.Team;
 import battlecode.common.MapLocation;
 
@@ -22,6 +23,9 @@ public class Soldier extends RobotPlayer {
 	private static int taxista (MapLocation a, MapLocation b) {
 		return Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y));
 	}
+	
+	static private boolean enCombat = false;
+	
 	
 	static boolean jo = false;
 	static int compt_bc = 0;
@@ -69,27 +73,23 @@ public class Soldier extends RobotPlayer {
             		else if (robots[i].team == Team.ZOMBIE) zombies[nzombies++] = robots[i];
             	}
             	if (jo) sortida+= Clock.getBytecodesLeft() + " ";
-            	//if (nenemies > 0) rc.broadcastSignal(visionRange);
-            	/*
-            	if (rc.isWeaponReady() && nenemies > 0) {
-            		RobotInfo obj;
-            		int proper = 0, debil = 0, dist = 2*visionRange;
-            		double vida = 1000000;
-            		for (int i = 0; i < enemies.length; ++i) {
-            			if (enemies[i].health < vida) {
-            				vida = enemies[i].health;
-            				debil = i;
-            			}
-            			if (taxista(rc.getLocation(),enemies[i].location) < dist) {
-            				dist = taxista(rc.getLocation(),enemies[i].location);
-            				proper = i;
-            			}
+            	
+            	if (!enCombat) {
+            		if (nenemies+nzombies > 0) {
+            			enCombat = true;
+            			rc.broadcastSignal(visionRange);
             		}
-            		if (dist == 1) obj = enemies[proper];
-            		else obj = enemies[debil];
-            		rc.attackLocation(obj.location);
             	}
-            	*/
+            	
+            	Signal[] sig = rc.emptySignalQueue();
+    			for (int i = 0; i < sig.length; ++i) {
+    				if (sig[i].getMessage() == null) {
+    					if (i == sig.length-1 || (sig[i].getID() != sig[i+1].getID())) { // si no es un senyal doble
+    						
+    					}
+    					else ++i; // no llegir el segon senyal dels dos
+    				}
+    			}
 
             									
         		int[] M = {0, 0, 0, 0, 0, 0, 0, 0, 0};
