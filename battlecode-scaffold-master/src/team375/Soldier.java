@@ -30,8 +30,11 @@ public class Soldier extends RobotPlayer {
 	
 	private static int[] aSoldierInf = {-1000000, -2100, -2000, -1000, -20, -10, -5};
 	private static int[] eSoldierInf = {-1000000, 2100, 2000, 1000, 20, 10, 5};
+	private static int[] eGuardInf = {-1000000, 2100, 2000, 1000, 20, 10, 5};
+	private static int[] eTurretInf = {-1000000, 2100, 2000, 1000, 20, 10, 5};
 	private static int[] eViperInf = {-1000000, 2500, 2300, 2000, 100, 50, 20};
-	private static int[] eArchonInf = {-1000000, 1000, 900, 800, 700, 500, 600, 500, 400, 300, 200, 100};
+	private static int [] eArchonInf = {-1000000, 5000, 3000, 2500, 1000, 500, 100};
+	private static int[] eArchonInfL = {-1000000, 1000, 900, 800, 700, 500, 600, 500, 400, 300, 200, 100};
 	
 	private static final int torns_combat = 5;
 	private static final int WEAK = 20;
@@ -95,7 +98,10 @@ public class Soldier extends RobotPlayer {
             	{
             		int infectionViper = rc.getViperInfectedTurns();
             		int infectionZombie = rc.getViperInfectedTurns();
-            		if((infectionViper > 0 && rc.getHealth() - infectionViper*2 < 0) || (infectionZombie > 5 && rc.getHealth() < WEAK)) dying = true;
+            		if((infectionViper > 0 && rc.getHealth() - infectionViper*2 < 0) || (infectionZombie > 5 && rc.getHealth() < WEAK)) 
+            			{
+            				dying = true;
+            			}
             		
             	}
             	
@@ -175,17 +181,26 @@ public class Soldier extends RobotPlayer {
             				else if (rob.type == RobotType.GUARD) {
             					for (int k = 0; k < 9; ++k) {
             						if(!dying) M[k] += eGuard[taxi[offsetDX][offsetDY][k]];
+            						else M[k] += eGuardInf[taxi[offsetDX][offsetDY][k]];
             					}
             				}
             				else if (rob.type == RobotType.TURRET) {
             					for (int k = 0; k < 9; ++k) {
             						if(!dying) M[k] += eTurret[taxi[offsetDX][offsetDY][k]];
+            						else M[k] += eTurretInf[taxi[offsetDX][offsetDY][k]];
             					}
             				}
             				else if (rob.type == RobotType.VIPER) {
             					for (int k = 0; k < 9; ++k) {
             						if(!dying) M[k] += eViper[taxi[offsetDX][offsetDY][k]];
             						else M[k] += eViperInf[taxi[offsetDX][offsetDY][k]];
+            					}
+            				}
+            				else if (rob.type == RobotType.ARCHON)
+            				{
+            					for(int k = 0; k < 9; ++k)
+            					{
+            						if(dying) M[k] += eArchonInf[taxi[offsetDX][offsetDY][k]];
             					}
             				}
             			}
@@ -234,16 +249,16 @@ public class Soldier extends RobotPlayer {
     	            	{
     	            		if(dir == directions[i])
     	            		{
-    	            			M[i] += eArchonInf[d]; continue;
+    	            			M[i] += eArchonInfL[d]; continue;
     	            		}
     	            		if(d == 10) continue;
     	            		if(dir.rotateLeft() == directions[i])
     	            		{
-    	            			M[i] += eArchonInf[d + 1];
+    	            			M[i] += eArchonInfL[d + 1];
     	            		}
     	            		if(dir.rotateRight() == directions[i])
     	            		{
-    	            			M[i] += eArchonInf[d + 1];
+    	            			M[i] += eArchonInfL[d + 1];
     	            		}
     	            	}
     	            }
