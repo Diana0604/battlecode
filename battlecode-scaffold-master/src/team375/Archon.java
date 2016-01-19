@@ -314,7 +314,7 @@ public class Archon extends RobotPlayer{
                     }
                     //if (targetLocation == null) System.out.println("target null");
                     if (!hasMoved){
-                    	if (targetLocation != null && targetLocation != rc.getLocation()){
+                    	if (targetLocation != null && !rc.canSense(targetLocation)){
                     		
                     		
                     		Direction dir = rc.getLocation().directionTo(targetLocation);
