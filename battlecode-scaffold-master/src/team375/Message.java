@@ -13,10 +13,10 @@ public class Message {
 	private int y; //X i Y es calculen respecte la posicio del que envia ( (128,128) -> posicio del que envia) 
 	// Per enviar: x = rc.getlocation - location + 128
 	// Per rebre: location = rc.getlocaion + 128 - x
-	private int messageID; //random, identificador unic del missatge. servira quan els scouts facin de repetidors (?)
 	private int destID;
 	private int typeControl;
 	private int idControl;
+	private int senderArchon; //1 si es un archon, 0 si es un scout
 	
 	/*
 	 * Constants del mode
@@ -69,7 +69,7 @@ public class Message {
 	 * b39-b32: y
 	 * 
 	 * i2:
-	 * b30-b16: message id
+	 * b16: senderArchon
 	 * b15: id control
 	 * b14-b0: dest id
 	 */
@@ -86,7 +86,7 @@ public class Message {
 		array = intsToLong(i1, i2);
 		destID = selectBits(array, 0, 14);
 		idControl = selectBits(array, 15, 15);
-		messageID = selectBits(array, 16, 30);
+		senderArchon = selectBits(array, 16, 16);
 		y = selectBits(array, 32, 39);
 		x = selectBits(array, 40, 47);
 		robotType = selectBits(array, 48, 51);
@@ -95,7 +95,7 @@ public class Message {
 		mode = selectBits(array, 57, 60);
 	}
 	
-	public Message(MapLocation sender2, int mode2, int object2, int robotType2, int x2, int y2, int destID2, int typeControl2, int idControl2){
+	public Message(MapLocation sender2, int mode2, int object2, int robotType2, int x2, int y2, int destID2, int typeControl2, int idControl2, int senderArchon2){
 		sender = sender2;
 		mode = mode2 % 16;
 		object = object2 % 16;
@@ -105,26 +105,10 @@ public class Message {
 		destID = destID2 % 32768;
 		typeControl = typeControl2 % 2;
 		idControl = idControl2 % 2;
-		Random rand = new Random(mode+object+robotType+x+y+destID+typeControl+idControl); //genera un nombre random, la seed es aquesta perque sigui sempre diferent
-		messageID = rand.nextInt(32768);
+		senderArchon = senderArchon2;
 		computeArray();
 	}
-	
-	public Message(MapLocation sender2, int mode2, int object2, int robotType2, int x2, int y2, int messageID2, int destID2, int typeControl2, int idControl2){
-		sender = sender2;
-		mode = mode2 % 16;
-		object = object2 % 16;
-		robotType = robotType2 % 16;
-		x = x2 % 256;
-		y = y2 % 256;
-		messageID = messageID2 % 32768;
-		destID = destID2 % 32768;
-		typeControl = typeControl2 % 2;
-		idControl = idControl2 % 2;
-		computeArray();
-	}
-	
-	
+		
 	//agafa els bits de x entre start i end, tots dos inclosos. start indica el bit de menor pes, i end el de major
 	//Per exemple, si x = 0b10110010, start = 2, end = 5, retornaria 0b1100 (10110010 -> 10 1100 10 -> 1100)
 	private int selectBits(long x, int start, int end){
@@ -164,7 +148,7 @@ public class Message {
 		array = 0;
 		array = setBits(array,0,14,destID);
 		array = setBits(array,15,15,idControl);
-		array = setBits(array,16,30,messageID);
+		array = setBits(array,16,16,senderArchon);
 		array = setBits(array,32,39,y);
 		array = setBits(array,40,47,x);
 		array = setBits(array,48,51,robotType);
@@ -189,11 +173,11 @@ public class Message {
 	
 	public int getY() {return sender.y + y - 128;}
 	
-	public int getMessageID() {return messageID;}
-	
 	public int getidControl() {return idControl;}
 	
 	public int getid() {return destID;}
+	
+	public int getSenderArchon() {return senderArchon;}
 	
 	public long getArray() {return array;}
 }

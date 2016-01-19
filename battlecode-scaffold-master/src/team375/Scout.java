@@ -7,6 +7,7 @@ import java.util.ArrayList;
 public class Scout  extends RobotPlayer{
 
 	static ArrayList<Integer> seenUnits = new ArrayList<>();
+	static ArrayList<MapLocation> myArchons = new ArrayList<>();
 	static int lastUnitSeen;
 	static Direction currentDir;
 	static int turnsLeft;
@@ -119,7 +120,7 @@ public class Scout  extends RobotPlayer{
 				int destID = 0;
 				int typeControl = 1;
 				int idControl = 0;
-				Message m = new Message(rc.getLocation(),mode, object,robotType,x,y, destID, typeControl, idControl);
+				Message m = new Message(rc.getLocation(),mode, object,robotType,x,y, destID, typeControl, idControl,0);
 				int[] coded = m.encode();
 				rc.broadcastMessageSignal(coded[0], coded[1], BROADCAST_DISTANCE);
 			}
@@ -135,7 +136,7 @@ public class Scout  extends RobotPlayer{
 				int destID = 0;
 				int typeControl = 1;
 				int idControl = 0;
-				Message m = new Message(rc.getLocation(),mode, object,robotType,x,y, destID, typeControl, idControl);
+				Message m = new Message(rc.getLocation(),mode, object,robotType,x,y, destID, typeControl, idControl,0);
 				int[] coded = m.encode();
 				rc.broadcastMessageSignal(coded[0], coded[1], BROADCAST_DISTANCE);
 			}
@@ -151,11 +152,12 @@ public class Scout  extends RobotPlayer{
 				int destID = 0;
 				int typeControl = 1;
 				int idControl = 0;
-				Message m = new Message(rc.getLocation(),mode, object,robotType,x,y, destID, typeControl, idControl);
+				Message m = new Message(rc.getLocation(),mode, object,robotType,x,y, destID, typeControl, idControl,0);
 				int[] coded = m.encode();
 				rc.broadcastMessageSignal(coded[0], coded[1], BROADCAST_DISTANCE);
 			}
 		}
+		
 		
 	}
 	

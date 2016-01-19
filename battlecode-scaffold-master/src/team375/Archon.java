@@ -64,6 +64,11 @@ public class Archon extends RobotPlayer{
     	else nextRobotType = RobotType.SOLDIER;
     }
     
+    private static void readMessages(){
+    	leader = false;
+    	
+    }
+    
 	public static void playArchon(){
 		try {
 			Signal[] signals = rc.emptySignalQueue();
@@ -92,7 +97,7 @@ public class Archon extends RobotPlayer{
 					int destID = 0;
 					int typeControl = 1;
 					int idControl = 0;
-					Message m = new Message(rc.getLocation(),mode, object,robotType,128, 128, destID, typeControl, idControl);
+					Message m = new Message(rc.getLocation(), mode, object,robotType,128, 128, destID, typeControl, idControl, 1);
 					int[] coded = m.encode();
 					rc.broadcastMessageSignal(coded[0], coded[1], maxdist);
 				}
@@ -120,6 +125,7 @@ public class Archon extends RobotPlayer{
                 nearbyNeutrals = rc.senseNearbyRobots(visionRange,Team.NEUTRAL);
                 danger = new int[3][3];
                 calculateDanger();
+                readMessages();
                 
                 
                 
