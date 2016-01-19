@@ -3,6 +3,7 @@ package team375;
 import battlecode.common.*;
 import java.util.ArrayList;
 
+// Aixo es per putejar una mica Pau :(
 
 public class Scout  extends RobotPlayer{
 
