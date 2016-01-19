@@ -28,11 +28,17 @@ public class Soldier extends RobotPlayer {
 	private static final int[][] eSoldier = {{-1000000, -2100, -2000, -1000, 20, 10, 0},{-1000000, -2100, -2000, -1500, -1250, -1000, 0}};
 	private static final int[][] rZombie = {{-1000000, -3100, -3000, -1500, 20, 10, 0},{-1000000, -3100, -3000, -2000, -1750, -1500, 0}};
 	
+	private static int[] aSoldierInf = {-1000000, -2100, -2000, -1000, -20, -10, -5};
+	private static int[] eSoldierInf = {-1000000, 2100, 2000, 1000, 20, 10, 5};
+	private static int[] eViperInf = {-1000000, 2500, 2300, 2000, 100, 50, 20};
+	private static int[] eArchonInf = {-1000000, 1000, 900, 800, 700, 500, 600, 500, 400, 300, 200, 100};
+	
 	private static final int torns_combat = 5;
+	private static final int WEAK = 20;
 	
 	private static int enCombat = 0;
 	private static MapLocation ls = null; //location del signal
-	
+	private static boolean dying = false;
 	
 	private static int taxista (MapLocation a, MapLocation b) {
 		return Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y));
@@ -57,7 +63,7 @@ public class Soldier extends RobotPlayer {
         	/**
         	 * Coses a tenir en compte:
         	 * * Quan una torre ataca i no la veiem
-        	 * * Quan una rubble ens barra el pas al camí recte
+        	 * * Quan una rubble ens barra el pas al camÃ­ recte
         	 * * Quan esta a poca vida en combat, retirar-se (si no esta infectat, almenys)
         	 */
         	
@@ -85,9 +91,16 @@ public class Soldier extends RobotPlayer {
             	}
             	if (jo) sortida+= Clock.getBytecodesLeft() + " ";
             	
+            	if(!dying)
+            	{
+            		int infectionViper = rc.getViperInfectedTurns();
+            		int infectionZombie = rc.getViperInfectedTurns();
+            		if((infectionViper > 0 && rc.getHealth() - infectionViper*2 < 0) || (infectionZombie > 5 && rc.getHealth() < WEAK)) dying = true;
+            		
+            	}
             	
             	Signal[] sig = rc.emptySignalQueue();
-    			for (int i = 0; i < sig.length; ++i) {
+            	if(!dying) for (int i = 0; i < sig.length; ++i) {
 					if (sig[i].getTeam() == enemyTeam) continue;
     				if (sig[i].getMessage() == null) {
     					if (i < sig.length-1) {
@@ -142,38 +155,41 @@ public class Soldier extends RobotPlayer {
             			if (rob.team == myTeam) {
             				if (rob.type == RobotType.SOLDIER) {
             					for (int k = 0; k < 9; ++k) {
-            						M[k] += aSoldier[taxi[offsetDX][offsetDY][k]];
+            						if(!dying) M[k] += aSoldier[taxi[offsetDX][offsetDY][k]];
+            						else M[k] = aSoldierInf[taxi[offsetDX][offsetDY][k]];
             					}
             				}
             				else if (rob.type == RobotType.ARCHON) {
             					for (int k = 0; k < 9; ++k) {
-            						M[k] += eSoldier[meva_vida][taxi[offsetDX][offsetDY][k]];
+            						if(!dying) M[k] += eSoldier[meva_vida][taxi[offsetDX][offsetDY][k]];
             					}
             				}
             			}
             			else if (rob.team == enemyTeam) {
             				if (rob.type == RobotType.SOLDIER) {
             					for (int k = 0; k < 9; ++k) {
-            						M[k] += eSoldier[meva_vida*seva_vida][taxi[offsetDX][offsetDY][k]];
+            						if(!dying) M[k] += eSoldier[meva_vida*seva_vida][taxi[offsetDX][offsetDY][k]];
+            						else M[k] = eSoldierInf[taxi[offsetDX][offsetDY][k]];
             					}
             				}
             				else if (rob.type == RobotType.GUARD) {
             					for (int k = 0; k < 9; ++k) {
-            						M[k] += eGuard[taxi[offsetDX][offsetDY][k]];
+            						if(!dying) M[k] += eGuard[taxi[offsetDX][offsetDY][k]];
             					}
             				}
             				else if (rob.type == RobotType.TURRET) {
             					for (int k = 0; k < 9; ++k) {
-            						M[k] += eTurret[taxi[offsetDX][offsetDY][k]];
+            						if(!dying) M[k] += eTurret[taxi[offsetDX][offsetDY][k]];
             					}
             				}
             				else if (rob.type == RobotType.VIPER) {
             					for (int k = 0; k < 9; ++k) {
-            						M[k] += eViper[taxi[offsetDX][offsetDY][k]];
+            						if(!dying) M[k] += eViper[taxi[offsetDX][offsetDY][k]];
+            						else M[k] += eViperInf[taxi[offsetDX][offsetDY][k]];
             					}
             				}
             			}
-            			else if (rob.team == Team.ZOMBIE) {
+            			else if (rob.team == Team.ZOMBIE && !dying) {
             				if (rob.type == RobotType.STANDARDZOMBIE) {
             					for (int k = 0; k < 9; ++k) {
             						M[k] += sZombie[taxi[offsetDX][offsetDY][k]];
@@ -196,6 +212,43 @@ public class Soldier extends RobotPlayer {
             				}
             			}
             		}
+            		
+            		//estic comencant a llegir senyal pero no esta ben preparat encar
+            		/*
+    	            if(dying) for(int i = 0; i < sig.length; ++i)
+    	            {
+    	            	Signal s = sig[i];
+    	            	
+    	            	if(s.getTeam() != myTeam) continue;
+    	            	int[] gm = s.getMessage();
+    	            	Message m = new Message(s.getLocation(), gm[0],gm[1]);
+    	            	if(gm == null || m.getMode() != Message.FOUND) continue;
+    	            	if(m.getObject() != Message.ENEMY_ARCHON) continue;
+    	            	int x = m.getX() + s.getLocation().x -128;
+    	            	int y = m.getY() + s.getLocation().y -128;
+    	            	MapLocation objective = new MapLocation(x,y);
+    	            	int d = taxista(rc.getLocation(), objective);
+    	            	if(d > 10) continue;
+    	            	Direction dir = rc.getLocation().directionTo(objective);
+    	            	for(int i = 0; i < 8; i++)
+    	            	{
+    	            		if(dir == directions[i])
+    	            		{
+    	            			M[i] += eArchonInf[d]; continue;
+    	            		}
+    	            		if(d == 10) continue;
+    	            		if(dir.rotateLeft() == directions[i])
+    	            		{
+    	            			M[i] += eArchonInf[d + 1];
+    	            		}
+    	            		if(dir.rotateRight() == directions[i])
+    	            		{
+    	            			M[i] += eArchonInf[d + 1];
+    	            		}
+    	            	}
+    	            }
+    	            */
+            		
             			int BC2 = Clock.getBytecodeNum();
     	            	++compt_no;
     	            	if (compt_no < 50) {
