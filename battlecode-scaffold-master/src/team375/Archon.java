@@ -82,7 +82,7 @@ public class Archon extends RobotPlayer{
 			int robotType = m.getRobotType();
 			int x = m.getX();
 			int y = m.getY();
-			System.out.println(x+"  "+y+"  my pos = "+rc.getLocation().x+","+rc.getLocation().y);
+			//System.out.println(x+"  "+y+"  my pos = "+rc.getLocation().x+","+rc.getLocation().y);
 			int idControl = m.getidControl();
 			int id = m.getid();
 			
@@ -250,7 +250,7 @@ public class Archon extends RobotPlayer{
                 readSignals();
                 updateTargetLocation();
                 if (leader)	sendSignals();
-                
+                //System.out.println("Perill = "+danger[1][1]);
                 
                 if (rc.isCoreReady()) {
                 	/*
@@ -314,7 +314,7 @@ public class Archon extends RobotPlayer{
                     }
                     //if (targetLocation == null) System.out.println("target null");
                     if (!hasMoved){
-                    	if (targetLocation != null && !rc.canSense(targetLocation)){
+                    	if (targetLocation != null && (!rc.canSense(targetLocation)||( rc.canSense(targetLocation) && rc.senseRobotAtLocation(targetLocation).type == RobotType.ARCHON))){
                     		
                     		
                     		Direction dir = rc.getLocation().directionTo(targetLocation);
@@ -324,6 +324,15 @@ public class Archon extends RobotPlayer{
                     			rc.move(dir);
                     			rc.setIndicatorString(0, "Ha anat a la target location");
                     			hasMoved = true;
+                    		}
+                    	}
+                    }
+                    if (!hasMoved){
+                    	for (Direction d: directions){
+                    		if (rc.senseRobotAtLocation(rc.getLocation().add(d)) != null){
+	                    		if (rc.senseRobotAtLocation(rc.getLocation().add(d)).team == Team.ZOMBIE){
+	                    			if (rc.canMove(d.opposite())) rc.move(d.opposite());
+	                    		}
                     		}
                     	}
                     }
