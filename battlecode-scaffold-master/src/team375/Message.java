@@ -105,7 +105,7 @@ public class Message {
 		destID = destID2 % 32768;
 		typeControl = typeControl2 % 2;
 		idControl = idControl2 % 2;
-		senderArchon = senderArchon2;
+		senderArchon = senderArchon2 % 2;
 		computeArray();
 	}
 		
@@ -168,6 +168,10 @@ public class Message {
 	public int getTypeControl() {return typeControl;}
 	
 	public int getRobotType() {return robotType;}
+	public Boolean toArchon() {return robotType == ARCHON || robotType == ALL_EXCEPT_SCOUT || robotType == ALL;}
+	public Boolean toSoldier() {return robotType == SOLDIER || robotType == SOLDIER_VIPER || robotType == SOLDIER_GUARD_VIPER ||
+							           robotType == SOLDIER_SCOUT_GUARD_VIPER || robotType == ALL_EXCEPT_ARCHON || robotType == ALL_EXCEPT_SCOUT ||
+							           robotType == ALL;}
 	
 	public int getX() {return sender.x + x - 128;}
 	

@@ -1,8 +1,12 @@
 package team375;
 
+import java.util.ArrayList;
+
 import battlecode.common.*;
 
 public class Archon extends RobotPlayer{
+	static ArrayList<MapLocation> dens = new ArrayList<>();
+	static ArrayList<MapLocation> neutralArchons = new ArrayList<>();
     static int[][] danger;
     static final int DANGER_THRESHHOLD = 1;
     static Boolean leader;
@@ -64,8 +68,102 @@ public class Archon extends RobotPlayer{
     	else nextRobotType = RobotType.SOLDIER;
     }
     
-    private static void readMessages(){
-    	leader = false;
+    private static void readSignals(){
+    	leader = true; //per defecte
+    	Signal[] signals = rc.emptySignalQueue();
+    	for (Signal s: signals){
+    		if (s.getTeam() != myTeam) continue;
+    		if (s.getMessage() == null) continue;
+    		int[] coded = s.getMessage();
+    		Message m = new Message(s.getLocation(), coded[0], coded[1]);
+    		int mode = m.getMode();
+			int object = m.getObject();
+			int typeControl = m.getTypeControl();
+			int robotType = m.getRobotType();
+			int x = m.getX();
+			int y = m.getY();
+			int idControl = m.getidControl();
+			int id = m.getid();
+			
+			if (typeControl == 1){
+				if (!m.toArchon()) continue;
+			}
+			if (idControl == 1 && id != rc.getID()) continue;
+    		
+			
+    		if (m.getSenderArchon() == 1){
+    			leader = false;
+    			//L'ha enviat un archon
+    			if (mode == Message.GO_TO){
+    				targetLocation = new MapLocation(x,y);
+    			}
+    		}else{
+    			//L'ha enviat un scout
+    			if (mode == Message.FOUND){
+    				if (object == Message.DEN){
+    					if (!dens.contains(object)){
+    						dens.add(new MapLocation(x,y));
+    					}
+    				}
+    				if (object == Message.NEUTRAL_ARCHON){
+    					if (!neutralArchons.contains(object)){
+    						neutralArchons.add(new MapLocation(x,y));
+    					}
+    				}
+    			}
+    		}
+    	}
+    }
+                          
+    private static void sendSignals() throws GameActionException{
+    	if (targetLocation != null){
+    		int mode = Message.GO_TO;
+			int object = Message.NONE;
+			int typeControl = Message.NONE;
+			int robotType = Message.NONE;
+			int x = rc.getLocation().x - targetLocation.x + 128;
+			int y = rc.getLocation().y - targetLocation.y + 128;
+			int idControl = Message.NONE;
+			int id = Message.NONE;
+			Message m = new Message(rc.getLocation(), mode, object, robotType, x, y, id, typeControl, idControl, 1);
+			int[] coded = m.encode();
+			rc.broadcastMessageSignal(coded[0], coded[1], rc.getType().sensorRadiusSquared);
+    	}
+    }
+    
+    private static void updateTargetLocation(){
+    	//ESBORRAR LOCS
+    	
+    	
+    	MapLocation closestDen = null;
+    	int dist = 1000000;
+    	for (MapLocation m: dens){
+    		if (rc.getLocation().distanceSquaredTo(m) > dist){
+    			dist = rc.getLocation().distanceSquaredTo(m);
+    			closestDen = m;
+    		}
+    	}
+    	MapLocation closestNeutralArchon = null;
+    	dist = 1000000;
+    	for (MapLocation m: neutralArchons){
+    		if (rc.getLocation().distanceSquaredTo(m) > dist){
+    			dist = rc.getLocation().distanceSquaredTo(m);
+    			closestNeutralArchon = m;
+    		}
+    	}
+    	if (closestDen == null){//si no coneix cap den
+    		if (closestNeutralArchon == null) { //si no coneix cap archon neutral
+    			targetLocation = null;
+    		}else targetLocation = closestNeutralArchon;
+    	}else{
+    		if (closestNeutralArchon == null) { //si no coneix cap archon neutral
+    			targetLocation = closestDen;
+    		}else{
+    			if (rc.getLocation().distanceSquaredTo(closestDen)*4 < rc.getLocation().distanceSquaredTo(closestNeutralArchon)){
+    				targetLocation = closestDen;
+    			}else targetLocation = closestNeutralArchon;
+    		}
+    	}
     	
     }
     
@@ -81,8 +179,6 @@ public class Archon extends RobotPlayer{
 			}
 			
 			if (found == null){
-				leader = true;
-				rc.setIndicatorString(0, "Soc el lider");
 				MapLocation[] initArchons = rc.getInitialArchonLocations(myTeam);
 				int maxdist = 0;
 				for (MapLocation i: initArchons){
@@ -102,10 +198,9 @@ public class Archon extends RobotPlayer{
 					rc.broadcastMessageSignal(coded[0], coded[1], maxdist);
 				}
 			}else{
-				leader = false;
 				int[] coded = found.getMessage();
-				Message m= new Message(found.getLocation(),coded[0], coded[1]);
-				targetLocation = new MapLocation(found.getLocation().x, found.getLocation().y);//canviar-ho quan arregli lo de la x i y
+				//Message m= new Message(found.getLocation(),coded[0], coded[1]);
+				targetLocation = new MapLocation(found.getLocation().x, found.getLocation().y);
 			}
         } catch (Exception e) {
             // Throwing an uncaught exception makes the robot die, so we need to catch exceptions.
@@ -117,16 +212,18 @@ public class Archon extends RobotPlayer{
         while (true) {
             // This is a loop to prevent the run() method from returning. Because of the Clock.yield()
             // at the end of it, the loop will iterate once per game round.
-            try {               
-                Signal[] signals = rc.emptySignalQueue();
+            try {
                 //nearbyFriends = rc.senseNearbyRobots(visionRange,myTeam);
                 nearbyEnemies = rc.senseNearbyRobots(visionRange,enemyTeam);
                 nearbyZombies = rc.senseNearbyRobots(visionRange,Team.ZOMBIE);
                 nearbyNeutrals = rc.senseNearbyRobots(visionRange,Team.NEUTRAL);
                 danger = new int[3][3];
                 calculateDanger();
-                readMessages();
-                
+                readSignals();
+                if (leader) {
+                	updateTargetLocation();
+                	sendSignals();
+                }
                 
                 
                 if (rc.isCoreReady()) {
