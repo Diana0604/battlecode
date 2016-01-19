@@ -134,7 +134,7 @@ public class Soldier extends RobotPlayer {
     					}
     				}
     			}
-            						
+            	
         		int[] M = {1, 0, 1, 0, 1, 0, 1, 0, 2};
             	int millor;
             	int meva_vida = 0;
@@ -142,59 +142,87 @@ public class Soldier extends RobotPlayer {
             	if (rc.isCoreReady()) {
 	        		int BC1 = Clock.getBytecodeNum();
             		for (int j = 0; j < robots.length; ++j) {
-            			sortida+= "dins " + Clock.getBytecodesLeft() + " ";
             			RobotInfo rob = robots[j];
             			int seva_vida = 1;
             			if (rc.getHealth() > rob.health) seva_vida = 0;
-            			int x = rc.getLocation().x;
-            			int y = rc.getLocation().y;
-            			int dx = rob.location.x-x;
-            			int dy = rob.location.y-y;
-            			int offsetDX = dx + 4;
-            			int offsetDY = dy + 4;
+            			int offsetDX = rob.location.x-rc.getLocation().x + 4;
+            			int offsetDY = rob.location.y-rc.getLocation().y + 4;
             			if (rob.team == myTeam) {
             				if (rob.type == RobotType.SOLDIER) {
-            					for (int k = 0; k < 9; ++k) {
-            						if(!dying) M[k] += aSoldier[eucl[offsetDX][offsetDY][k]];
-            						else M[k] = aSoldierInf[eucl[offsetDX][offsetDY][k]];
+            					if (!dying) {
+            						for (int k = 0; k < 9; ++k) {
+            							M[k] += aSoldier[eucl[offsetDX][offsetDY][k]];
+            						}
+            					}
+            					else {
+            						for (int k = 0; k < 9; ++k) {
+            							M[k] += aSoldierInf[eucl[offsetDX][offsetDY][k]];
+            						}
             					}
             				}
             				else if (rob.type == RobotType.ARCHON) {
-            					for (int k = 0; k < 9; ++k) {
-            						if(!dying) M[k] += aArchon[meva_vida][eucl[offsetDX][offsetDY][k]];
+            					if(!dying) {
+	            					for (int k = 0; k < 9; ++k) {
+	            						M[k] += aArchon[meva_vida][eucl[offsetDX][offsetDY][k]];
+	            					}
             					}
             				}
             			}
             			else if (rob.team == enemyTeam) {
             				if (rob.type == RobotType.SOLDIER) {
-            					for (int k = 0; k < 9; ++k) {
-            						if(!dying) M[k] += eSoldier[meva_vida*seva_vida][eucl[offsetDX][offsetDY][k]];
-            						else M[k] = eSoldierInf[eucl[offsetDX][offsetDY][k]];
+            					if(!dying) {
+	            					for (int k = 0; k < 9; ++k) {
+                						M[k] += eSoldier[meva_vida*seva_vida][eucl[offsetDX][offsetDY][k]];
+	            					}
+            					}
+            					else {
+            						for (int k = 0; k < 9; ++k) {
+            							M[k] += eSoldierInf[eucl[offsetDX][offsetDY][k]];
+	            					}
             					}
             				}
             				else if (rob.type == RobotType.GUARD) {
-            					for (int k = 0; k < 9; ++k) {
-            						if(!dying) M[k] += eGuard[eucl[offsetDX][offsetDY][k]];
-            						else M[k] += eGuardInf[eucl[offsetDX][offsetDY][k]];
+            					if(!dying) {
+            						for (int k = 0; k < 9; ++k) {
+            							M[k] += eGuard[eucl[offsetDX][offsetDY][k]];
+            						}
+            					}
+            					else {
+            						for (int k = 0; k < 9; ++k) {
+            							M[k] += eGuardInf[eucl[offsetDX][offsetDY][k]];
+            						}
             					}
             				}
             				else if (rob.type == RobotType.TURRET) {
-            					for (int k = 0; k < 9; ++k) {
-            						if(!dying) M[k] += eTurret[eucl[offsetDX][offsetDY][k]];
-            						else M[k] += eTurretInf[eucl[offsetDX][offsetDY][k]];
+            					if(!dying) {
+            						for (int k = 0; k < 9; ++k) {
+            							M[k] += eTurret[eucl[offsetDX][offsetDY][k]];
+            						}
+            					}
+            					else {
+            						for (int k = 0; k < 9; ++k) {
+            							M[k] += eTurretInf[eucl[offsetDX][offsetDY][k]];
+            						}
             					}
             				}
             				else if (rob.type == RobotType.VIPER) {
-            					for (int k = 0; k < 9; ++k) {
-            						if(!dying) M[k] += eViper[eucl[offsetDX][offsetDY][k]];
-            						else M[k] += eViperInf[eucl[offsetDX][offsetDY][k]];
+            					if(!dying) {
+            						for (int k = 0; k < 9; ++k) {
+            							M[k] += eViper[eucl[offsetDX][offsetDY][k]];
+            						}
+            					}
+            					else {
+            						for (int k = 0; k < 9; ++k) {
+            							M[k] += eViperInf[eucl[offsetDX][offsetDY][k]];
+            						}
             					}
             				}
             				else if (rob.type == RobotType.ARCHON)
             				{
-            					for(int k = 0; k < 9; ++k)
-            					{
-            						if(dying) M[k] += eArchonInf[eucl[offsetDX][offsetDY][k]];
+            					if (dying) {
+	            					for(int k = 0; k < 9; ++k) {
+	            						M[k] += eArchonInf[eucl[offsetDX][offsetDY][k]];
+	            					}
             					}
             				}
             			}
@@ -257,7 +285,7 @@ public class Soldier extends RobotPlayer {
     	            	}
     	            }
     	            */
-            		
+
             			int BC2 = Clock.getBytecodeNum();
     	            	++compt_no;
     	            	if (compt_no < 50) {
@@ -273,14 +301,15 @@ public class Soldier extends RobotPlayer {
             				if (M[i] > M[millor]) millor = i;
             			}
             		}
-                	
+                	rc.setIndicatorString(0, ""+M[7]+" "+M[0]+" "+M[1]+" "+M[6]+" "+M[8]+" "+M[2]+" "+M[5]+" "+M[4]+" "+M[3]);
+            			
             		if (millor < 8) {
             			rc.move(directions[millor]);
             		}
 	            	
             	}
         		if (rc.isWeaponReady() && (nzombies > 0 || nenemies > 0)) {
-                	
+                	rc.setIndicatorString(0, "Atacant");
             		RobotInfo obj = null;
             		int proper = 0, debil = 0, dist = 2*visionRange;
             		double vida = 1000000;
