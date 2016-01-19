@@ -47,12 +47,10 @@ public class Soldier extends RobotPlayer {
 		return Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y));
 	}
 	
-	static boolean jo = false;
 	static int compt_bc = 0;
 	static int compt_no = 0;
 	public static void playSoldier() {
 		try {
-			if (rc.getLocation().x == 426 && rc.getLocation().y == 157) jo = true;
             // Any code here gets executed exactly once at the beginning of the game.
             attackRange = rc.getType().attackRadiusSquared;
         } catch (Exception e) {
@@ -77,10 +75,7 @@ public class Soldier extends RobotPlayer {
             	
             	String sortida = "";
             	
-            	if (rc.getRoundNum() > 40) jo = false;
             	int torn = rc.getRoundNum();
-            									if (jo) sortida+="torn "+torn+" bytecodes " + Clock.getBytecodesLeft() + " ";
-
             	RobotInfo[] robots = rc.senseNearbyRobots();
             	RobotInfo[] allies = new RobotInfo[robots.length];
             	RobotInfo[] enemies = new RobotInfo[robots.length];
@@ -92,7 +87,6 @@ public class Soldier extends RobotPlayer {
             		else if (robots[i].team == enemyTeam) enemies[nenemies++] = robots[i];
             		else if (robots[i].team == Team.ZOMBIE) zombies[nzombies++] = robots[i];
             	}
-            	if (jo) sortida+= Clock.getBytecodesLeft() + " ";
             	
             	if(!dying)
             	{
@@ -141,7 +135,7 @@ public class Soldier extends RobotPlayer {
     				}
     			}
             						
-        		int[] M = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+        		int[] M = {1, 0, 1, 0, 1, 0, 1, 0, 2};
             	int millor;
             	int meva_vida = 0;
             	if (rc.getHealth() < 60/4) meva_vida = 1;
@@ -279,14 +273,6 @@ public class Soldier extends RobotPlayer {
             				if (M[i] > M[millor]) millor = i;
             			}
             		}
-
-            		if (false && jo) {
-            			System.out.printf("\n===================== Torn %d =============\n", rc.getRoundNum());
-            			System.out.printf("(%d,%d):\n", rc.getLocation().x, rc.getLocation().y);
-            			System.out.printf("%d %d %d\n", M[7],M[0],M[1]);
-            			System.out.printf("%d %d %d\n", M[6],M[8],M[2]);
-            			System.out.printf("%d %d %d\n", M[5],M[4],M[3]);
-            		}
                 	
             		if (millor < 8) {
             			rc.move(directions[millor]);
@@ -294,7 +280,6 @@ public class Soldier extends RobotPlayer {
 	            	
             	}
         		if (rc.isWeaponReady() && (nzombies > 0 || nenemies > 0)) {
-        											if (jo) sortida+="atacar "+ Clock.getBytecodesLeft() + " ";
                 	
             		RobotInfo obj = null;
             		int proper = 0, debil = 0, dist = 2*visionRange;
@@ -327,8 +312,6 @@ public class Soldier extends RobotPlayer {
             			rc.attackLocation(obj.location);
             		}
             	}
-        										if (jo) sortida+="final "+ Clock.getBytecodesLeft() + " ";
-        										if (jo) System.out.print(sortida+"\n");
             	
             	/*
                 int fate = rand.nextInt(1000);
