@@ -19,7 +19,7 @@ public class Scout  extends RobotPlayer{
 	
 	/*
 	 * Coses a fer
-	 * -millorar perill scouts amb zombies (fer que s'allunyin com més millor fins a distancia 8)
+	 * -millorar perill scouts amb zombies (fer que s'allunyin com mes millor fins a distancia 8)
 	 */
 	
 	private static void calculateDanger(){
