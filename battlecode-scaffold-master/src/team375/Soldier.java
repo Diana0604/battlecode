@@ -41,7 +41,9 @@ public class Soldier extends RobotPlayer {
 	
 	private static int enCombat = 0;
 	private static MapLocation ls = null; //location del signal
+	private static MapLocation desti = null;
 	private static boolean dying = false;
+	
 	
 	private static int taxista (MapLocation a, MapLocation b) {
 		return Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y));
@@ -112,7 +114,10 @@ public class Soldier extends RobotPlayer {
     					if (enCombat < torns_combat && ls == null) ls = sig[i].getLocation();
     				}
     				else {
-    					// senyal guai
+    					int a = sig[i].getMessage()[0];
+    					int b = sig[i].getMessage()[1];
+    					Message m = new Message(rc.getLocation(), a, b);
+    					desti = new MapLocation(m.getX(), m.getY());
     				}
     			}
     			
@@ -126,6 +131,12 @@ public class Soldier extends RobotPlayer {
     				else {
     					if (ls != null && rc.isCoreReady()) {
     						Direction dir = rc.getLocation().directionTo(ls);
+    	    				if (rc.canMove(dir)) rc.move(dir);
+    	    				else if (rc.canMove(dir.rotateLeft())) rc.move(dir.rotateLeft());
+    	    				else if (rc.canMove(dir.rotateRight())) rc.move(dir.rotateRight());
+    					}
+    					else if (desti != null && rc.isCoreReady()) {
+    						Direction dir = rc.getLocation().directionTo(desti);
     	    				if (rc.canMove(dir)) rc.move(dir);
     	    				else if (rc.canMove(dir.rotateLeft())) rc.move(dir.rotateLeft());
     	    				else if (rc.canMove(dir.rotateRight())) rc.move(dir.rotateRight());
