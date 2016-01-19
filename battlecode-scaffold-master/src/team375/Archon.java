@@ -32,12 +32,6 @@ public class Archon extends RobotPlayer{
     			}
     		}
     	}
-    	
-    	for (int i = 0; i < 3; i++){
-    		for (int j = 0; j < 3; j++){
-    			//if (rc.senseRubble(rc.getLocation().add(i-1,j-1)) > GameConstants.RUBBLE_SLOW_THRESH) danger[i][j] *= 2;
-    		}
-    	}
     }
     
     //De les 8 direccions retorna la que tingui menys perill

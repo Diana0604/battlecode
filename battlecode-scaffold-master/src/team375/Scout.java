@@ -17,6 +17,11 @@ public class Scout  extends RobotPlayer{
 	final static int MAX_TURNS = 30;
 	final static int MAX_SEEN_UNITS = 5;
 	
+	/*
+	 * Coses a fer
+	 * -millorar perill scouts amb zombies (fer que s'allunyin com més millor fins a distancia 8)
+	 */
+	
 	private static void calculateDanger(){
 		for (RobotInfo info: nearbyEnemies){
     		RobotInfo[] friendlyTargets = rc.senseNearbyRobots(info.location, info.type.attackRadiusSquared, myTeam);
