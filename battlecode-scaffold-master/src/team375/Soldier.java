@@ -140,9 +140,6 @@ public class Soldier extends RobotPlayer {
     	    				if (rc.canMove(dir)) rc.move(dir);
     	    				else if (rc.canMove(dir.rotateLeft())) rc.move(dir.rotateLeft());
     	    				else if (rc.canMove(dir.rotateRight())) rc.move(dir.rotateRight());
-    	    				else {
-    	    					System.out.printf("No puc avansar");
-    	    				}
     					}
     				}
     			}
