@@ -49,6 +49,7 @@ public class Soldier extends RobotPlayer {
 		return Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y));
 	}
 	
+	static int rv = 0; //robots al voltant
 	static int compt_bc = 0;
 	static int compt_no = 0;
 	public static void playSoldier() {
@@ -77,6 +78,7 @@ public class Soldier extends RobotPlayer {
             	
             	
             	RobotInfo[] robots = rc.senseNearbyRobots();
+            	if (robots.length > rv) rv = robots.length;
             	RobotInfo[] allies = new RobotInfo[robots.length];
             	RobotInfo[] enemies = new RobotInfo[robots.length];
             	RobotInfo[] zombies = new RobotInfo[robots.length];
@@ -154,107 +156,97 @@ public class Soldier extends RobotPlayer {
             			RobotInfo rob = robots[j];
             			int seva_vida = 1;
             			if (rc.getHealth() > rob.health) seva_vida = 0;
-            			int offsetDX = rob.location.x-rc.getLocation().x + 4;
-            			int offsetDY = rob.location.y-rc.getLocation().y + 4;
+            			int dists[] = eucl[rob.location.x-rc.getLocation().x + 4][rob.location.y-rc.getLocation().y + 4];
             			if (rob.team == myTeam) {
             				if (rob.type == RobotType.SOLDIER) {
             					if (!dying) {
-            						for (int k = 0; k < 9; ++k) {
-            							M[k] += aSoldier[eucl[offsetDX][offsetDY][k]];
-            						}
+            						int k = 9;
+            						while (k-- != 0) M[k] += aSoldier[dists[k]];
             					}
             					else {
-            						for (int k = 0; k < 9; ++k) {
-            							M[k] += aSoldierInf[eucl[offsetDX][offsetDY][k]];
-            						}
+            						int k = 9;
+            						while (k-- != 0) M[k] += aSoldierInf[dists[k]];
             					}
             				}
             				else if (rob.type == RobotType.ARCHON) {
             					if(!dying) {
-	            					for (int k = 0; k < 9; ++k) {
-	            						M[k] += aArchon[meva_vida][eucl[offsetDX][offsetDY][k]];
-	            					}
+            						int k = 9;
+            						while (k-- != 0) M[k] += aArchon[meva_vida][dists[k]];
             					}
             				}
             			}
             			else if (rob.team == enemyTeam) {
             				if (rob.type == RobotType.SOLDIER) {
             					if(!dying) {
-	            					for (int k = 0; k < 9; ++k) {
-                						M[k] += eSoldier[meva_vida*seva_vida][eucl[offsetDX][offsetDY][k]];
-	            					}
+            						M[0] += eSoldier[meva_vida*seva_vida][dists[0]];
+            						M[1] += eSoldier[meva_vida*seva_vida][dists[1]];
+            						M[2] += eSoldier[meva_vida*seva_vida][dists[2]];
+            						M[3] += eSoldier[meva_vida*seva_vida][dists[3]];
+            						M[4] += eSoldier[meva_vida*seva_vida][dists[4]];
+            						M[5] += eSoldier[meva_vida*seva_vida][dists[5]];
+            						M[6] += eSoldier[meva_vida*seva_vida][dists[6]];
+            						M[7] += eSoldier[meva_vida*seva_vida][dists[7]];
+            						M[8] += eSoldier[meva_vida*seva_vida][dists[8]];
             					}
             					else {
-            						for (int k = 0; k < 9; ++k) {
-            							M[k] += eSoldierInf[eucl[offsetDX][offsetDY][k]];
-	            					}
+            						int k = 9;
+            						while (k-- != 0) M[k] += eSoldierInf[dists[k]];
             					}
             				}
             				else if (rob.type == RobotType.GUARD) {
             					if(!dying) {
-            						for (int k = 0; k < 9; ++k) {
-            							M[k] += eGuard[eucl[offsetDX][offsetDY][k]];
-            						}
+            						int k = 9;
+            						while (k-- != 0) M[k] += eGuard[dists[k]];
             					}
             					else {
-            						for (int k = 0; k < 9; ++k) {
-            							M[k] += eGuardInf[eucl[offsetDX][offsetDY][k]];
-            						}
+            						int k = 9;
+            						while (k-- != 0) M[k] += eGuardInf[dists[k]];
             					}
             				}
             				else if (rob.type == RobotType.TURRET) {
             					if(!dying) {
-            						for (int k = 0; k < 9; ++k) {
-            							M[k] += eTurret[eucl[offsetDX][offsetDY][k]];
-            						}
+            						int k = 9;
+            						while (k-- != 0) M[k] += eTurret[dists[k]];
             					}
             					else {
-            						for (int k = 0; k < 9; ++k) {
-            							M[k] += eTurretInf[eucl[offsetDX][offsetDY][k]];
-            						}
+            						int k = 9;
+            						while (k-- != 0) M[k] += eTurretInf[dists[k]];
             					}
             				}
             				else if (rob.type == RobotType.VIPER) {
             					if(!dying) {
-            						for (int k = 0; k < 9; ++k) {
-            							M[k] += eViper[eucl[offsetDX][offsetDY][k]];
-            						}
+            						int k = 9;
+            						while (k-- != 0) M[k] += eViper[dists[k]];
             					}
             					else {
-            						for (int k = 0; k < 9; ++k) {
-            							M[k] += eViperInf[eucl[offsetDX][offsetDY][k]];
-            						}
+            						int k = 9;
+            						while (k-- != 0) M[k] += eViperInf[dists[k]];
             					}
             				}
             				else if (rob.type == RobotType.ARCHON)
             				{
             					if (dying) {
-	            					for(int k = 0; k < 9; ++k) {
-	            						M[k] += eArchonInf[eucl[offsetDX][offsetDY][k]];
-	            					}
+            						int k = 9;
+            						while (k-- != 0) M[k] += eArchonInf[dists[k]];
             					}
             				}
             			}
             			else if (rob.team == Team.ZOMBIE && !dying) {
             				if (rob.type == RobotType.STANDARDZOMBIE) {
-            					for (int k = 0; k < 9; ++k) {
-            						M[k] += sZombie[eucl[offsetDX][offsetDY][k]];
-            					}
+            					int k = 9;
+        						while (k-- != 0) M[k] += sZombie[dists[k]];
             				}
             				else if (rob.type == RobotType.FASTZOMBIE) {
-            					for (int k = 0; k < 9; ++k) {
-            						M[k] += fZombie[eucl[offsetDX][offsetDY][k]];
-            					}
+            					int k = 9;
+        						while (k-- != 0) M[k] += fZombie[dists[k]];
             				}
             				else if (rob.type == RobotType.BIGZOMBIE) {
-            					for (int k = 0; k < 9; ++k) {
-            						M[k] += bZombie[eucl[offsetDX][offsetDY][k]];
-            					}
+            					int k = 9;
+        						while (k-- != 0) M[k] += bZombie[dists[k]];
             				}
             				else if (rob.type == RobotType.RANGEDZOMBIE) {
-            					for (int k = 0; k < 9; ++k) {
-            						M[k] += rZombie[meva_vida*seva_vida][eucl[offsetDX][offsetDY][k]];
-            					}
+            					int k = 9;
+        						while (k-- != 0) M[k] += rZombie[meva_vida*seva_vida][dists[k]];
             				}
             			}
             		}
@@ -294,15 +286,15 @@ public class Soldier extends RobotPlayer {
     	            	}
     	            }
     	            */
-
-            			/*int BC2 = Clock.getBytecodeNum();
+            		
+            			int BC2 = Clock.getBytecodeNum();
     	            	++compt_no;
     	            	if (compt_no < 50) {
     	            		compt_bc += BC2-BC1;
     	            		System.out.printf("\nDiferencia de bc: %d\n", BC2-BC1);
     		            }
     	            	else if (compt_no == 50) System.out.printf("\nMitjana de diferencia de bc: %f\n", (double)compt_bc/compt_no);
-    	            	*/
+    	            	
             		
             		M[8] -= rc.senseRubble(rc.getLocation());
             		for (int k = 0; k < 8; ++k) {
@@ -397,6 +389,7 @@ public class Soldier extends RobotPlayer {
                 }
                 */
         		//if (torn != rc.getRoundNum()) System.out.print("================Desgraciaaaaaaa===============\n");
+        		System.out.printf("                                        %d", rv);
                 Clock.yield();
             } catch (Exception e) {
                 System.out.println(e.getMessage());
