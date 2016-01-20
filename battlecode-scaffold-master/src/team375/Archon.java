@@ -32,7 +32,8 @@ public class Archon extends RobotPlayer{
     			for (int j = -1; j<2; j++){
     				MapLocation loc = rc.getLocation().add(i, j);
     				if (info.type.attackRadiusSquared < info.location.distanceSquaredTo(loc) && info.location.distanceSquaredTo(loc) > 8) continue;
-    				danger[i+1][j+1] += info.attackPower/info.type.attackDelay;
+    				if (info.type.attackRadiusSquared < info.location.distanceSquaredTo(loc)) danger[i+1][j+1] += info.attackPower/info.type.attackDelay;
+    				else danger[i+1][j+1]+= info.attackPower/info.type.attackDelay/2;
     			}
     		}
     	}
@@ -82,7 +83,6 @@ public class Archon extends RobotPlayer{
 			int robotType = m.getRobotType();
 			int x = m.getX();
 			int y = m.getY();
-			//System.out.println(x+"  "+y+"  my pos = "+rc.getLocation().x+","+rc.getLocation().y);
 			int idControl = m.getidControl();
 			int id = m.getid();
 			
@@ -124,8 +124,8 @@ public class Archon extends RobotPlayer{
 			int object = Message.NONE;
 			int typeControl = Message.NONE;
 			int robotType = Message.NONE;
-			int x = rc.getLocation().x - targetLocation.x + 128;
-			int y = rc.getLocation().y - targetLocation.y + 128;
+			int x = targetLocation.x;
+			int y = targetLocation.y;
 			int idControl = Message.NONE;
 			int id = Message.NONE;
 			Message m = new Message(rc.getLocation(), mode, object, robotType, x, y, id, typeControl, idControl, 1);
@@ -136,8 +136,7 @@ public class Archon extends RobotPlayer{
     
     private static void updateTargetLocation() throws GameActionException{
     	//ESBORRAR LOCS
-    	if (dens == null) System.out.println("dens null");
-    	else for (int i = 0; i < dens.size(); i++){
+    	for (int i = 0; i < dens.size(); i++){
     		MapLocation m = dens.get(i);
     		//System.out.print(m.x+","+m.y+"  ");
     		if (rc.canSense(m)){
@@ -145,10 +144,8 @@ public class Archon extends RobotPlayer{
     			else if (rc.senseRobotAtLocation(m).type != RobotType.ZOMBIEDEN) dens.remove(m);
     		}
     	}
-    	//System.out.println("aaa");
     	
-    	if (neutralArchons == null) System.out.println("neutrals null");
-    	else for (int i = 0; i < neutralArchons.size(); i++){
+    	for (int i = 0; i < neutralArchons.size(); i++){
     		MapLocation m = neutralArchons.get(i);
     		//System.out.print(m.x+","+m.y+"  ");
     		if (rc.canSense(m)){
@@ -156,7 +153,6 @@ public class Archon extends RobotPlayer{
     			else if (rc.senseRobotAtLocation(m).type != RobotType.ARCHON) neutralArchons.remove(m);
     		}
     	}
-    	//System.out.println("bbb");
     	
     	
     	
@@ -192,7 +188,6 @@ public class Archon extends RobotPlayer{
     			}else targetLocation = closestNeutralArchon;
     		}
     	}
-    	//if (targetLocation != null) System.out.println(targetLocation.x+" "+targetLocation.y);
     }
     
 	public static void playArchon(){
@@ -221,9 +216,9 @@ public class Archon extends RobotPlayer{
 					int destID = 0;
 					int typeControl = 1;
 					int idControl = 0;
-					Message m = new Message(rc.getLocation(), mode, object,robotType,128, 128, destID, typeControl, idControl, 1);
+					Message m = new Message(rc.getLocation(), mode, object,robotType,rc.getLocation().x, rc.getLocation().y, destID, typeControl, idControl, 1);
 					int[] coded = m.encode();
-					rc.broadcastMessageSignal(coded[0], coded[1], maxdist);
+					rc.broadcastMessageSignal(coded[0], coded[1], maxdist+1);
 				}
 			}else{
 				int[] coded = found.getMessage();
@@ -231,8 +226,6 @@ public class Archon extends RobotPlayer{
 				targetLocation = new MapLocation(found.getLocation().x, found.getLocation().y);
 			}
         } catch (Exception e) {
-            // Throwing an uncaught exception makes the robot die, so we need to catch exceptions.
-            // Caught exceptions will result in a bytecode penalty.
             System.out.println(e.getMessage());
             e.printStackTrace();
         }
@@ -314,9 +307,7 @@ public class Archon extends RobotPlayer{
                     }
                     //if (targetLocation == null) System.out.println("target null");
                     if (!hasMoved){
-                    	if (targetLocation != null && (!rc.canSense(targetLocation)||( rc.canSense(targetLocation) && rc.senseRobotAtLocation(targetLocation).type == RobotType.ARCHON))){
-                    		
-                    		
+                    	if (targetLocation != null && (!rc.canSense(targetLocation)||( rc.canSense(targetLocation) && rc.senseRobotAtLocation(targetLocation) != null && rc.senseRobotAtLocation(targetLocation).type == RobotType.ARCHON))){
                     		Direction dir = rc.getLocation().directionTo(targetLocation);
                     		if (directionDanger(dir) > 0 || !rc.canMove(dir)) dir = dir.rotateLeft();
                     		if (directionDanger(dir) > 0 || !rc.canMove(dir)) dir = dir.rotateRight().rotateRight();
@@ -324,15 +315,6 @@ public class Archon extends RobotPlayer{
                     			rc.move(dir);
                     			rc.setIndicatorString(0, "Ha anat a la target location");
                     			hasMoved = true;
-                    		}
-                    	}
-                    }
-                    if (!hasMoved){
-                    	for (Direction d: directions){
-                    		if (rc.senseRobotAtLocation(rc.getLocation().add(d)) != null){
-	                    		if (rc.senseRobotAtLocation(rc.getLocation().add(d)).team == Team.ZOMBIE){
-	                    			if (rc.canMove(d.opposite())) rc.move(d.opposite());
-	                    		}
                     		}
                     	}
                     }
@@ -353,12 +335,20 @@ public class Archon extends RobotPlayer{
                     
                     if (!hasMoved)
                     	rc.setIndicatorString(0,"No ha fet res aquest torn");
-                    
+                    /*
+                    for(int i = 0; i < 3; i++){
+                    	for (int j = 0; j < 3; j++){
+                    		System.out.print(danger[i][j]+" ");
+                    	}
+                    	System.out.println("");
+                    }
+                    System.out.println("");	
+                    */
                 }else{
                 	rc.setIndicatorString(0,"Tenia core delay");
                 }
 
-                
+                //if (targetLocation != null) System.out.println(targetLocation.x+" "+targetLocation.y);
                 RobotInfo[] healableRobots = rc.senseNearbyRobots(attackRange, myTeam);
                 Boolean hasHealed = false;
                 int i = 0;

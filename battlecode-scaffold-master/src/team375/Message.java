@@ -100,8 +100,8 @@ public class Message {
 		mode = mode2 % 16;
 		object = object2 % 16;
 		robotType = robotType2 % 16;
-		x = x2 % 256;
-		y = y2 % 256;
+		x = sender2.x - x2 + 128;
+		y = sender2.y - y2 + 128;
 		destID = destID2 % 32768;
 		typeControl = typeControl2 % 2;
 		idControl = idControl2 % 2;
