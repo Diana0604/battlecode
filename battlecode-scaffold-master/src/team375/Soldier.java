@@ -43,13 +43,27 @@ public class Soldier extends RobotPlayer {
 	private static MapLocation ls = null; //location del signal
 	private static MapLocation desti = null;
 	private static boolean dying = false;
+	private static int M0, M1, M2, M3, M4, M5, M6, M7, M8;
+	private static int[] M, perills, dists;
 	
+	
+	private static void sumarM() {
+		M0 += perills[dists[0]];
+		M1 += perills[dists[1]];
+		M2 += perills[dists[2]];
+		M3 += perills[dists[3]];
+		M4 += perills[dists[4]];
+		M5 += perills[dists[5]];
+		M6 += perills[dists[6]];
+		M7 += perills[dists[7]];
+		M8 += perills[dists[8]];
+	}
 	
 	private static int taxista (MapLocation a, MapLocation b) {
 		return Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y));
 	}
-	
-	static int rv = 0; //robots al voltant
+
+
 	static boolean jo = false;
 	static int torn_maxim = 1;
 	static int mc_maxim = 0;
@@ -78,17 +92,17 @@ public class Soldier extends RobotPlayer {
             // This is a loop to prevent the run() method from returning. Because of the Clock.yield()
             // at the end of it, the loop will iterate once per game round.
             try {
-            	
-            	if (rc.getLocation().x == 422 && rc.getLocation().y == 168) jo = true;
+            	int nallies = 0, nenemies = 0, nzombies = 0;
             	RobotInfo[] robots = rc.senseNearbyRobots();
-            	if (robots.length > rv) rv = robots.length;
-            	RobotInfo[] allies = new RobotInfo[robots.length];
+            	RobotInfo[] allies = rc.senseNearbyRobots(6,myTeam);
+            	boolean pocs_amics = (allies.length == 0);
+            	if (pocs_amics) allies = new RobotInfo[robots.length];
+            	else nallies = allies.length;
             	RobotInfo[] enemies = new RobotInfo[robots.length];
             	RobotInfo[] zombies = new RobotInfo[robots.length];
-
-            	int nallies = 0, nenemies = 0, nzombies = 0;
+            	
             	for (int i = 0; i < robots.length; ++i) {
-            		if (robots[i].team == myTeam) allies[nallies++] = robots[i];
+            		if (pocs_amics && robots[i].team == myTeam) allies[nallies++] = robots[i];
             		else if (robots[i].team == enemyTeam) enemies[nenemies++] = robots[i];
             		else if (robots[i].team == Team.ZOMBIE) zombies[nzombies++] = robots[i];
             	}
@@ -149,69 +163,78 @@ public class Soldier extends RobotPlayer {
     				}
     			}
             	
-        		int[] M = {1, 0, 1, 0, 1, 0, 1, 0, 2};
-            	int millor;
+            	
             	int meva_vida = 0;
             	if (rc.getHealth() < 60/4) meva_vida = 1;
             	if (rc.isCoreReady()) {
+            		M0 = 1; M1 = 0; M2 = 1; M3 = 0; M4 = 1; M5 = 0; M6 = 1; M7 = 0; M8 = 2;
 	        		int BC1 = Clock.getBytecodeNum();
-            		for (int j = 0; j < robots.length; ++j) {
-            			RobotInfo rob = robots[j];
+	        		for (int j = 0; j < nenemies; ++j) {
+	        			RobotInfo rob = enemies[j];
             			int seva_vida = 1;
             			if (rc.getHealth() > rob.health) seva_vida = 0;
-            			int dists[] = eucl[rob.location.x-rc.getLocation().x + 4][rob.location.y-rc.getLocation().y + 4];
-            			int perills[] = null;
+            			dists = eucl[rob.location.x-rc.getLocation().x + 4][rob.location.y-rc.getLocation().y + 4];
+            			perills = null;
+            			// 36 bc fins aqui
+            			
             			if (!dying) {
-            				if (rob.team == myTeam) {
-            					if (rob.type == RobotType.SOLDIER) perills = aSoldier;
-            					else if (rob.type == RobotType.ARCHON) perills = aArchon[meva_vida];
-            				}
-            				else if (rob.team == enemyTeam) {
-            					switch(rob.type) {
-            					case SOLDIER: perills = eSoldier[meva_vida*seva_vida]; break;
-            					case GUARD: perills = eGuard; break;
-            					case TURRET: perills = eTurret; break;
-            					case VIPER: perills = eViper; break;
-            					default: break;
-            					}
-            				}
+            				switch(rob.type) {
+        					case SOLDIER: perills = eSoldier[meva_vida*seva_vida]; break;
+        					case GUARD: perills = eGuard; break;
+        					case TURRET: perills = eTurret; break;
+        					case VIPER: perills = eViper; break;
+        					default: break;
+        					}
             			}
             			else {
-            				if (rob.team == myTeam) {
-            					if (rob.type == RobotType.SOLDIER) perills = aSoldierInf;
-            				}
-            				else if (rob.team == enemyTeam) {
-            					switch(rob.type) {
-            					case SOLDIER: perills = eSoldierInf; break;
-            					case GUARD: perills = eGuardInf; break;
-            					case TURRET: perills = eTurretInf; break;
-            					case VIPER: perills = eViperInf; break;
-            					case ARCHON: perills = eArchonInf; break;
-            					default: break;
-            					}
-            				}
-            			}
-            			if (rob.team == Team.ZOMBIE && !dying) {
             				switch(rob.type) {
-            				case STANDARDZOMBIE: perills = sZombie; break;
-            				case FASTZOMBIE: perills = fZombie; break;
-            				case BIGZOMBIE: perills = bZombie; break;
-            				case RANGEDZOMBIE: perills = rZombie[meva_vida*seva_vida]; break;
-            				default: break;
-            				}
+        					case SOLDIER: perills = eSoldierInf; break;
+        					case GUARD: perills = eGuardInf; break;
+        					case TURRET: perills = eTurretInf; break;
+        					case VIPER: perills = eViperInf; break;
+        					case ARCHON: perills = eArchonInf; break;
+        					default: break;
+        					}
             			}
-            			if (perills != null) {
-	            			M[0] += perills[dists[0]];
-							M[1] += perills[dists[1]];
-							M[2] += perills[dists[2]];
-							M[3] += perills[dists[3]];
-							M[4] += perills[dists[4]];
-							M[5] += perills[dists[5]];
-							M[6] += perills[dists[6]];
-							M[7] += perills[dists[7]];
-							M[8] += perills[dists[8]];
+            			// fins aqui son ?
+            			if (perills != null) sumarM();
+            			// fins aqui son 74 bc mes
+	        		}
+	        		for (int j = 0; j < nzombies; ++j) {
+	        			RobotInfo rob = zombies[j];
+            			int seva_vida = 1;
+            			if (rc.getHealth() > rob.health) seva_vida = 0;
+            			dists = eucl[rob.location.x-rc.getLocation().x + 4][rob.location.y-rc.getLocation().y + 4];
+            			perills = null;
+            			// 36 bc fins aqui
+            			switch(rob.type) {
+        				case STANDARDZOMBIE: perills = sZombie; break;
+        				case FASTZOMBIE: perills = fZombie; break;
+        				case BIGZOMBIE: perills = bZombie; break;
+        				case RANGEDZOMBIE: perills = rZombie[meva_vida*seva_vida]; break;
+        				default: break;
+        				}
+            			// fins aqui son ?
+            			if (perills != null) sumarM();
+            			// fins aqui son 74 bc mes
+	        		}
+	        		for (int j = 0; j < nallies; ++j) {
+	        			RobotInfo rob = allies[j];
+            			dists = eucl[rob.location.x-rc.getLocation().x + 4][rob.location.y-rc.getLocation().y + 4];
+            			perills = null;
+            			// ? bc fins aqui
+            			
+            			if (!dying) {
+            				if (rob.type == RobotType.SOLDIER) perills = aSoldier;
+        					else if (rob.type == RobotType.ARCHON) perills = aArchon[meva_vida];
             			}
-            		}
+            			else if (rob.type == RobotType.SOLDIER) perills = aSoldierInf;
+            			// fins aqui son ?
+            			if (perills != null) sumarM();
+            			// fins aqui son 74 bc mes
+	        		}
+            		
+            		int [] M = {M0, M1, M2, M3, M4, M5, M6, M7, M8};
             		
             		//estic comencant a llegir senyal pero no esta ben preparat encar
             		/*
@@ -248,15 +271,15 @@ public class Soldier extends RobotPlayer {
     	            	}
     	            }
     	            */
-            		if (true) {
+
             			int BC2 = Clock.getBytecodeNum();
+            			rc.setIndicatorString(1, "\nDiferencia de bc: " + (BC2-BC1) + "\n");
     	            	++compt_no;
     	            	if (compt_no < 50) {
     	            		compt_bc += BC2-BC1;
-    	            		System.out.printf("\nDiferencia de bc: %d\n", BC2-BC1);
     		            }
     	            	else if (compt_no == 50) System.out.printf("\nMitjana de diferencia de bc: %f\n", (double)compt_bc/compt_no);
-            		}
+            		
             		
             		M[8] -= rc.senseRubble(rc.getLocation());
             		for (int k = 0; k < 8; ++k) {
@@ -264,7 +287,7 @@ public class Soldier extends RobotPlayer {
             		}
             		
 	            	
-	            	millor = 8;
+	            	int millor = 8;
             		for (int i = 0; i < 8; i++) {
             			if (rc.canMove(directions[i])) {
             				if (M[i] > M[millor]) millor = i;
@@ -357,7 +380,6 @@ public class Soldier extends RobotPlayer {
                 System.out.println(e.getMessage());
                 e.printStackTrace();
             }
-            System.out.printf("%d\n", rv);
         }
 	}
 
