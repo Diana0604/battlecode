@@ -14,7 +14,7 @@ public class Soldier extends RobotPlayer {
 	
 	//private static int[][][] taxi = { { { 5, 6, 6, 6, 6, 6, 5, 4, 5} , { 5, 6, 6, 6, 5, 5, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 5, 5} , { 6, 6, 6, 6, 5, 4, 5, 6, 5} } , { { 4, 5, 5, 6, 6, 6, 5, 4, 5} , { 4, 5, 5, 5, 5, 5, 4, 3, 4} , { 4, 5, 5, 5, 4, 4, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 4, 4} , { 5, 5, 5, 5, 4, 3, 4, 5, 4} , { 6, 6, 5, 5, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 4, 4, 5, 5, 5, 4, 3, 4} , { 3, 4, 4, 4, 4, 4, 3, 2, 3} , { 3, 4, 4, 4, 3, 3, 2, 1, 3} , { 3, 4, 4, 4, 3, 2, 1, 2, 3} , { 3, 4, 4, 4, 3, 1, 2, 3, 3} , { 4, 4, 4, 4, 3, 2, 3, 4, 3} , { 5, 5, 4, 4, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 2, 3, 3, 4, 4, 4, 3, 1, 3} , { 1, 3, 3, 3, 3, 3, 1, 1, 2} , { 2, 3, 3, 3, 2, 1, 1, 1, 1} , { 3, 3, 3, 3, 1, 1, 1, 3, 2} , { 4, 4, 3, 3, 2, 1, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 1, 2, 3, 4, 4, 4, 3, 2, 3} , { 1, 1, 2, 3, 3, 3, 2, 1, 1} , { 1, 2, 1, 2, 1, 2, 1, 2, 1} , { 3, 3, 2, 1, 1, 1, 2, 3, 1} , { 4, 4, 3, 2, 1, 2, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 2, 1, 3, 4, 4, 4, 3, 3, 3} , { 1, 1, 1, 3, 3, 3, 3, 3, 2} , { 2, 1, 1, 1, 2, 3, 3, 3, 1} , { 3, 3, 1, 1, 1, 3, 3, 3, 2} , { 4, 4, 3, 1, 2, 3, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 4, 4} , { 3, 2, 3, 4, 4, 4, 4, 4, 3} , { 3, 1, 2, 3, 3, 4, 4, 4, 3} , { 3, 2, 1, 2, 3, 4, 4, 4, 3} , { 3, 3, 2, 1, 3, 4, 4, 4, 3} , { 4, 4, 3, 2, 3, 4, 4, 4, 3} , { 5, 5, 4, 3, 3, 4, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 5, 5} , { 4, 3, 4, 5, 5, 5, 5, 5, 4} , { 4, 3, 3, 4, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 4, 3, 3, 4, 5, 5, 5, 4} , { 5, 5, 4, 3, 4, 5, 5, 5, 4} , { 6, 6, 5, 4, 4, 5, 5, 6, 5} } , { { 5, 4, 5, 6, 6, 6, 6, 6, 5} , { 5, 4, 4, 5, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 5, 4, 4, 5, 6, 6, 6, 5} , { 6, 6, 5, 4, 5, 6, 6, 6, 5} } };
 
-	// IMPORTANT CANVIAR PER DONAR PRIORITAT A LA NO RUBBLE!!
+	// QUAN ANEM CAP A UN OBJECTIU (DESTI) ELS SOLDATS ES PODEN AJUNTAR MOLT
 	private static int[][][] eucl = { { { 6, 6, 6, 6, 6, 6, 6, 5, 6} , { 5, 6, 6, 6, 6, 6, 5, 4, 6} , { 5, 6, 6, 6, 6, 5, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 6, 6, 6, 6, 5, 4, 4, 5, 5} , { 6, 6, 6, 6, 5, 4, 5, 6, 6} , { 6, 6, 6, 6, 6, 5, 6, 6, 6} } , { { 5, 6, 6, 6, 6, 6, 5, 4, 6} , { 4, 5, 6, 6, 6, 5, 4, 3, 5} , { 4, 5, 5, 6, 5, 4, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 5, 6, 5, 5, 4, 3, 3, 4, 4} , { 6, 6, 6, 5, 4, 3, 4, 5, 5} , { 6, 6, 6, 6, 5, 4, 5, 6, 6} } , { { 4, 5, 6, 6, 6, 6, 5, 4, 5} , { 3, 4, 5, 6, 5, 5, 4, 3, 4} , { 3, 4, 4, 5, 4, 4, 3, 2, 3} , { 3, 4, 4, 4, 3, 3, 2, 1, 3} , { 3, 4, 4, 4, 3, 2, 1, 2, 3} , { 3, 4, 4, 4, 3, 1, 2, 3, 3} , { 4, 5, 4, 4, 3, 2, 3, 4, 3} , { 5, 6, 5, 4, 3, 3, 4, 5, 4} , { 6, 6, 6, 5, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 2, 3, 3, 4, 4, 4, 3, 1, 3} , { 1, 3, 3, 3, 3, 3, 1, 0, 2} , { 2, 3, 3, 3, 2, 1, 0, 1, 1} , { 3, 3, 3, 3, 1, 0, 1, 3, 2} , { 4, 4, 3, 3, 2, 1, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 1, 2, 3, 4, 4, 4, 3, 2, 3} , { 0, 1, 2, 3, 3, 3, 2, 1, 1} , { 1, 2, 1, 2, 1, 2, 1, 2, 0} , { 3, 3, 2, 1, 0, 1, 2, 3, 1} , { 4, 4, 3, 2, 1, 2, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 2, 1, 3, 4, 4, 4, 3, 3, 3} , { 1, 0, 1, 3, 3, 3, 3, 3, 2} , { 2, 1, 0, 1, 2, 3, 3, 3, 1} , { 3, 3, 1, 0, 1, 3, 3, 3, 2} , { 4, 4, 3, 1, 2, 3, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 6, 5, 5} , { 3, 3, 4, 5, 5, 6, 5, 4, 4} , { 3, 2, 3, 4, 4, 5, 4, 4, 3} , { 3, 1, 2, 3, 3, 4, 4, 4, 3} , { 3, 2, 1, 2, 3, 4, 4, 4, 3} , { 3, 3, 2, 1, 3, 4, 4, 4, 3} , { 4, 4, 3, 2, 3, 4, 4, 5, 3} , { 5, 5, 4, 3, 3, 4, 5, 6, 4} , { 6, 6, 5, 4, 4, 5, 6, 6, 5} } , { { 5, 4, 5, 6, 6, 6, 6, 6, 6} , { 4, 3, 4, 5, 6, 6, 6, 5, 5} , { 4, 3, 3, 4, 5, 6, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 5, 4, 3, 3, 4, 5, 5, 6, 4} , { 6, 5, 4, 3, 4, 5, 6, 6, 5} , { 6, 6, 5, 4, 5, 6, 6, 6, 6} } , { { 6, 5, 6, 6, 6, 6, 6, 6, 6} , { 5, 4, 5, 6, 6, 6, 6, 6, 6} , { 5, 4, 4, 5, 6, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 6, 5, 4, 4, 5, 6, 6, 6, 5} , { 6, 6, 5, 4, 5, 6, 6, 6, 6} , { 6, 6, 6, 5, 6, 6, 6, 6, 6} } };
 	private static final int[] aSoldier = {-1000000, -5, -5, 0, 0, 0, 0};
 	private static final int[] eGuard = {-1000000, -1500, -1250, -500, 20, 10, 0};
@@ -50,6 +50,9 @@ public class Soldier extends RobotPlayer {
 	}
 	
 	static int rv = 0; //robots al voltant
+	static boolean jo = false;
+	static int torn_maxim = 1;
+	static int mc_maxim = 0;
 	static int compt_bc = 0;
 	static int compt_no = 0;
 	public static void playSoldier() {
@@ -76,7 +79,7 @@ public class Soldier extends RobotPlayer {
             // at the end of it, the loop will iterate once per game round.
             try {
             	
-            	
+            	if (rc.getLocation().x == 422 && rc.getLocation().y == 168) jo = true;
             	RobotInfo[] robots = rc.senseNearbyRobots();
             	if (robots.length > rv) rv = robots.length;
             	RobotInfo[] allies = new RobotInfo[robots.length];
@@ -157,97 +160,56 @@ public class Soldier extends RobotPlayer {
             			int seva_vida = 1;
             			if (rc.getHealth() > rob.health) seva_vida = 0;
             			int dists[] = eucl[rob.location.x-rc.getLocation().x + 4][rob.location.y-rc.getLocation().y + 4];
-            			if (rob.team == myTeam) {
-            				if (rob.type == RobotType.SOLDIER) {
-            					if (!dying) {
-            						int k = 9;
-            						while (k-- != 0) M[k] += aSoldier[dists[k]];
-            					}
-            					else {
-            						int k = 9;
-            						while (k-- != 0) M[k] += aSoldierInf[dists[k]];
-            					}
+            			int perills[] = null;
+            			if (!dying) {
+            				if (rob.team == myTeam) {
+            					if (rob.type == RobotType.SOLDIER) perills = aSoldier;
+            					else if (rob.type == RobotType.ARCHON) perills = aArchon[meva_vida];
             				}
-            				else if (rob.type == RobotType.ARCHON) {
-            					if(!dying) {
-            						int k = 9;
-            						while (k-- != 0) M[k] += aArchon[meva_vida][dists[k]];
+            				else if (rob.team == enemyTeam) {
+            					switch(rob.type) {
+            					case SOLDIER: perills = eSoldier[meva_vida*seva_vida]; break;
+            					case GUARD: perills = eGuard; break;
+            					case TURRET: perills = eTurret; break;
+            					case VIPER: perills = eViper; break;
+            					default: break;
             					}
             				}
             			}
-            			else if (rob.team == enemyTeam) {
-            				if (rob.type == RobotType.SOLDIER) {
-            					if(!dying) {
-            						M[0] += eSoldier[meva_vida*seva_vida][dists[0]];
-            						M[1] += eSoldier[meva_vida*seva_vida][dists[1]];
-            						M[2] += eSoldier[meva_vida*seva_vida][dists[2]];
-            						M[3] += eSoldier[meva_vida*seva_vida][dists[3]];
-            						M[4] += eSoldier[meva_vida*seva_vida][dists[4]];
-            						M[5] += eSoldier[meva_vida*seva_vida][dists[5]];
-            						M[6] += eSoldier[meva_vida*seva_vida][dists[6]];
-            						M[7] += eSoldier[meva_vida*seva_vida][dists[7]];
-            						M[8] += eSoldier[meva_vida*seva_vida][dists[8]];
-            					}
-            					else {
-            						int k = 9;
-            						while (k-- != 0) M[k] += eSoldierInf[dists[k]];
-            					}
+            			else {
+            				if (rob.team == myTeam) {
+            					if (rob.type == RobotType.SOLDIER) perills = aSoldierInf;
             				}
-            				else if (rob.type == RobotType.GUARD) {
-            					if(!dying) {
-            						int k = 9;
-            						while (k-- != 0) M[k] += eGuard[dists[k]];
-            					}
-            					else {
-            						int k = 9;
-            						while (k-- != 0) M[k] += eGuardInf[dists[k]];
-            					}
-            				}
-            				else if (rob.type == RobotType.TURRET) {
-            					if(!dying) {
-            						int k = 9;
-            						while (k-- != 0) M[k] += eTurret[dists[k]];
-            					}
-            					else {
-            						int k = 9;
-            						while (k-- != 0) M[k] += eTurretInf[dists[k]];
-            					}
-            				}
-            				else if (rob.type == RobotType.VIPER) {
-            					if(!dying) {
-            						int k = 9;
-            						while (k-- != 0) M[k] += eViper[dists[k]];
-            					}
-            					else {
-            						int k = 9;
-            						while (k-- != 0) M[k] += eViperInf[dists[k]];
-            					}
-            				}
-            				else if (rob.type == RobotType.ARCHON)
-            				{
-            					if (dying) {
-            						int k = 9;
-            						while (k-- != 0) M[k] += eArchonInf[dists[k]];
+            				else if (rob.team == enemyTeam) {
+            					switch(rob.type) {
+            					case SOLDIER: perills = eSoldierInf; break;
+            					case GUARD: perills = eGuardInf; break;
+            					case TURRET: perills = eTurretInf; break;
+            					case VIPER: perills = eViperInf; break;
+            					case ARCHON: perills = eArchonInf; break;
+            					default: break;
             					}
             				}
             			}
-            			else if (rob.team == Team.ZOMBIE && !dying) {
-            				if (rob.type == RobotType.STANDARDZOMBIE) {
-            					int k = 9;
-        						while (k-- != 0) M[k] += sZombie[dists[k]];
+            			if (rob.team == Team.ZOMBIE && !dying) {
+            				switch(rob.type) {
+            				case STANDARDZOMBIE: perills = sZombie; break;
+            				case FASTZOMBIE: perills = fZombie; break;
+            				case BIGZOMBIE: perills = bZombie; break;
+            				case RANGEDZOMBIE: perills = rZombie[meva_vida*seva_vida]; break;
+            				default: break;
             				}
-            				else if (rob.type == RobotType.FASTZOMBIE) {
-            					int k = 9;
-        						while (k-- != 0) M[k] += fZombie[dists[k]];
-            				}
-            				else if (rob.type == RobotType.BIGZOMBIE) {
-            					int k = 9;
-        						while (k-- != 0) M[k] += bZombie[dists[k]];
-            				}
-            				else if (rob.type == RobotType.RANGEDZOMBIE) {
-            					int k = 9;
-        						while (k-- != 0) M[k] += rZombie[meva_vida*seva_vida][dists[k]];
-            				}
+            			}
+            			if (perills != null) {
+	            			M[0] += perills[dists[0]];
+							M[1] += perills[dists[1]];
+							M[2] += perills[dists[2]];
+							M[3] += perills[dists[3]];
+							M[4] += perills[dists[4]];
+							M[5] += perills[dists[5]];
+							M[6] += perills[dists[6]];
+							M[7] += perills[dists[7]];
+							M[8] += perills[dists[8]];
             			}
             		}
             		
@@ -286,7 +248,7 @@ public class Soldier extends RobotPlayer {
     	            	}
     	            }
     	            */
-            		
+            		if (true) {
             			int BC2 = Clock.getBytecodeNum();
     	            	++compt_no;
     	            	if (compt_no < 50) {
@@ -294,7 +256,7 @@ public class Soldier extends RobotPlayer {
     	            		System.out.printf("\nDiferencia de bc: %d\n", BC2-BC1);
     		            }
     	            	else if (compt_no == 50) System.out.printf("\nMitjana de diferencia de bc: %f\n", (double)compt_bc/compt_no);
-    	            	
+            		}
             		
             		M[8] -= rc.senseRubble(rc.getLocation());
             		for (int k = 0; k < 8; ++k) {
@@ -389,12 +351,13 @@ public class Soldier extends RobotPlayer {
                 }
                 */
         		//if (torn != rc.getRoundNum()) System.out.print("================Desgraciaaaaaaa===============\n");
-        		System.out.printf("                                        %d", rv);
+        		
                 Clock.yield();
             } catch (Exception e) {
                 System.out.println(e.getMessage());
                 e.printStackTrace();
             }
+            System.out.printf("%d\n", rv);
         }
 	}
 
