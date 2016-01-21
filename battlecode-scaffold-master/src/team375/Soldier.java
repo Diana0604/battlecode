@@ -7,6 +7,7 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Signal;
 import battlecode.common.Team;
+import battlecode.common.ZombieSpawnSchedule;
 import battlecode.common.MapLocation;
 
 public class Soldier extends RobotPlayer {
@@ -14,38 +15,55 @@ public class Soldier extends RobotPlayer {
 	
 	//private static int[][][] taxi = { { { 5, 6, 6, 6, 6, 6, 5, 4, 5} , { 5, 6, 6, 6, 5, 5, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 5, 5} , { 6, 6, 6, 6, 5, 4, 5, 6, 5} } , { { 4, 5, 5, 6, 6, 6, 5, 4, 5} , { 4, 5, 5, 5, 5, 5, 4, 3, 4} , { 4, 5, 5, 5, 4, 4, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 4, 4} , { 5, 5, 5, 5, 4, 3, 4, 5, 4} , { 6, 6, 5, 5, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 4, 4, 5, 5, 5, 4, 3, 4} , { 3, 4, 4, 4, 4, 4, 3, 2, 3} , { 3, 4, 4, 4, 3, 3, 2, 1, 3} , { 3, 4, 4, 4, 3, 2, 1, 2, 3} , { 3, 4, 4, 4, 3, 1, 2, 3, 3} , { 4, 4, 4, 4, 3, 2, 3, 4, 3} , { 5, 5, 4, 4, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 2, 3, 3, 4, 4, 4, 3, 1, 3} , { 1, 3, 3, 3, 3, 3, 1, 1, 2} , { 2, 3, 3, 3, 2, 1, 1, 1, 1} , { 3, 3, 3, 3, 1, 1, 1, 3, 2} , { 4, 4, 3, 3, 2, 1, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 1, 2, 3, 4, 4, 4, 3, 2, 3} , { 1, 1, 2, 3, 3, 3, 2, 1, 1} , { 1, 2, 1, 2, 1, 2, 1, 2, 1} , { 3, 3, 2, 1, 1, 1, 2, 3, 1} , { 4, 4, 3, 2, 1, 2, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 2, 1, 3, 4, 4, 4, 3, 3, 3} , { 1, 1, 1, 3, 3, 3, 3, 3, 2} , { 2, 1, 1, 1, 2, 3, 3, 3, 1} , { 3, 3, 1, 1, 1, 3, 3, 3, 2} , { 4, 4, 3, 1, 2, 3, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 4, 4} , { 3, 2, 3, 4, 4, 4, 4, 4, 3} , { 3, 1, 2, 3, 3, 4, 4, 4, 3} , { 3, 2, 1, 2, 3, 4, 4, 4, 3} , { 3, 3, 2, 1, 3, 4, 4, 4, 3} , { 4, 4, 3, 2, 3, 4, 4, 4, 3} , { 5, 5, 4, 3, 3, 4, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 5, 5} , { 4, 3, 4, 5, 5, 5, 5, 5, 4} , { 4, 3, 3, 4, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 4, 3, 3, 4, 5, 5, 5, 4} , { 5, 5, 4, 3, 4, 5, 5, 5, 4} , { 6, 6, 5, 4, 4, 5, 5, 6, 5} } , { { 5, 4, 5, 6, 6, 6, 6, 6, 5} , { 5, 4, 4, 5, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 5, 4, 4, 5, 6, 6, 6, 5} , { 6, 6, 5, 4, 5, 6, 6, 6, 5} } };
 
-	// QUAN ANEM CAP A UN OBJECTIU (DESTI) ELS SOLDATS ES PODEN AJUNTAR MOLT
 	private static int[][][] eucl = { { { 6, 6, 6, 6, 6, 6, 6, 5, 6} , { 5, 6, 6, 6, 6, 6, 5, 4, 6} , { 5, 6, 6, 6, 6, 5, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 6, 6, 6, 6, 5, 4, 4, 5, 5} , { 6, 6, 6, 6, 5, 4, 5, 6, 6} , { 6, 6, 6, 6, 6, 5, 6, 6, 6} } , { { 5, 6, 6, 6, 6, 6, 5, 4, 6} , { 4, 5, 6, 6, 6, 5, 4, 3, 5} , { 4, 5, 5, 6, 5, 4, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 5, 6, 5, 5, 4, 3, 3, 4, 4} , { 6, 6, 6, 5, 4, 3, 4, 5, 5} , { 6, 6, 6, 6, 5, 4, 5, 6, 6} } , { { 4, 5, 6, 6, 6, 6, 5, 4, 5} , { 3, 4, 5, 6, 5, 5, 4, 3, 4} , { 3, 4, 4, 5, 4, 4, 3, 2, 3} , { 3, 4, 4, 4, 3, 3, 2, 1, 3} , { 3, 4, 4, 4, 3, 2, 1, 2, 3} , { 3, 4, 4, 4, 3, 1, 2, 3, 3} , { 4, 5, 4, 4, 3, 2, 3, 4, 3} , { 5, 6, 5, 4, 3, 3, 4, 5, 4} , { 6, 6, 6, 5, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 2, 3, 3, 4, 4, 4, 3, 1, 3} , { 1, 3, 3, 3, 3, 3, 1, 0, 2} , { 2, 3, 3, 3, 2, 1, 0, 1, 1} , { 3, 3, 3, 3, 1, 0, 1, 3, 2} , { 4, 4, 3, 3, 2, 1, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 1, 2, 3, 4, 4, 4, 3, 2, 3} , { 0, 1, 2, 3, 3, 3, 2, 1, 1} , { 1, 2, 1, 2, 1, 2, 1, 2, 0} , { 3, 3, 2, 1, 0, 1, 2, 3, 1} , { 4, 4, 3, 2, 1, 2, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 2, 1, 3, 4, 4, 4, 3, 3, 3} , { 1, 0, 1, 3, 3, 3, 3, 3, 2} , { 2, 1, 0, 1, 2, 3, 3, 3, 1} , { 3, 3, 1, 0, 1, 3, 3, 3, 2} , { 4, 4, 3, 1, 2, 3, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 6, 5, 5} , { 3, 3, 4, 5, 5, 6, 5, 4, 4} , { 3, 2, 3, 4, 4, 5, 4, 4, 3} , { 3, 1, 2, 3, 3, 4, 4, 4, 3} , { 3, 2, 1, 2, 3, 4, 4, 4, 3} , { 3, 3, 2, 1, 3, 4, 4, 4, 3} , { 4, 4, 3, 2, 3, 4, 4, 5, 3} , { 5, 5, 4, 3, 3, 4, 5, 6, 4} , { 6, 6, 5, 4, 4, 5, 6, 6, 5} } , { { 5, 4, 5, 6, 6, 6, 6, 6, 6} , { 4, 3, 4, 5, 6, 6, 6, 5, 5} , { 4, 3, 3, 4, 5, 6, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 5, 4, 3, 3, 4, 5, 5, 6, 4} , { 6, 5, 4, 3, 4, 5, 6, 6, 5} , { 6, 6, 5, 4, 5, 6, 6, 6, 6} } , { { 6, 5, 6, 6, 6, 6, 6, 6, 6} , { 5, 4, 5, 6, 6, 6, 6, 6, 6} , { 5, 4, 4, 5, 6, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 6, 5, 4, 4, 5, 6, 6, 6, 5} , { 6, 6, 5, 4, 5, 6, 6, 6, 6} , { 6, 6, 6, 5, 6, 6, 6, 6, 6} } };
-	private static final int[] aSoldier = {-1000000, -5, -5, 0, 0, 0, 0};
+	private static final int[] aSoldier = {-1000000, -3, 0, 0, 0, 0, 0};
+	private static final int[] eArchon = {-1000000, 20, 20, 15, 10, 5, 0};
 	private static final int[] eGuard = {-1000000, -1500, -1250, -500, 20, 10, 0};
 	private static final int[] eTurret = {-1000000, -4000, -3900, -3750, -3500, -3250, -3000};
 	private static final int[] eViper = {-1000000, -8000, -7800, -7500, -7000, -6500, -6000};
 	private static final int[] sZombie = {-1000000, -1500, -1250, -500, 20, 10, 0};
 	private static final int[] fZombie = {-1000000, -3000, -2750, -1000, 20, 10, 0};
 	private static final int[] bZombie = {-1000000, -8300, -8200, -4000, 20, 10, 0};
+	private static final int[] xNeutral = {-1000000, -3, 0, 0, 0, 0, 0};
 		
 	private static final int[][] aArchon = {{-1000000, -5, -5, 0, 0, 0, 0}, {-1000000, 5, 5, 5, 5, 5, 0}};
 	private static final int[][] eSoldier = {{-1000000, -2100, -2000, -1000, 20, 10, 0},{-1000000, -2100, -2000, -1500, -1250, -1000, 0}};
 	private static final int[][] rZombie = {{-1000000, -3100, -3000, -1500, 20, 10, 0},{-1000000, -3100, -3000, -2000, -1750, -1500, 0}};
+	private static final int[][] dZombie = {{-1000000, -50, -50, 30, 15, 5, 0}, {-1000000, -100, -100, -50, -30, -20, -10}, {-1000000, -1000, -1000, -500, 20, 10, 0}};
 	
-	private static int[] aSoldierInf = {-1000000, -2100, -2000, -1000, -20, -10, -5};
-	private static int[] eSoldierInf = {-1000000, 2100, 2000, 1000, 20, 10, 5};
-	private static int[] eGuardInf = {-1000000, 2100, 2000, 1000, 20, 10, 5};
-	private static int[] eTurretInf = {-1000000, 2100, 2000, 1000, 20, 10, 5};
-	private static int[] eViperInf = {-1000000, 2500, 2300, 2000, 100, 50, 20};
-	private static int [] eArchonInf = {-1000000, 5000, 3000, 2500, 1000, 500, 100};
-	private static int[] eArchonInfL = {-1000000, 1000, 900, 800, 700, 500, 600, 500, 400, 300, 200, 100};
+	private static final int[] aSoldierInf = {-1000000, -2100, -2000, -1000, -20, -10, -5};
+	private static final int[] eSoldierInf = {-1000000, 2100, 2000, 1000, 20, 10, 5};
+	private static final int[] eGuardInf = {-1000000, 2100, 2000, 1000, 20, 10, 5};
+	private static final int[] eTurretInf = {-1000000, 2100, 2000, 1000, 20, 10, 5};
+	private static final int[] eViperInf = {-1000000, 2500, 2300, 2000, 100, 50, 20};
+	private static final int [] eArchonInf = {-1000000, 5000, 3000, 2500, 1000, 500, 100};
+	private static final int[] eArchonInfL = {-1000000, 1000, 900, 800, 700, 500, 600, 500, 400, 300, 200, 100};
 	
 	private static final int torns_combat = 5;
 	private static final int WEAK = 20;
 	
+	private static int [] rondes_zombies;
+	private static int proxima_zombies = 0;
 	private static int enCombat = 0;
 	private static MapLocation ls = null; //location del signal
 	private static MapLocation desti = null;
 	private static boolean dying = false;
 	private static int M0, M1, M2, M3, M4, M5, M6, M7, M8;
-	private static int[] M, perills, dists;
+	private static int[] perills, dists;
 	
+	private static int inversaDirections (Direction d) {
+		switch(d) {
+		case NORTH: return 0;
+		case NORTH_EAST: return 1;
+		case EAST: return 2;
+		case SOUTH_EAST: return 3;
+		case SOUTH: return 4;
+		case SOUTH_WEST: return 5;
+		case WEST: return 6;
+		case NORTH_WEST: return 7;
+		default: return 8;
+		}
+	}
 	
 	private static void sumarM() {
 		M0 += perills[dists[0]];
@@ -72,6 +90,7 @@ public class Soldier extends RobotPlayer {
 	public static void playSoldier() {
 		try {
             // Any code here gets executed exactly once at the beginning of the game.
+			rondes_zombies = rc.getZombieSpawnSchedule().getRounds();
             attackRange = rc.getType().attackRadiusSquared;
         } catch (Exception e) {
             // Throwing an uncaught exception makes the robot die, so we need to catch exceptions.
@@ -81,6 +100,7 @@ public class Soldier extends RobotPlayer {
         }
 
         while (true) {
+        	
         	/**
         	 * Coses a tenir en compte:
         	 * * Quan una torre ataca i no la veiem
@@ -92,7 +112,10 @@ public class Soldier extends RobotPlayer {
             // This is a loop to prevent the run() method from returning. Because of the Clock.yield()
             // at the end of it, the loop will iterate once per game round.
             try {
-            	int nallies = 0, nenemies = 0, nzombies = 0;
+            	rc.setIndicatorString(0, ""); rc.setIndicatorString(1, ""); rc.setIndicatorString(2, "");
+            	MapLocation loc = rc.getLocation();
+            	
+            	int nallies = 0, nenemies = 0, nzombies = 0, nneutrals = 0, dens = 0;
             	RobotInfo[] robots = rc.senseNearbyRobots();
             	RobotInfo[] allies = rc.senseNearbyRobots(6,myTeam);
             	boolean pocs_amics = (allies.length == 0);
@@ -100,11 +123,18 @@ public class Soldier extends RobotPlayer {
             	else nallies = allies.length;
             	RobotInfo[] enemies = new RobotInfo[robots.length];
             	RobotInfo[] zombies = new RobotInfo[robots.length];
+            	RobotInfo[] neutrals = new RobotInfo[robots.length];
             	
             	for (int i = 0; i < robots.length; ++i) {
-            		if (pocs_amics && robots[i].team == myTeam) allies[nallies++] = robots[i];
+            		if (robots[i].team == myTeam) {
+            			if (pocs_amics) allies[nallies++] = robots[i];
+            		}
             		else if (robots[i].team == enemyTeam) enemies[nenemies++] = robots[i];
-            		else if (robots[i].team == Team.ZOMBIE) zombies[nzombies++] = robots[i];
+            		else if (robots[i].team == Team.ZOMBIE) {
+            			if (robots[i].type == RobotType.ZOMBIEDEN) ++dens;
+            			zombies[nzombies++] = robots[i];
+            		}
+            		else neutrals[nneutrals++] = robots[i];
             	}
             	
             	if(!dying)
@@ -119,6 +149,7 @@ public class Soldier extends RobotPlayer {
             	}
             	
             	Signal[] sig = rc.emptySignalQueue();
+            	rc.setIndicatorString(2, "Signals: "+sig.length);
             	if(!dying) for (int i = 0; i < sig.length; ++i) {
 					if (sig[i].getTeam() == enemyTeam) continue;
     				if (sig[i].getMessage() == null) {
@@ -135,34 +166,33 @@ public class Soldier extends RobotPlayer {
     				else {
     					int a = sig[i].getMessage()[0];
     					int b = sig[i].getMessage()[1];
-    					Message m = new Message(rc.getLocation(), a, b);
+    					Message m = new Message(loc, a, b);
     					desti = new MapLocation(m.getX(), m.getY());
     				}
     			}
     			
-    			if (nenemies+nzombies > 0) {
+    			if (nenemies+nzombies > dens) {
         			ls = null;
         			if (enCombat < torns_combat) rc.broadcastSignal(visionRange);
         			enCombat = torns_combat;
         		}
     			else {
     				if (enCombat > 0) --enCombat;
-    				else {
-    					if (ls != null && rc.isCoreReady()) {
-    						Direction dir = rc.getLocation().directionTo(ls);
-    	    				if (rc.canMove(dir)) rc.move(dir);
-    	    				else if (rc.canMove(dir.rotateLeft())) rc.move(dir.rotateLeft());
-    	    				else if (rc.canMove(dir.rotateRight())) rc.move(dir.rotateRight());
-    					}
-    					else if (desti != null && rc.isCoreReady()) {
-    						Direction dir = rc.getLocation().directionTo(desti);
-    	    				if (rc.canMove(dir)) rc.move(dir);
-    	    				else if (rc.canMove(dir.rotateLeft())) rc.move(dir.rotateLeft());
-    	    				else if (rc.canMove(dir.rotateRight())) rc.move(dir.rotateRight());
-    					}
-    				}
     			}
             	
+    			int torn = rc.getRoundNum();
+    			int zombies_aprop = 0;
+    			if (proxima_zombies < rondes_zombies.length) {
+	    			if (rondes_zombies[proxima_zombies] <= torn) {
+	    				proxima_zombies++;
+	    			}
+	    			int dif = rondes_zombies[proxima_zombies] - torn;
+	    			if (dif < 10) zombies_aprop = 2;
+	    			else if (dif < 15) zombies_aprop = 1;
+    			}
+    			
+    			
+    			
             	
             	int meva_vida = 0;
             	if (rc.getHealth() < 60/4) meva_vida = 1;
@@ -173,7 +203,7 @@ public class Soldier extends RobotPlayer {
 	        			RobotInfo rob = enemies[j];
             			int seva_vida = 1;
             			if (rc.getHealth() > rob.health) seva_vida = 0;
-            			dists = eucl[rob.location.x-rc.getLocation().x + 4][rob.location.y-rc.getLocation().y + 4];
+            			dists = eucl[rob.location.x-loc.x + 4][rob.location.y-loc.y + 4];
             			perills = null;
             			// 36 bc fins aqui
             			
@@ -183,6 +213,7 @@ public class Soldier extends RobotPlayer {
         					case GUARD: perills = eGuard; break;
         					case TURRET: perills = eTurret; break;
         					case VIPER: perills = eViper; break;
+        					case ARCHON: perills = eArchon; break;
         					default: break;
         					}
             			}
@@ -204,7 +235,7 @@ public class Soldier extends RobotPlayer {
 	        			RobotInfo rob = zombies[j];
             			int seva_vida = 1;
             			if (rc.getHealth() > rob.health) seva_vida = 0;
-            			dists = eucl[rob.location.x-rc.getLocation().x + 4][rob.location.y-rc.getLocation().y + 4];
+            			dists = eucl[rob.location.x-loc.x + 4][rob.location.y-loc.y + 4];
             			perills = null;
             			// 36 bc fins aqui
             			switch(rob.type) {
@@ -212,6 +243,7 @@ public class Soldier extends RobotPlayer {
         				case FASTZOMBIE: perills = fZombie; break;
         				case BIGZOMBIE: perills = bZombie; break;
         				case RANGEDZOMBIE: perills = rZombie[meva_vida*seva_vida]; break;
+        				case ZOMBIEDEN: perills = dZombie[zombies_aprop]; break;
         				default: break;
         				}
             			// fins aqui son ?
@@ -220,7 +252,7 @@ public class Soldier extends RobotPlayer {
 	        		}
 	        		for (int j = 0; j < nallies; ++j) {
 	        			RobotInfo rob = allies[j];
-            			dists = eucl[rob.location.x-rc.getLocation().x + 4][rob.location.y-rc.getLocation().y + 4];
+            			dists = eucl[rob.location.x-loc.x + 4][rob.location.y-loc.y + 4];
             			perills = null;
             			// ? bc fins aqui
             			
@@ -233,8 +265,20 @@ public class Soldier extends RobotPlayer {
             			if (perills != null) sumarM();
             			// fins aqui son 74 bc mes
 	        		}
+	        		for (int j = 0; j < nneutrals; ++j) {
+	        			RobotInfo rob = neutrals[j];
+            			dists = eucl[rob.location.x-loc.x + 4][rob.location.y-loc.y + 4];
+            			perills = null;
+            			// ? bc fins aqui
+            			perills = xNeutral;
+            			// fins aqui son ?
+            			if (perills != null) sumarM();
+            			// fins aqui son 74 bc mes
+	        		}
             		
             		int [] M = {M0, M1, M2, M3, M4, M5, M6, M7, M8};
+	        		
+            		
             		
             		//estic comencant a llegir senyal pero no esta ben preparat encar
             		/*
@@ -250,9 +294,9 @@ public class Soldier extends RobotPlayer {
     	            	int x = m.getX() + s.getLocation().x -128;
     	            	int y = m.getY() + s.getLocation().y -128;
     	            	MapLocation objective = new MapLocation(x,y);
-    	            	int d = taxista(rc.getLocation(), objective);
+    	            	int d = taxista(loc, objective);
     	            	if(d > 10) continue;
-    	            	Direction dir = rc.getLocation().directionTo(objective);
+    	            	Direction dir = loc.directionTo(objective);
     	            	for(int i = 0; i < 8; i++)
     	            	{
     	            		if(dir == directions[i])
@@ -271,37 +315,52 @@ public class Soldier extends RobotPlayer {
     	            	}
     	            }
     	            */
-
+            		
             			int BC2 = Clock.getBytecodeNum();
             			rc.setIndicatorString(1, "\nDiferencia de bc: " + (BC2-BC1) + "\n");
     	            	++compt_no;
-    	            	if (compt_no < 50) {
-    	            		compt_bc += BC2-BC1;
-    		            }
-    	            	else if (compt_no == 50) System.out.printf("\nMitjana de diferencia de bc: %f\n", (double)compt_bc/compt_no);
-            		
-            		
-            		M[8] -= rc.senseRubble(rc.getLocation());
+    	            	compt_bc += BC2-BC1;
+    	            	
+	            	if (enCombat == 0) {
+		        		if (ls != null) {
+							int dir = inversaDirections(loc.directionTo(ls));
+		    				M[dir] += 80;
+		    				M[(dir+1)%8] += 75;
+		    				M[(dir+7)%8] += 75;
+						}
+						else if (desti != null) {
+							int dir = inversaDirections(loc.directionTo(desti));
+		    				M[dir] += 80;
+		    				M[(dir+1)%8] += 75;
+		    				M[(dir+7)%8] += 75;
+						}
+	        		}
+	            	
+	            	boolean urgencia = (enCombat > 0) || ls != null;
+            		if (rc.senseRubble(loc) >= 50) M[8] -= 30;
             		for (int k = 0; k < 8; ++k) {
-            			M[k] -= rc.senseRubble(rc.getLocation().add(directions[k]));
+            			double rubble = rc.senseRubble(loc.add(directions[k]));
+            			if (urgencia && rubble >= 100) M[k] -= 1000000;
+            			else if (rubble >= 50) M[k] -= 30;
             		}
-            		
 	            	
 	            	int millor = 8;
             		for (int i = 0; i < 8; i++) {
-            			if (rc.canMove(directions[i])) {
+            			if (rc.canMove(directions[i]) || (!urgencia && rc.senseRubble(loc.add(directions[i])) >= 100)) {
             				if (M[i] > M[millor]) millor = i;
             			}
             		}
                 	rc.setIndicatorString(0, ""+M[7]+" "+M[0]+" "+M[1]+" "+M[6]+" "+M[8]+" "+M[2]+" "+M[5]+" "+M[4]+" "+M[3]);
             			
             		if (millor < 8) {
-            			rc.move(directions[millor]);
+            			Direction dir = directions[millor];
+            			if (rc.senseRubble(loc.add(dir)) >= 100) rc.clearRubble(dir);
+            			else rc.move(directions[millor]);
             		}
 	            	
             	}
         		if (rc.isWeaponReady() && (nzombies > 0 || nenemies > 0)) {
-                	rc.setIndicatorString(0, "Atacant");
+        			rc.setIndicatorString(1, "Atacant");
             		RobotInfo obj = null;
             		int proper = 0, debil = 0, dist = 2*visionRange;
             		double vida = 1000000;
@@ -310,8 +369,8 @@ public class Soldier extends RobotPlayer {
             				vida = enemies[i].health;
             				debil = i;
             			}
-            			if (taxista(rc.getLocation(),enemies[i].location) < dist && rc.canAttackLocation(enemies[i].location)) {
-            				dist = taxista(rc.getLocation(),enemies[i].location);
+            			if (taxista(loc,enemies[i].location) < dist && rc.canAttackLocation(enemies[i].location)) {
+            				dist = taxista(loc,enemies[i].location);
             				proper = i;
             			}
             		}
@@ -322,8 +381,8 @@ public class Soldier extends RobotPlayer {
 	            				vida = zombies[i].health;
 	            				debil = i;
 	            			}
-	            			if (taxista(rc.getLocation(),zombies[i].location) < dist && rc.canAttackLocation(zombies[i].location)) {
-	            				dist = taxista(rc.getLocation(),zombies[i].location);
+	            			if (taxista(loc,zombies[i].location) < dist && rc.canAttackLocation(zombies[i].location)) {
+	            				dist = taxista(loc,zombies[i].location);
 	            				proper = i;
 	            			}
 	            		}
@@ -361,7 +420,7 @@ public class Soldier extends RobotPlayer {
                             // Choose a random direction to try to move in
                             Direction dirToMove = directions[fate % 8];
                             // Check the rubble in that direction
-                            if (rc.senseRubble(rc.getLocation().add(dirToMove)) >= GameConstants.RUBBLE_OBSTRUCTION_THRESH) {
+                            if (rc.senseRubble(loc.add(dirToMove)) >= GameConstants.RUBBLE_OBSTRUCTION_THRESH) {
                                 // Too much rubble, so I should clear it
                                 rc.clearRubble(dirToMove);
                                 // Check if I can move in this direction
@@ -380,6 +439,7 @@ public class Soldier extends RobotPlayer {
                 System.out.println(e.getMessage());
                 e.printStackTrace();
             }
+            //System.out.printf("\nMitjana de diferencia de bc: %f\n", (double)compt_bc/compt_no);
         }
 	}
 
