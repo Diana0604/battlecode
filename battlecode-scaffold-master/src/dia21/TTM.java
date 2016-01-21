@@ -1,4 +1,4 @@
-package antic;
+package dia21;
 
 public class TTM extends RobotPlayer {
 

@@ -1,4 +1,4 @@
-package antic;
+package dia21;
 
 import java.util.Random;
 import battlecode.common.*;

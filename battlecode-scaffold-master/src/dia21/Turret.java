@@ -1,4 +1,4 @@
-package antic;
+package dia21;
 
 import battlecode.common.Clock;
 import battlecode.common.Direction;
