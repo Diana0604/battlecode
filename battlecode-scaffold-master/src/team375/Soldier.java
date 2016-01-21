@@ -186,9 +186,11 @@ public class Soldier extends RobotPlayer {
 	    			if (rondes_zombies[proxima_zombies] <= torn) {
 	    				proxima_zombies++;
 	    			}
-	    			int dif = rondes_zombies[proxima_zombies] - torn;
-	    			if (dif < 10) zombies_aprop = 2;
-	    			else if (dif < 15) zombies_aprop = 1;
+	    			if (proxima_zombies < rondes_zombies.length) {
+		    			int dif = rondes_zombies[proxima_zombies] - torn;
+		    			if (dif < 10) zombies_aprop = 2;
+		    			else if (dif < 15) zombies_aprop = 1;
+	    			}
     			}
     			
     			
