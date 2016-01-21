@@ -130,21 +130,21 @@ public class Message {
 		return l;
 	}
 	
-	public long intsToLong(int i1, int i2){
+	private long intsToLong(int i1, int i2){
 		long ret = i1;
 		ret = ret << 32;
 		ret += i2;
 		return ret;
 	}
 	
-	public int[] longToInts(long l){
+	private int[] longToInts(long l){
 		int[] ret = new int[2];
 		ret[0] = selectBits(l, 32, 63);
 		ret[1] = selectBits(l, 0, 31);
 		return ret;
 	}
 	
-	public void computeArray(){
+	private void computeArray(){
 		array = 0;
 		array = setBits(array,0,14,destID);
 		array = setBits(array,15,15,idControl);
@@ -168,10 +168,6 @@ public class Message {
 	public int getTypeControl() {return typeControl;}
 	
 	public int getRobotType() {return robotType;}
-	public Boolean toArchon() {return robotType == ARCHON || robotType == ALL_EXCEPT_SCOUT || robotType == ALL;}
-	public Boolean toSoldier() {return robotType == SOLDIER || robotType == SOLDIER_VIPER || robotType == SOLDIER_GUARD_VIPER ||
-							           robotType == SOLDIER_SCOUT_GUARD_VIPER || robotType == ALL_EXCEPT_ARCHON || robotType == ALL_EXCEPT_SCOUT ||
-							           robotType == ALL;}
 	
 	public int getX() {return sender.x - x + 128;}
 	
@@ -184,4 +180,26 @@ public class Message {
 	public int getSenderArchon() {return senderArchon;}
 	
 	public long getArray() {return array;}
+	
+	public Boolean toArchon() {return robotType == ARCHON || robotType == ALL_EXCEPT_SCOUT || robotType == ALL;}
+	
+	public Boolean toScout() {return robotType == SCOUT || robotType == SOLDIER_SCOUT_GUARD_VIPER || 
+									 robotType == ALL_EXCEPT_ARCHON || robotType == ALL;}
+	
+	public Boolean toSoldier() {return robotType == SOLDIER || robotType == SOLDIER_VIPER || robotType == SOLDIER_GUARD_VIPER ||
+							           robotType == SOLDIER_SCOUT_GUARD_VIPER || robotType == ALL_EXCEPT_ARCHON || robotType == ALL_EXCEPT_SCOUT ||
+							           robotType == ALL;}
+	
+	public Boolean toGuard() {return robotType == GUARD || robotType == SOLDIER_GUARD_VIPER || robotType == SOLDIER_SCOUT_GUARD_VIPER ||
+									 robotType == ALL_EXCEPT_ARCHON || robotType == ALL_EXCEPT_SCOUT || robotType == ALL;}
+	
+	public Boolean toViper() {return robotType == VIPER || robotType == SOLDIER_VIPER || robotType == SOLDIER_GUARD_VIPER || 
+									 robotType == SOLDIER_SCOUT_GUARD_VIPER || robotType == ALL_EXCEPT_ARCHON || 
+									 robotType == ALL_EXCEPT_SCOUT || robotType == ALL;}
+	
+	public Boolean toTurret() {return robotType == TURRET || robotType == TURRET_TTM || robotType == ALL_EXCEPT_ARCHON || 
+			 						  robotType == ALL_EXCEPT_SCOUT || robotType == ALL;}
+	
+	public Boolean toTTM() {return robotType == TTM || robotType == TURRET_TTM || robotType == ALL_EXCEPT_ARCHON || 
+			  					   robotType == ALL_EXCEPT_SCOUT || robotType == ALL;}
 }
