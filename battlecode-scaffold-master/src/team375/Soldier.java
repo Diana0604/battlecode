@@ -169,7 +169,7 @@ public class Soldier extends RobotPlayer {
     				else {
     					int a = sig[i].getMessage()[0];
     					int b = sig[i].getMessage()[1];
-    					Message m = new Message(loc, a, b);
+    					Message m = new Message(sig[i].getLocation(), a, b);
     					if (m.getTypeControl() == 1){
     						if (!m.toSoldier()) continue;
     					}
