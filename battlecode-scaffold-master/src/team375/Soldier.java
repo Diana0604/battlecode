@@ -25,11 +25,11 @@ public class Soldier extends RobotPlayer {
 	private static final int[] fZombie = {-1000000, -3000, -2750, -1000, 20, 10, 0};
 	private static final int[] bZombie = {-1000000, -8300, -8200, -4000, 20, 10, 0};
 	private static final int[] xNeutral = {-1000000, -3, 0, 0, 0, 0, 0};
-		
+		 
 	private static final int[][] aArchon = {{-1000000, -5, -5, 0, 0, 0, 0}, {-1000000, 5, 5, 5, 5, 5, 0}};
 	private static final int[][] eSoldier = {{-1000000, -2100, -2000, -1000, 20, 10, 0},{-1000000, -2100, -2000, -1500, -1250, -1000, 0}};
 	private static final int[][] rZombie = {{-1000000, -3100, -3000, -1500, 20, 10, 0},{-1000000, -3100, -3000, -2000, -1750, -1500, 0}};
-	private static final int[][] dZombie = {{-1000000, -50, -50, 30, 15, 5, 0}, {-1000000, -100, -100, -50, -30, -20, -10}, {-1000000, -1000, -1000, -500, 20, 10, 0}};
+	private static final int[][] dZombie = {{-1000000, -50, -50, 30, 15, 5, 0}, {-1000000, -200, -200, -100, -50, -30, -15}, {-1000000, -1000, -1000, -500, 20, 10, 0}};
 	
 	private static final int[] aSoldierInf = {-1000000, -2100, -2000, -1000, -20, -10, -5};
 	private static final int[] eSoldierInf = {-1000000, 2100, 2000, 1000, 20, 10, 5};
@@ -44,7 +44,7 @@ public class Soldier extends RobotPlayer {
 	
 	private static int [] rondes_zombies;
 	private static int proxima_zombies = 0;
-	private static int enCombat = 0;
+	private static int enCombat = 0, buscantCombat = 0;
 	private static MapLocation ls = null; //location del signal
 	private static MapLocation desti = null;
 	private static boolean dying = false;
@@ -149,7 +149,7 @@ public class Soldier extends RobotPlayer {
             	}
             	
             	Signal[] sig = rc.emptySignalQueue();
-            	rc.setIndicatorString(2, "Signals: "+sig.length);
+            	//rc.setIndicatorString(2, "Signals: "+sig.length);
             	if(!dying) for (int i = 0; i < sig.length; ++i) {
 					if (sig[i].getTeam() == enemyTeam) continue;
     				if (sig[i].getMessage() == null) {
@@ -161,13 +161,21 @@ public class Soldier extends RobotPlayer {
     						}
     					}
     					// no es senyal doble
-    					if (enCombat < torns_combat && ls == null) ls = sig[i].getLocation();
+    					if (enCombat < torns_combat && ls == null) {
+    						buscantCombat = 10;
+    						ls = sig[i].getLocation();
+    					}
     				}
     				else {
     					int a = sig[i].getMessage()[0];
     					int b = sig[i].getMessage()[1];
     					Message m = new Message(loc, a, b);
-    					desti = new MapLocation(m.getX(), m.getY());
+    					if (m.getTypeControl() == 1){
+    						if (!m.toSoldier()) continue;
+    					}
+    					//Si el signal distingeix per ID del receptor i no esta dirigit a ell, l'ignora
+    					if (m.getidControl() == 1 && m.getid() != rc.getID()) continue;
+    					if (m.getMode() == Message.GO_TO) desti = new MapLocation(m.getX(), m.getY());
     				}
     			}
     			
@@ -178,6 +186,8 @@ public class Soldier extends RobotPlayer {
         		}
     			else {
     				if (enCombat > 0) --enCombat;
+    				if (buscantCombat == 0) ls = null;
+    				else --buscantCombat;
     			}
             	
     			int torn = rc.getRoundNum();
@@ -331,6 +341,7 @@ public class Soldier extends RobotPlayer {
 		    				M[(dir+7)%8] += 75;
 						}
 						else if (desti != null) {
+							rc.setIndicatorString(2, "Desti: ("+desti.x+","+desti.y+")");
 							int dir = inversaDirections(loc.directionTo(desti));
 		    				M[dir] += 80;
 		    				M[(dir+1)%8] += 75;
