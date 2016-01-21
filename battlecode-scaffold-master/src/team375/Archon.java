@@ -5,17 +5,33 @@ import java.util.ArrayList;
 import battlecode.common.*;
 
 public class Archon extends RobotPlayer{
+	
+	//Arraylist amb les posicions dels dens que coneix
 	static ArrayList<MapLocation> dens = new ArrayList<>();
+	
+	//Arraylist amb les posicions dels archons neutrals que coneix
 	static ArrayList<MapLocation> neutralArchons = new ArrayList<>();
+	
+	//Array 3x3 amb els perills adjacents
     static int[][] danger;
+    
+    //Aixo es per dir que si perill > danger_threshhold llavors fuig
     static final int DANGER_THRESHHOLD = 1;
+    
+    //si aquest archon es el lider
     static Boolean leader;
+    
+    //tipus del proxim robot que construira
     static RobotType nextRobotType = RobotType.SCOUT;
     
+    //Retorna el perill que hi ha en una direccio
     private static int directionDanger(Direction dir){
     	return danger[dir.dx+1][dir.dy+1];
     }
     
+    //Calcula el perill i el posa en la array de 3x3
+    //Si vols aixo ho pots canviar i fer-ho igual que amb els soldats
+    //L'unic diferent es que els enemics, si poden atacar a un altre robot que no sigui aquest, segurament l'atacaran, per tant no li poso perill
     public static void calculateDanger(){
     	for (RobotInfo info: nearbyEnemies){
     		RobotInfo[] friendlyTargets = rc.senseNearbyRobots(info.location, info.type.attackRadiusSquared, myTeam);
@@ -23,6 +39,7 @@ public class Archon extends RobotPlayer{
     			for (int j = -1; j<2; j++){
     				MapLocation loc = rc.getLocation().add(i, j);
     				if (info.type.attackRadiusSquared < info.location.distanceSquaredTo(loc)) continue;
+    				//Si nomes poden atacar a aquest archon, poso perill
     				if (friendlyTargets.length <= 1) danger[i+1][j+1] += info.attackPower/info.type.attackDelay;
     			}
     		}
@@ -32,6 +49,8 @@ public class Archon extends RobotPlayer{
     			for (int j = -1; j<2; j++){
     				MapLocation loc = rc.getLocation().add(i, j);
     				if (info.type.attackRadiusSquared < info.location.distanceSquaredTo(loc) && info.location.distanceSquaredTo(loc) > 8) continue;
+    				//Si estas en rang de que t'ataquin, poses perill
+    				//Si no estas en rang pero estas a distancia^2 < 8, poses la meitat de perill
     				if (info.type.attackRadiusSquared < info.location.distanceSquaredTo(loc)) danger[i+1][j+1] += info.attackPower/info.type.attackDelay;
     				else danger[i+1][j+1]+= info.attackPower/info.type.attackDelay/2;
     			}
@@ -63,16 +82,19 @@ public class Archon extends RobotPlayer{
     	return bestDir;
     }
     
+    //Tria un robot per construir
     public static void chooseNextRobotType(){
     	int n = rand.nextInt(12); // 1 de cada 12 robots seran scouts
     	if (n == 0) nextRobotType = RobotType.SCOUT;
     	else nextRobotType = RobotType.SOLDIER;
     }
     
+    //Llegeix les signals que li han arribat
     private static void readSignals(){
     	leader = true; //per defecte
     	Signal[] signals = rc.emptySignalQueue();
     	for (Signal s: signals){
+    		//Si el signal es de l'altre equip o es cutre, l'ignora
     		if (s.getTeam() != myTeam) continue;
     		if (s.getMessage() == null) continue;
     		int[] coded = s.getMessage();
@@ -86,29 +108,34 @@ public class Archon extends RobotPlayer{
 			int idControl = m.getidControl();
 			int id = m.getid();
 			
+			//Si el signal distingeix per tipus, i no esta dirigit als archons, l'ignora
 			if (typeControl == 1){
 				if (!m.toArchon()) continue;
 			}
+			
+			//Si el signal distingeix per ID del receptor i no esta dirigit a ell, l'ignora
 			if (idControl == 1 && id != rc.getID()) continue;
     		
 			
     		if (m.getSenderArchon() == 1){
+    			//Ha rebut signal d'un archon, per tant no es el lier
     			leader = false;
-    			//L'ha enviat un archon
     			if (mode == Message.GO_TO){
+    				//si l'archon li ordena d'anar a un lloc, el posa com a objectiu
     				targetLocation = new MapLocation(x,y);
     			}
     		}else{
     			//L'ha enviat un scout
     			//System.out.println("rep missatge de scout");
-    			//System.out.println(mode+" "+object+" "+typeControl+" "+x+" "+y);
     			if (mode == Message.FOUND){
     				if (object == Message.DEN){
+    					//Si un scout li diu que ha trobat un den, l'afegeix a la llista
     					if (!dens.contains(object)){
     						dens.add(new MapLocation(x,y));
     					}
     				}
     				if (object == Message.NEUTRAL_ARCHON){
+    					//Si un scout li diu que ha trobat un archon neutral, l'afegeix a la llista
     					if (!neutralArchons.contains(object)){
     						neutralArchons.add(new MapLocation(x,y));
     					}
@@ -117,7 +144,8 @@ public class Archon extends RobotPlayer{
     		}
     	}
     }
-                          
+    
+    //Si envia signals es perque es lider. Diu a tots els robots propers d'anar a la target location que te
     private static void sendSignals() throws GameActionException{
     	if (targetLocation != null){
     		int mode = Message.GO_TO;
@@ -130,12 +158,13 @@ public class Archon extends RobotPlayer{
 			int id = Message.NONE;
 			Message m = new Message(rc.getLocation(), mode, object, robotType, x, y, id, typeControl, idControl, 1);
 			int[] coded = m.encode();
-			rc.broadcastMessageSignal(coded[0], coded[1], rc.getType().sensorRadiusSquared);
+			rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
     	}
     }
     
+    //Actualitza la target location
     private static void updateTargetLocation() throws GameActionException{
-    	//ESBORRAR LOCS
+    	//Si veu que a on hi havia un den ara no hi ha res, esborra el den de la llista
     	for (int i = 0; i < dens.size(); i++){
     		MapLocation m = dens.get(i);
     		//System.out.print(m.x+","+m.y+"  ");
@@ -145,6 +174,7 @@ public class Archon extends RobotPlayer{
     		}
     	}
     	
+    	//Si veu que a on hi havia un archon neutral ara no hi ha res, esborra l'archon neutral de la llista
     	for (int i = 0; i < neutralArchons.size(); i++){
     		MapLocation m = neutralArchons.get(i);
     		//System.out.print(m.x+","+m.y+"  ");
@@ -155,7 +185,7 @@ public class Archon extends RobotPlayer{
     	}
     	
     	
-    	
+    	//Posa a closestDen el den que te mes proper
     	MapLocation closestDen = null;
     	int dist = 1000000;
     	for (int i = 0; i < dens.size(); i++){
@@ -166,6 +196,7 @@ public class Archon extends RobotPlayer{
     		}
     	}
     	
+    	//Posa a closestNeutralArchon l'archon neutral que te mes proper
     	MapLocation closestNeutralArchon = null;
     	dist = 1000000;
     	for (int i = 0; i < neutralArchons.size(); i++){
@@ -175,6 +206,7 @@ public class Archon extends RobotPlayer{
     			closestNeutralArchon = m;
     		}
     	}
+    	
     	if (closestDen == null){//si no coneix cap den
     		if (closestNeutralArchon == null) { //si no coneix cap archon neutral
     			targetLocation = null;
@@ -183,6 +215,7 @@ public class Archon extends RobotPlayer{
     		if (closestNeutralArchon == null) { //si no coneix cap archon neutral
     			targetLocation = closestDen;
     		}else{
+    			//Si te un den i un archon neutral, anira a pel den nomes si la distancia^2 es 4 vegades menor que al archon neutral
     			if (rc.getLocation().distanceSquaredTo(closestDen)*4 < rc.getLocation().distanceSquaredTo(closestNeutralArchon)){
     				targetLocation = closestDen;
     			}else targetLocation = closestNeutralArchon;
@@ -201,6 +234,7 @@ public class Archon extends RobotPlayer{
 				}
 			}
 			
+			//Si no ha rebut cap missatge, vol dir que es el primer, i li diu a tots els archons que vagin cap a ell
 			if (found == null){
 				MapLocation[] initArchons = rc.getInitialArchonLocations(myTeam);
 				int maxdist = 0;
@@ -221,8 +255,8 @@ public class Archon extends RobotPlayer{
 					rc.broadcastMessageSignal(coded[0], coded[1], maxdist+1);
 				}
 			}else{
+				//Si n'ha rebut, va cap a la location que diu el missatge (que es la location del archon lider)
 				int[] coded = found.getMessage();
-				//Message m= new Message(found.getLocation(),coded[0], coded[1]);
 				targetLocation = new MapLocation(found.getLocation().x, found.getLocation().y);
 			}
         } catch (Exception e) {
@@ -231,8 +265,6 @@ public class Archon extends RobotPlayer{
         }
 
         while (true) {
-            // This is a loop to prevent the run() method from returning. Because of the Clock.yield()
-            // at the end of it, the loop will iterate once per game round.
             try {
                 //nearbyFriends = rc.senseNearbyRobots(visionRange,myTeam);
                 nearbyEnemies = rc.senseNearbyRobots(visionRange,enemyTeam);
@@ -260,12 +292,14 @@ public class Archon extends RobotPlayer{
                 	RobotInfo[] adjacentNeutrals = rc.senseNearbyRobots(2, Team.NEUTRAL);
                     //if (targetLocation != null) System.out.println("TargetLocation = "+targetLocation.x+" "+targetLocation.y);
                 	
+                	//Si esta al costat d'un robot neutral, l'activa
                 	if (adjacentNeutrals.length != 0){
                     	rc.activate(adjacentNeutrals[0].location);
                     	rc.setIndicatorString(0,"Ha activat un robot neutral");
                     	hasMoved = true;
                     }
                     
+                	//Si pot fabricar un robot, el fabrica
                     if (!hasMoved && rc.hasBuildRequirements(nextRobotType)) {
                     	//De moment nomes fabrica soldiers
                         Direction dirToBuild = directions[rand.nextInt(8)];
@@ -284,6 +318,7 @@ public class Archon extends RobotPlayer{
                         }
                     } 
                     
+                    //Si esta en perill, fuig
                     if (!hasMoved && danger[1][1] >= DANGER_THRESHHOLD){
                     	Direction dir = safestDirection();
                     	if (dir != Direction.NONE && danger[dir.dx+1][dir.dy+1] < danger[1][1]){
@@ -293,6 +328,7 @@ public class Archon extends RobotPlayer{
                     	}
                     }
                     
+                    //Si esta al costat d'unes parts, les agafa
                     if (!hasMoved){
                     	Direction dir = Direction.NORTH;
                     	for (int i = 0; i < 8; i++){
@@ -305,7 +341,9 @@ public class Archon extends RobotPlayer{
                     		dir = dir.rotateLeft();
                     	}
                     }
-                    //if (targetLocation == null) System.out.println("target null");
+
+                    //Si pot anar cap a la target location, hi va
+                    //Si no pot directament, intenta les dues direccions del costat
                     if (!hasMoved){
                     	if (targetLocation != null && (!rc.canSense(targetLocation)||( rc.canSense(targetLocation) && rc.senseRobotAtLocation(targetLocation) != null && rc.senseRobotAtLocation(targetLocation).type == RobotType.ARCHON))){
                     		Direction dir = rc.getLocation().directionTo(targetLocation);
@@ -319,6 +357,8 @@ public class Archon extends RobotPlayer{
                     	}
                     }
                     
+                    //Si pot netejar rubble en alguna direccio, la neteja
+                    //Aixo ho vaig ficar perque fes algo pero no se si cal ni si es bo jajaja
                     if (!hasMoved){
                     	Direction dir = Direction.NORTH;
                     	for (int i = 0; i < 8; i++){
@@ -348,7 +388,7 @@ public class Archon extends RobotPlayer{
                 	rc.setIndicatorString(0,"Tenia core delay");
                 }
 
-                //if (targetLocation != null) System.out.println(targetLocation.x+" "+targetLocation.y);
+                //Si pot curar a algun robot, en cura a un de random
                 RobotInfo[] healableRobots = rc.senseNearbyRobots(attackRange, myTeam);
                 Boolean hasHealed = false;
                 int i = 0;
