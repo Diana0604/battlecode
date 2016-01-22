@@ -397,7 +397,7 @@ public class Archon extends RobotPlayer{
             		
             		int [] M = {M0, M1, M2, M3, M4, M5, M6, M7, M8};
 	        		
-    	            	
+    	            boolean molt_aprop = false;
 	            	if (enCombat == 0) {
 		        		if (ls != null) {
 							int dir = inversaDirections(loc.directionTo(ls));
@@ -411,16 +411,19 @@ public class Archon extends RobotPlayer{
 		    				M[dir] += 80;
 		    				M[(dir+1)%8] += 75;
 		    				M[(dir+7)%8] += 75;
+		    				if (targetLocation.distanceSquaredTo(loc) < 5) molt_aprop = true;
 						}
 	        		}
 	            	
 	            	boolean urgencia = (enCombat > 0) || ls != null;
-            		if (rc.senseRubble(loc) >= 50) M[8] -= 30;
-            		for (int k = 0; k < 8; ++k) {
-            			double rubble = rc.senseRubble(loc.add(directions[k]));
-            			if (urgencia && rubble >= 100) M[k] -= 1000000;
-            			else if (rubble >= 50) M[k] -= 30;
-            		}
+	            	if (!molt_aprop) {
+	            		if (rc.senseRubble(loc) >= 50) M[8] -= 30;
+	            		for (int k = 0; k < 8; ++k) {
+	            			double rubble = rc.senseRubble(loc.add(directions[k]));
+	            			if (urgencia && rubble >= 100) M[k] -= 1000000;
+	            			else if (rubble >= 50) M[k] -= 30;
+	            		}
+	            	}
 	            	
 	            	int millor = 8;
             		for (int i = 0; i < 8; i++) {
