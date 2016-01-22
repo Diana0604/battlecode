@@ -3,6 +3,7 @@ package team375;
 import battlecode.common.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 
 public class Scout extends RobotPlayer{
@@ -194,8 +195,8 @@ public class Scout extends RobotPlayer{
 				d = Direction.SOUTH_EAST;
 			}else d = Direction.NORTH_EAST;
 		}
+		if (!corners.containsKey(d)) System.out.println("He rebut la direccio " +d);
 		corners.put(d, new MapLocation(x,y));
-		System.out.println("He rebut la direccio " +d);
 	}
 	
 	private static void readSignals() throws GameActionException{
@@ -280,6 +281,11 @@ public class Scout extends RobotPlayer{
 			}
 		}
 		
+		for (Direction d: corners.keySet()){
+			Message m = new Message(rc.getLocation(), Message.FOUND, Message.CORNER, Message.ALL, corners.get(d).x, corners.get(d).y, 0, 0, 0, 0);	
+			int[] coded = m.encode();
+			rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
+		}
 		
 	}
 	

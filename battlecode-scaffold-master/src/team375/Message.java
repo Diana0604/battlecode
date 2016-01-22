@@ -36,6 +36,7 @@ public class Message {
 	static int NEUTRAL_ARCHON = 3;
 	static int DEN = 4;
 	static int BIG_ZOMBIE = 5;
+	static int CORNER = 6;
 	
 	/*
 	 * Constants del robotType
