@@ -236,13 +236,25 @@ public class Archon extends RobotPlayer{
 			
 			//Si no ha rebut cap missatge, vol dir que es el primer, i li diu a tots els archons que vagin cap a ell
 			if (found == null){
-				MapLocation[] initArchons = rc.getInitialArchonLocations(myTeam);
-				int maxdist = 0;
-				for (MapLocation i: initArchons){
-					if (rc.getLocation().distanceSquaredTo(i) > maxdist){
-						maxdist = rc.getLocation().distanceSquaredTo(i);
+				MapLocation[] initAllies = rc.getInitialArchonLocations(myTeam);
+				MapLocation[] initEnemies = rc.getInitialArchonLocations(enemyTeam);
+				int millor = 0, maxima = 0, maxdist = 0;
+				for (int i = 0; i < initAllies.length; ++i) {
+					int suma = 0;
+					for (MapLocation mj: initEnemies) {
+						suma += initAllies[i].distanceSquaredTo(mj);
+					}
+					if (suma > maxima) {
+						maxima = suma;
+						millor = i;
+					}
+					if (rc.getLocation().distanceSquaredTo(initAllies[i]) > maxdist){
+						maxdist = rc.getLocation().distanceSquaredTo(initAllies[i]);
 					}
 				}
+				// ens reunirem a l'archon millor
+				targetLocation = initAllies[millor];
+				
 				if (maxdist > 0){
 					int mode = Message.GO_TO;
 					int object = Message.NONE;
@@ -250,15 +262,22 @@ public class Archon extends RobotPlayer{
 					int destID = 0;
 					int typeControl = 1;
 					int idControl = 0;
-					Message m = new Message(rc.getLocation(), mode, object,robotType,rc.getLocation().x, rc.getLocation().y, destID, typeControl, idControl, 1);
+					Message m = new Message(rc.getLocation(), mode, object,robotType,targetLocation.x, targetLocation.y, destID, typeControl, idControl, 1);
 					int[] coded = m.encode();
 					rc.broadcastMessageSignal(coded[0], coded[1], maxdist+1);
 				}
-			}else{
-				//Si n'ha rebut, va cap a la location que diu el missatge (que es la location del archon lider)
-				int[] coded = found.getMessage();
-				targetLocation = new MapLocation(found.getLocation().x, found.getLocation().y);
 			}
+			else {
+				//Si n'ha rebut, va cap a la location que li diu el missatge
+				int[] coded = found.getMessage();
+				Message m = new Message(found.getLocation(),coded[0],coded[1]);
+				targetLocation = new MapLocation(m.getX(), m.getY());
+			}
+			
+			// Si aquest es l'archon a on tothom es dirigeix, sera el lider
+			if (rc.getLocation().x == targetLocation.x && rc.getLocation().y == targetLocation.y) leader = true;
+			else leader = false;
+			
         } catch (Exception e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
