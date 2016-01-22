@@ -383,6 +383,7 @@ public class Soldier extends RobotPlayer {
             			Direction dir = directions[millor];
             			if (rc.senseRubble(loc.add(dir)) >= 100) rc.clearRubble(dir);
             			else rc.move(directions[millor]);
+            			//DAVID aixo a vegades (molt poc) em dona una excepcio de can't move too much rubble
             		}
 	            	
             	}

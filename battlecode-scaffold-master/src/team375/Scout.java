@@ -12,7 +12,6 @@ public class Scout extends RobotPlayer{
 	static ArrayList<MapLocation> myArchonsLocation = new ArrayList<>();
 	static ArrayList<Integer> myArchonsID = new ArrayList<>();
 	static ArrayList<Integer> myArchonsLastSeen = new ArrayList<>();
-	static ArrayList<MapLocation> pastLocations = new ArrayList<>();
 	static Direction currentDir;
 	static Direction nextCorner;
 	static Boolean hasMoved;
@@ -50,6 +49,12 @@ public class Scout extends RobotPlayer{
     			}
     		}
     	}
+    	/*for (int i = 0; i < 3; i++){
+    		for (int j = 0; j < 3; j++){
+    			System.out.print(danger[i][j]+" ");
+    		}
+    		System.out.println("");
+    	}*/
 	}
 	
 	public static Direction safestDirection(){
@@ -76,24 +81,14 @@ public class Scout extends RobotPlayer{
     }
 	
 	private static Direction randomDiagonalDirection(){
-		Direction dir;
-		if (!corners.containsKey(Direction.NORTH_EAST)){
-			dir = Direction.NORTH_EAST;
-		}else if (!corners.containsKey(Direction.NORTH_WEST)){
-			dir = Direction.NORTH_WEST;
-		}else if (!corners.containsKey(Direction.SOUTH_EAST)){
-			dir = Direction.SOUTH_EAST;
-		}else if (!corners.containsKey(Direction.SOUTH_WEST)){
-			dir = Direction.SOUTH_WEST;
-		}else return null;
+		Direction dir = directions[rand.nextInt(4)*2+1];
 		
 		if (corners.size() <= 4){
 			while (corners.containsKey(dir)){
-				dir = directions[rand.nextInt(4)*2+1];
+				dir = dir.rotateLeft().rotateLeft();
 			}
 		}else{
-			//Falta posar que vagi cap al lider
-			dir = directions[rand.nextInt(8)];
+			return null;
 		}
 		return dir;
 	}
@@ -103,8 +98,8 @@ public class Scout extends RobotPlayer{
 		//System.out.println("Entra "+Clock.getBytecodeNum());
 		//Ens posem com a objectiu trobar una cantonada, si no en teniem ja
 		if (nextCorner == null || !nextCorner.isDiagonal() || corners.containsKey(nextCorner)){
-			//System.out.println("Tria nova direccio");
 			nextCorner = randomDiagonalDirection(); 
+			System.out.println("Tria nova direccio "+nextCorner);
 		}
 		//System.out.println("Vaig amb direccio " + nextCorner+"  "+Clock.getBytecodeNum());
 		//Comprova que no vegi la cantonada
@@ -129,13 +124,26 @@ public class Scout extends RobotPlayer{
 						    nextCorner.rotateRight().rotateRight().rotateRight(), nextCorner.opposite()};
 		int i = 0;
 		while (i < 8){
-			if (rc.canMove(dirs[i]) && !pastLocations.contains(rc.getLocation().add(dirs[i])) && danger[dirs[i].dx+1][dirs[i].dy+1] == 0){
+			if (rc.canMove(dirs[i])  && danger[dirs[i].dx+1][dirs[i].dy+1] == 0){
 				currentDir = dirs[i];
 				i = 9;
 			}
 			i++;
 		}
 		if (i == 8) currentDir = null;
+	}
+	
+	private static void calcLastCorner(){
+		if (!corners.containsKey(Direction.NORTH_EAST)){
+			corners.put(Direction.NORTH_EAST, new MapLocation(corners.get(Direction.SOUTH_EAST).x, corners.get(Direction.NORTH_WEST).y));
+		}else if (!corners.containsKey(Direction.NORTH_WEST)){
+			corners.put(Direction.NORTH_WEST, new MapLocation(corners.get(Direction.SOUTH_WEST).x, corners.get(Direction.NORTH_EAST).y));
+		}else if (!corners.containsKey(Direction.SOUTH_EAST)){
+			corners.put(Direction.SOUTH_EAST, new MapLocation(corners.get(Direction.NORTH_EAST).x, corners.get(Direction.SOUTH_WEST).y));
+		}else if (!corners.containsKey(Direction.SOUTH_WEST)){
+			corners.put(Direction.SOUTH_WEST, new MapLocation(corners.get(Direction.NORTH_WEST).x, corners.get(Direction.SOUTH_EAST).y));
+			
+		}
 	}
 	
 	private static void returnToLeader(){
@@ -147,7 +155,7 @@ public class Scout extends RobotPlayer{
 		
 		int i = 0;
 		while (i < 8){
-			if (rc.canMove(dirs[i]) && !pastLocations.contains(rc.getLocation().add(dirs[i]))){
+			if (rc.canMove(dirs[i])){
 				currentDir = dirs[i];
 				i = 9;
 			}
@@ -176,33 +184,34 @@ public class Scout extends RobotPlayer{
 		Direction d;
 		int dx = x-rc.getLocation().x;
 		int dy = y-rc.getLocation().y;
+		//System.out.println("x,y = "+x+","+y+"  dx,dy = "+dx+","+dy);
 		if (dx == 0){
-			if (rc.onTheMap(rc.getLocation().add(1,0))){
-				dx = 1;
-			}else dx = -1;
+			if (rc.onTheMap(rc.getLocation().add(1,0))){ //Si puc anar mes a l'est
+				dx = -1;
+			}else dx = 1;
 		}
 		if (dy == 0){
-			if (rc.onTheMap(rc.getLocation().add(0,1))){
-				dy = 1;
-			}else dy = -1;
+			if (rc.onTheMap(rc.getLocation().add(0,1))){ //Si puc anar mes al sud
+				dy = -1;
+			}else dy = 1;
 		}
 		if (dx < 0){
 			if (dy < 0){
-				d = Direction.SOUTH_WEST;
-			}else d = Direction.NORTH_WEST;
+				d = Direction.NORTH_WEST;
+			}else d = Direction.SOUTH_WEST;
 		}else{
 			if (dy < 0){
-				d = Direction.SOUTH_EAST;
-			}else d = Direction.NORTH_EAST;
+				d = Direction.NORTH_EAST;
+			}else d = Direction.SOUTH_EAST;
 		}
-		//if (!corners.containsKey(d)) System.out.println("He rebut la direccio " +d);
+		//System.out.println("He rebut la direccio " +d);
 		corners.put(d, new MapLocation(x,y));
 	}
 	
 	private static void readSignals() throws GameActionException{
 		Signal[] signals = rc.emptySignalQueue();
 		for (Signal s: signals){
-    		if (s.getTeam() != myTeam) continue;
+			if (s.getTeam() != myTeam) continue;
     		if (s.getMessage() == null) continue;
     		int[] coded = s.getMessage();
     		Message m = new Message(s.getLocation(), coded[0], coded[1]);
@@ -248,6 +257,8 @@ public class Scout extends RobotPlayer{
 				rc.broadcastMessageSignal(coded[0], coded[1], BROADCAST_DISTANCE);
 			}
 		}
+
+        //System.out.println("Despres de neutrals "+Clock.getBytecodeNum());
 		for (RobotInfo ri: nearbyZombies){
 			if (ri.type == RobotType.ZOMBIEDEN && !seenUnits.contains(ri.ID)){
 				addUnitToSeenList(ri.ID);
@@ -264,29 +275,16 @@ public class Scout extends RobotPlayer{
 				rc.broadcastMessageSignal(coded[0], coded[1], BROADCAST_DISTANCE);
 			}
 		}
-		for (RobotInfo ri: nearbyEnemies){
-			if (ri.type == RobotType.ARCHON && !seenUnits.contains(ri.ID)){
-				addUnitToSeenList(ri.ID);
-				int mode = Message.FOUND;
-				int object = Message.ENEMY_ARCHON;
-				int robotType = Message.ARCHON;
-				int x = ri.location.x;
-				int y = ri.location.y;
-				int destID = 0;
-				int typeControl = 1;
-				int idControl = 0;
-				Message m = new Message(rc.getLocation(),mode, object,robotType,x,y, destID, typeControl, idControl,0);
+
+        //System.out.println("Despres de dens "+Clock.getBytecodeNum());
+		if (rc.getRoundNum() % 5 == rc.getID() % 5){
+			for (Direction d: corners.keySet()){
+	
+				Message m = new Message(rc.getLocation(), Message.FOUND, Message.CORNER, Message.ALL, corners.get(d).x, corners.get(d).y, 0, 0, 0, 0);	
 				int[] coded = m.encode();
-				rc.broadcastMessageSignal(coded[0], coded[1], BROADCAST_DISTANCE);
+				rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
 			}
 		}
-		
-		for (Direction d: corners.keySet()){
-			Message m = new Message(rc.getLocation(), Message.FOUND, Message.CORNER, Message.ALL, corners.get(d).x, corners.get(d).y, 0, 0, 0, 0);	
-			int[] coded = m.encode();
-			rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
-		}
-		
 	}
 	
 	private static Boolean earlyGame(){
@@ -305,7 +303,8 @@ public class Scout extends RobotPlayer{
 
         while (true) {
 	        try {
-                if (earlyGame()){
+                rc.setIndicatorString(0, "");
+	        	if (earlyGame()){
 		        	nearbyEnemies = rc.senseNearbyRobots(visionRange,enemyTeam);
 	                nearbyZombies = rc.senseNearbyRobots(visionRange,Team.ZOMBIE);
 	                nearbyNeutrals = rc.senseNearbyRobots(visionRange,Team.NEUTRAL);
@@ -329,14 +328,28 @@ public class Scout extends RobotPlayer{
 	                    	//System.out.println("Es mou sense perill");
 	                    	if (corners.size() < 4) {
 	                    		searchCorners();
-	                    	}else returnToLeader();
+	                    	}else if (corners.size() == 3) calcLastCorner();
+	                    	else {
+	                    		returnToLeader();
+	                    		rc.setIndicatorString(0, "Ja ha trobat les 4 cantonades");
+	                    	}
+	                    	/*System.out.println("Cantonades trobades: "+corners.size());
+	                    	for (Direction d:corners.keySet()) System.out.print(d+": "+corners.get(d)+" ");
+	                    	System.out.println("");*/
 	                    	if (currentDir != null) {
 	                    		//System.out.print("Em moc amb direccio ");
 	                    		//System.out.println(currentDir);
-	                    		if (rc.canMove(currentDir)) rc.move(currentDir); //Cal tornar a fer el if perque si troba una cantonada envia un missatge i li dona core delay
+	                    		if (canMove()) {
+	                    			rc.move(currentDir); //Cal tornar a fer el if perque si troba una cantonada envia un missatge i li dona core delay
+	                    			rc.setIndicatorString(0, "Es mou cap a la direccio "+nextCorner);
+	                    			String s1 = "", s2 = "", s3 = "", s4 = "";
+	                    			if (corners.containsKey(Direction.NORTH_EAST)) s1 = "NE";
+	                    			if (corners.containsKey(Direction.NORTH_WEST)) s2 = "NW";
+	                    			if (corners.containsKey(Direction.SOUTH_EAST)) s3 = "SE";
+	                    			if (corners.containsKey(Direction.SOUTH_WEST)) s4 = "SW";
+	                    			rc.setIndicatorString(1, s1+" "+s2+" "+s3+" "+s4);
+	                    		}
 	                    	}
-	                    	pastLocations.add(rc.getLocation());
-	                    	if (pastLocations.size() > 20) pastLocations.remove(0);
 	                    	hasMoved = true;
 	                    }                    
 	                }
