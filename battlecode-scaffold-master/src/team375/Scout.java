@@ -114,8 +114,8 @@ public class Scout extends RobotPlayer{
 				while (!rc.onTheMap(rc.getLocation().add(nextCorner.rotateLeft(), xmax--)));
 				while (!rc.onTheMap(rc.getLocation().add(nextCorner.rotateRight(), ymax--)));
 				corners.put(nextCorner, rc.getLocation().add(nextCorner.rotateLeft(), xmax+1).add(nextCorner.rotateRight(), ymax+1));
-				System.out.println("He trobat cantonada a la posicio "+corners.get(nextCorner).x+","+corners.get(nextCorner).y);
-				System.out.println("En direccio "+nextCorner);
+				//System.out.println("He trobat cantonada a la posicio "+corners.get(nextCorner).x+","+corners.get(nextCorner).y);
+				//System.out.println("En direccio "+nextCorner);
 				Message m = new Message(rc.getLocation(), Message.FOUND, Message.CORNER, Message.ALL, corners.get(nextCorner).x, corners.get(nextCorner).y, 0, 0, 0, 0);	
 				int[] coded = m.encode();
 				rc.broadcastMessageSignal(coded[0], coded[1], BROADCAST_DISTANCE);
@@ -195,7 +195,7 @@ public class Scout extends RobotPlayer{
 				d = Direction.SOUTH_EAST;
 			}else d = Direction.NORTH_EAST;
 		}
-		if (!corners.containsKey(d)) System.out.println("He rebut la direccio " +d);
+		//if (!corners.containsKey(d)) System.out.println("He rebut la direccio " +d);
 		corners.put(d, new MapLocation(x,y));
 	}
 	
@@ -331,8 +331,8 @@ public class Scout extends RobotPlayer{
 	                    		searchCorners();
 	                    	}else returnToLeader();
 	                    	if (currentDir != null) {
-	                    		System.out.print("Em moc amb direccio ");
-	                    		System.out.println(currentDir);
+	                    		//System.out.print("Em moc amb direccio ");
+	                    		//System.out.println(currentDir);
 	                    		if (rc.canMove(currentDir)) rc.move(currentDir); //Cal tornar a fer el if perque si troba una cantonada envia un missatge i li dona core delay
 	                    	}
 	                    	pastLocations.add(rc.getLocation());
