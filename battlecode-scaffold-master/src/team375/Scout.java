@@ -331,8 +331,9 @@ public class Scout extends RobotPlayer{
 	                    		searchCorners();
 	                    	}else returnToLeader();
 	                    	if (currentDir != null) {
-	                    		//System.out.println("Em moc amb direccio "+currentDir);
-	                    		if (canMove()) rc.move(currentDir); //Cal tornar a fer el if perque si troba una cantonada envia un missatge i li dona core delay
+	                    		System.out.print("Em moc amb direccio ");
+	                    		System.out.println(currentDir);
+	                    		if (rc.canMove(currentDir)) rc.move(currentDir); //Cal tornar a fer el if perque si troba una cantonada envia un missatge i li dona core delay
 	                    	}
 	                    	pastLocations.add(rc.getLocation());
 	                    	if (pastLocations.size() > 20) pastLocations.remove(0);
