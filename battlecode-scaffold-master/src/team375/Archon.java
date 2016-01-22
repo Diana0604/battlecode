@@ -30,56 +30,60 @@ public class Archon extends RobotPlayer{
     }
     
     //Calcula el perill i el posa en la array de 3x3
-    //Si vols aixo ho pots canviar i fer-ho igual que amb els soldats
-    //L'unic diferent es que els enemics, si poden atacar a un altre robot que no sigui aquest, segurament l'atacaran, per tant no li poso perill
     public static void calculateDanger(){
-    	for (RobotInfo info: nearbyEnemies){
-    		RobotInfo[] friendlyTargets = rc.senseNearbyRobots(info.location, info.type.attackRadiusSquared, myTeam);
-    		for (int i = -1; i < 2; i++){
-    			for (int j = -1; j<2; j++){
-    				MapLocation loc = rc.getLocation().add(i, j);
-    				if (info.type.attackRadiusSquared < info.location.distanceSquaredTo(loc)) continue;
-    				//Si nomes poden atacar a aquest archon, poso perill
-    				if (friendlyTargets.length <= 1) danger[i+1][j+1] += info.attackPower/info.type.attackDelay;
-    			}
-    		}
-    	}
-    	for (RobotInfo info: nearbyZombies){
-    		for (int i = -1; i < 2; i++){
-    			for (int j = -1; j<2; j++){
-    				MapLocation loc = rc.getLocation().add(i, j);
-    				if (info.type.attackRadiusSquared < info.location.distanceSquaredTo(loc) && info.location.distanceSquaredTo(loc) > 8) continue;
-    				//Si estas en rang de que t'ataquin, poses perill
-    				//Si no estas en rang pero estas a distancia^2 < 8, poses la meitat de perill
-    				if (info.type.attackRadiusSquared < info.location.distanceSquaredTo(loc)) danger[i+1][j+1] += info.attackPower/info.type.attackDelay;
-    				else danger[i+1][j+1]+= info.attackPower/info.type.attackDelay/2;
-    			}
-    		}
-    	}
+    	M0 = 1; M1 = 0; M2 = 1; M3 = 0; M4 = 1; M5 = 0; M6 = 1; M7 = 0; M8 = 2;
+		for (int j = 0; j < nenemies; ++j) {
+			RobotInfo rob = enemies[j];
+			dists = eucl[rob.location.x-loc.x + 5][rob.location.y-loc.y + 5];
+			perills = null;
+			switch(rob.type) {
+				case SOLDIER: perills = eSoldier; break;
+				case GUARD: perills = eGuard; break;
+				case TURRET: perills = eTurret; break;
+				case VIPER: perills = eViper; break;
+				case ARCHON: perills = eArchon; break;
+				default: break;
+			}
+			if (perills != null) sumarM();
+		}
+    	for (int j = 0; j < nzombies; ++j) {
+			RobotInfo rob = zombies[j];
+			dists = eucl[rob.location.x-loc.x + 5][rob.location.y-loc.y + 5];
+			perills = null;
+			switch(rob.type) {
+			case STANDARDZOMBIE: perills = sZombie; break;
+			case FASTZOMBIE: perills = fZombie; break;
+			case BIGZOMBIE: perills = bZombie; break;
+			case RANGEDZOMBIE: perills = rZombie; break;
+			case ZOMBIEDEN: perills = dZombie[zombies_aprop]; break;
+			default: break;
+			}
+			if (perills != null) sumarM();
+		}
+    	for (int j = 0; j < nallies; ++j) {
+			RobotInfo rob = allies[j];
+			dists = eucl[rob.location.x-loc.x + 5][rob.location.y-loc.y + 5];
+			perills = null;
+			if (rob.type == RobotType.SOLDIER) perills = aSoldier;
+			else if (rob.type == RobotType.ARCHON) perills = aArchon;
+			if (perills != null) sumarM();
+		}
+    	for (int j = 0; j < nneutrals; ++j) {
+			RobotInfo rob = neutrals[j];
+			dists = eucl[rob.location.x-loc.x + 5][rob.location.y-loc.y + 5];
+			perills = null;
+			perills = xNeutral;
+			if (perills != null) sumarM();
+		}
+		
+		int [] Maux = {M0, M1, M2, M3, M4, M5, M6, M7, M8};
+		M = Maux;
+		
     }
     
     //De les 8 direccions retorna la que tingui menys perill
     public static Direction safestDirection(){
-    	Direction dir = Direction.NORTH;
-    	int safeDir = -1;
-    	int lowestDanger = 100;
-    	for (int i = 0; i < 8; i++){
-    		if (!rc.canMove(dir)) {
-    			dir = dir.rotateLeft();
-    			continue;
-    		}
-    		int aux = danger[dir.dx+1][dir.dy+1];
-    		if (aux < lowestDanger){
-    			lowestDanger = aux;
-    			safeDir = i;
-    		}
-    		dir = dir.rotateLeft();
-    	}
-    	if (safeDir < 0) return Direction.NONE;
-    	Direction bestDir = Direction.NORTH;
-    	for (int i = 0; i < safeDir; i++) bestDir = bestDir.rotateLeft();
-    	//System.out.println("La millor direccio es "+bestDir);
-    	return bestDir;
+    	
     }
     
     //Tria un robot per construir
@@ -250,7 +254,105 @@ public class Archon extends RobotPlayer{
 		M8 += perills[dists[8]];
 	}
     
+	private static void construirArrays() {
+		nallies = 0; nenemies = 0; nzombies = 0; nneutrals = 0; ndens = 0;
+    	robots = rc.senseNearbyRobots();
+    	allies = rc.senseNearbyRobots(6,myTeam);
+    	boolean pocs_amics = (allies.length == 0);
+    	if (pocs_amics) allies = new RobotInfo[robots.length];
+    	else nallies = allies.length;
+    	enemies = new RobotInfo[robots.length];
+    	zombies = new RobotInfo[robots.length];
+    	neutrals = new RobotInfo[robots.length];
+    	
+    	for (int i = 0; i < robots.length; ++i) {
+    		if (robots[i].team == myTeam) {
+    			if (pocs_amics) allies[nallies++] = robots[i];
+    		}
+    		else if (robots[i].team == enemyTeam) enemies[nenemies++] = robots[i];
+    		else if (robots[i].team == Team.ZOMBIE) {
+    			if (robots[i].type == RobotType.ZOMBIEDEN) ++ndens;
+    			zombies[nzombies++] = robots[i];
+    		}
+    		else neutrals[nneutrals++] = robots[i];
+    	}
+	}
+	
+	private static void variablesCombat() throws GameActionException {
+		if (nenemies+nzombies > ndens) {
+			ls = null;
+			if (enCombat < torns_combat) rc.broadcastSignal(visionRange);
+			enCombat = torns_combat;
+		}
+		else {
+			if (enCombat > 0) --enCombat;
+			if (buscantCombat == 0) ls = null;
+			else --buscantCombat;
+		}
+	}
 
+	private static void variablesRondes() {
+		torn = rc.getRoundNum();
+		zombies_aprop = 0;
+		if (proxima_zombies < rondes_zombies.length) {
+			if (rondes_zombies[proxima_zombies] <= torn) {
+				proxima_zombies++;
+			}
+			if (proxima_zombies < rondes_zombies.length) {
+    			int dif = rondes_zombies[proxima_zombies] - torn;
+    			if (dif < 15) zombies_aprop = 1;
+			}
+		}
+	}
+	
+	private static void addTargetPriority() {
+		molt_aprop = false;
+    	if (enCombat == 0) {
+    		if (ls != null) {
+				int dir = inversaDirections(loc.directionTo(ls));
+				M[dir] += 80;
+				M[(dir+1)%8] += 75;
+				M[(dir+7)%8] += 75;
+			}
+			else if (targetLocation != null) {
+				rc.setIndicatorString(2, "Desti: ("+targetLocation.x+","+targetLocation.y+")");
+				int dir = inversaDirections(loc.directionTo(targetLocation));
+				M[dir] += 80;
+				M[(dir+1)%8] += 75;
+				M[(dir+7)%8] += 75;
+				if (targetLocation.distanceSquaredTo(loc) < 5) molt_aprop = true;
+			}
+		}
+	}
+	
+	private static void addRubblePriority() {
+		urgencia = (enCombat > 0) || ls != null; // si estem en combat o anem a ajudar a algu (llavors no netegem rubble, sino que la esquivem)
+    	if (!molt_aprop) {
+    		if (rc.senseRubble(loc) >= 50) M[8] -= 30;
+    		for (int k = 0; k < 8; ++k) {
+    			double rubble = rc.senseRubble(loc.add(directions[k]));
+    			if (urgencia && rubble >= 100) M[k] -= 1000000;
+    			else if (rubble >= 50) M[k] -= 30;
+    		}
+    	}
+	}
+	
+	private static void chooseDirection() throws GameActionException {
+		int millor = 8;
+		for (int i = 0; i < 8; i++) {
+			if (rc.canMove(directions[i]) || (!urgencia && rc.senseRubble(loc.add(directions[i])) >= 100)) {
+				if (M[i] > M[millor]) millor = i;
+			}
+		}
+    	rc.setIndicatorString(0, ""+M[7]+" "+M[0]+" "+M[1]+" "+M[6]+" "+M[8]+" "+M[2]+" "+M[5]+" "+M[4]+" "+M[3]);
+			
+		if (millor < 8) {
+			Direction dir = directions[millor];
+			if (rc.senseRubble(loc.add(dir)) >= 100) rc.clearRubble(dir);
+			else rc.move(directions[millor]);
+		}
+	}
+	
 	private static int[][][] eucl = { { {7,7,7,7,7,7,7,6,7} , {6,7,7,7,7,7,6,6,7} , {6,7,7,7,7,6,6,5,6} , {6,7,7,7,6,6,5,5,6} , {6,7,7,7,6,5,5,5,6} , {6,7,7,7,6,5,5,5,6} , {6,7,7,7,6,5,5,5,6} , {6,7,7,7,6,5,5,6,6} , {7,7,7,7,6,5,6,6,6} , {7,7,7,7,6,6,6,7,7} , {7,7,7,7,7,6,7,7,7} } , { {6,7,7,7,7,7,6,6,7} , {6,6,7,7,7,6,6,5,6} , {5,6,6,7,6,6,5,4,6} , {5,6,6,6,6,5,4,4,5} , {5,6,6,6,5,4,4,4,5} , {5,6,6,6,5,4,4,4,5} , {5,6,6,6,5,4,4,4,5} , {6,6,6,6,5,4,4,5,5} , {6,7,6,6,5,4,5,6,6} , {7,7,7,6,6,5,6,6,6} , {7,7,7,7,6,6,6,7,7} } , { {6,6,7,7,7,7,6,5,6} , {5,6,6,7,6,6,5,4,6} , {4,5,6,6,6,5,4,3,5} , {4,5,5,6,5,4,3,3,4} , {4,5,5,5,4,3,3,3,4} , {4,5,5,5,4,3,3,3,4} , {4,5,5,5,4,3,3,3,4} , {5,6,5,5,4,3,3,4,4} , {6,6,6,5,4,3,4,5,5} , {6,7,6,6,5,4,5,6,6} , {7,7,7,6,6,5,6,7,6} } , { {5,6,6,7,7,7,6,5,6} , {4,5,6,6,6,6,5,4,5} , {3,4,5,6,5,5,4,3,4} , {3,4,4,5,4,4,3,2,3} , {3,4,4,4,3,3,2,1,3} , {3,4,4,4,3,2,1,2,3} , {3,4,4,4,3,1,2,3,3} , {4,5,4,4,3,2,3,4,3} , {5,6,5,4,3,3,4,5,4} , {6,6,6,5,4,4,5,6,5} , {7,7,6,6,5,5,6,7,6} } , { {5,5,6,7,7,7,6,5,6} , {4,4,5,6,6,6,5,4,5} , {3,3,4,5,5,5,4,3,4} , {2,3,3,4,4,4,3,1,3} , {1,3,3,3,3,3,1,0,2} , {2,3,3,3,2,1,0,1,1} , {3,3,3,3,1,0,1,3,2} , {4,4,3,3,2,1,3,4,3} , {5,5,4,3,3,3,4,5,4} , {6,6,5,4,4,4,5,6,5} , {7,7,6,5,5,5,6,7,6} } , { {5,5,6,7,7,7,6,5,6} , {4,4,5,6,6,6,5,4,5} , {3,3,4,5,5,5,4,3,4} , {1,2,3,4,4,4,3,2,3} , {0,1,2,3,3,3,2,1,1} , {1,2,1,2,1,2,1,2,0} , {3,3,2,1,0,1,2,3,1} , {4,4,3,2,1,2,3,4,3} , {5,5,4,3,3,3,4,5,4} , {6,6,5,4,4,4,5,6,5} , {7,7,6,5,5,5,6,7,6} } , { {5,5,6,7,7,7,6,5,6} , {4,4,5,6,6,6,5,4,5} , {3,3,4,5,5,5,4,3,4} , {2,1,3,4,4,4,3,3,3} , {1,0,1,3,3,3,3,3,2} , {2,1,0,1,2,3,3,3,1} , {3,3,1,0,1,3,3,3,2} , {4,4,3,1,2,3,3,4,3} , {5,5,4,3,3,3,4,5,4} , {6,6,5,4,4,4,5,6,5} , {7,7,6,5,5,5,6,7,6} } , { {5,5,6,7,7,7,6,6,6} , {4,4,5,6,6,6,6,5,5} , {3,3,4,5,5,6,5,4,4} , {3,2,3,4,4,5,4,4,3} , {3,1,2,3,3,4,4,4,3} , {3,2,1,2,3,4,4,4,3} , {3,3,2,1,3,4,4,4,3} , {4,4,3,2,3,4,4,5,3} , {5,5,4,3,3,4,5,6,4} , {6,6,5,4,4,5,6,6,5} , {7,7,6,5,5,6,6,7,6} } , { {6,5,6,7,7,7,7,6,6} , {5,4,5,6,6,7,6,6,6} , {4,3,4,5,6,6,6,5,5} , {4,3,3,4,5,6,5,5,4} , {4,3,3,3,4,5,5,5,4} , {4,3,3,3,4,5,5,5,4} , {4,3,3,3,4,5,5,5,4} , {5,4,3,3,4,5,5,6,4} , {6,5,4,3,4,5,6,6,5} , {6,6,5,4,5,6,6,7,6} , {7,7,6,5,6,6,7,7,6} } , { {6,6,6,7,7,7,7,7,7} , {6,5,6,6,7,7,7,6,6} , {5,4,5,6,6,7,6,6,6} , {5,4,4,5,6,6,6,6,5} , {5,4,4,4,5,6,6,6,5} , {5,4,4,4,5,6,6,6,5} , {5,4,4,4,5,6,6,6,5} , {6,5,4,4,5,6,6,6,5} , {6,6,5,4,5,6,6,7,6} , {7,6,6,5,6,6,7,7,6} , {7,7,6,6,6,7,7,7,7} } , { {7,6,7,7,7,7,7,7,7} , {6,6,6,7,7,7,7,7,7} , {6,5,6,6,7,7,7,7,6} , {6,5,5,6,6,7,7,7,6} , {6,5,5,5,6,7,7,7,6} , {6,5,5,5,6,7,7,7,6} , {6,5,5,5,6,7,7,7,6} , {6,6,5,5,6,7,7,7,6} , {7,6,6,5,6,7,7,7,6} , {7,7,6,6,6,7,7,7,7} , {7,7,7,6,7,7,7,7,7} } };
 
 	private static final int[] aSoldier = {-1000000, 30, 30, 25, 20, 15, 10, -10};
@@ -269,6 +371,10 @@ public class Archon extends RobotPlayer{
 	
 	private static final int torns_combat = 5;
 	
+	private static RobotInfo[] robots, allies, enemies, neutrals, zombies;
+	private static int nallies, nenemies, nzombies, nneutrals, ndens;
+	private static int torn, zombies_aprop;
+	private static int[] M;
     private static int M0, M1, M2, M3, M4, M5, M6, M7, M8;
     private static int[] perills, dists;
     private static MapLocation loc;
@@ -276,6 +382,7 @@ public class Archon extends RobotPlayer{
 	private static int proxima_zombies = 0;
 	private static int enCombat = 0, buscantCombat = 0;
 	private static MapLocation ls = null; //location del signal
+	private static boolean molt_aprop, urgencia;
     
 	
     
@@ -302,143 +409,17 @@ public class Archon extends RobotPlayer{
             	//nearbyEnemies = rc.senseNearbyRobots(visionRange,enemyTeam);
                 //nearbyZombies = rc.senseNearbyRobots(visionRange,Team.ZOMBIE);
                 //nearbyNeutrals = rc.senseNearbyRobots(visionRange,Team.NEUTRAL);
+            	
                 loc = rc.getLocation();
-                
-                int nallies = 0, nenemies = 0, nzombies = 0, nneutrals = 0, dens = 0;
-            	RobotInfo[] robots = rc.senseNearbyRobots();
-            	RobotInfo[] allies = rc.senseNearbyRobots(6,myTeam);
-            	boolean pocs_amics = (allies.length == 0);
-            	if (pocs_amics) allies = new RobotInfo[robots.length];
-            	else nallies = allies.length;
-            	RobotInfo[] enemies = new RobotInfo[robots.length];
-            	RobotInfo[] zombies = new RobotInfo[robots.length];
-            	RobotInfo[] neutrals = new RobotInfo[robots.length];
-            	
-            	for (int i = 0; i < robots.length; ++i) {
-            		if (robots[i].team == myTeam) {
-            			if (pocs_amics) allies[nallies++] = robots[i];
-            		}
-            		else if (robots[i].team == enemyTeam) enemies[nenemies++] = robots[i];
-            		else if (robots[i].team == Team.ZOMBIE) {
-            			if (robots[i].type == RobotType.ZOMBIEDEN) ++dens;
-            			zombies[nzombies++] = robots[i];
-            		}
-            		else neutrals[nneutrals++] = robots[i];
-            	}
-                
-            	if (nenemies+nzombies > dens) {
-        			ls = null;
-        			if (enCombat < torns_combat) rc.broadcastSignal(visionRange);
-        			enCombat = torns_combat;
-        		}
-    			else {
-    				if (enCombat > 0) --enCombat;
-    				if (buscantCombat == 0) ls = null;
-    				else --buscantCombat;
-    			}
-            	
-                int torn = rc.getRoundNum();
-    			int zombies_aprop = 0;
-    			if (proxima_zombies < rondes_zombies.length) {
-	    			if (rondes_zombies[proxima_zombies] <= torn) {
-	    				proxima_zombies++;
-	    			}
-	    			if (proxima_zombies < rondes_zombies.length) {
-		    			int dif = rondes_zombies[proxima_zombies] - torn;
-		    			if (dif < 15) zombies_aprop = 1;
-	    			}
-    			}
+                construirArrays();
+                variablesCombat();
+            	variablesRondes();
                 
             	if (rc.isCoreReady()) {
-            		M0 = 1; M1 = 0; M2 = 1; M3 = 0; M4 = 1; M5 = 0; M6 = 1; M7 = 0; M8 = 2;
-            		for (int j = 0; j < nenemies; ++j) {
-	        			RobotInfo rob = enemies[j];
-            			dists = eucl[rob.location.x-loc.x + 5][rob.location.y-loc.y + 5];
-            			perills = null;
-        				switch(rob.type) {
-	    					case SOLDIER: perills = eSoldier; break;
-	    					case GUARD: perills = eGuard; break;
-	    					case TURRET: perills = eTurret; break;
-	    					case VIPER: perills = eViper; break;
-	    					case ARCHON: perills = eArchon; break;
-	    					default: break;
-            			}
-            			if (perills != null) sumarM();
-	        		}
-	            	for (int j = 0; j < nzombies; ++j) {
-	        			RobotInfo rob = zombies[j];
-            			dists = eucl[rob.location.x-loc.x + 5][rob.location.y-loc.y + 5];
-            			perills = null;
-            			switch(rob.type) {
-        				case STANDARDZOMBIE: perills = sZombie; break;
-        				case FASTZOMBIE: perills = fZombie; break;
-        				case BIGZOMBIE: perills = bZombie; break;
-        				case RANGEDZOMBIE: perills = rZombie; break;
-        				case ZOMBIEDEN: perills = dZombie[zombies_aprop]; break;
-        				default: break;
-        				}
-            			if (perills != null) sumarM();
-	        		}
-	            	for (int j = 0; j < nallies; ++j) {
-	        			RobotInfo rob = allies[j];
-            			dists = eucl[rob.location.x-loc.x + 5][rob.location.y-loc.y + 5];
-            			perills = null;
-        				if (rob.type == RobotType.SOLDIER) perills = aSoldier;
-    					else if (rob.type == RobotType.ARCHON) perills = aArchon;
-            			if (perills != null) sumarM();
-	        		}
-	            	for (int j = 0; j < nneutrals; ++j) {
-	        			RobotInfo rob = neutrals[j];
-            			dists = eucl[rob.location.x-loc.x + 5][rob.location.y-loc.y + 5];
-            			perills = null;
-            			perills = xNeutral;
-            			if (perills != null) sumarM();
-	        		}
-            		
-            		int [] M = {M0, M1, M2, M3, M4, M5, M6, M7, M8};
-	        		
-    	            boolean molt_aprop = false;
-	            	if (enCombat == 0) {
-		        		if (ls != null) {
-							int dir = inversaDirections(loc.directionTo(ls));
-		    				M[dir] += 80;
-		    				M[(dir+1)%8] += 75;
-		    				M[(dir+7)%8] += 75;
-						}
-						else if (targetLocation != null) {
-							rc.setIndicatorString(2, "Desti: ("+targetLocation.x+","+targetLocation.y+")");
-							int dir = inversaDirections(loc.directionTo(targetLocation));
-		    				M[dir] += 80;
-		    				M[(dir+1)%8] += 75;
-		    				M[(dir+7)%8] += 75;
-		    				if (targetLocation.distanceSquaredTo(loc) < 5) molt_aprop = true;
-						}
-	        		}
-	            	
-	            	boolean urgencia = (enCombat > 0) || ls != null;
-	            	if (!molt_aprop) {
-	            		if (rc.senseRubble(loc) >= 50) M[8] -= 30;
-	            		for (int k = 0; k < 8; ++k) {
-	            			double rubble = rc.senseRubble(loc.add(directions[k]));
-	            			if (urgencia && rubble >= 100) M[k] -= 1000000;
-	            			else if (rubble >= 50) M[k] -= 30;
-	            		}
-	            	}
-	            	
-	            	int millor = 8;
-            		for (int i = 0; i < 8; i++) {
-            			if (rc.canMove(directions[i]) || (!urgencia && rc.senseRubble(loc.add(directions[i])) >= 100)) {
-            				if (M[i] > M[millor]) millor = i;
-            			}
-            		}
-                	rc.setIndicatorString(0, ""+M[7]+" "+M[0]+" "+M[1]+" "+M[6]+" "+M[8]+" "+M[2]+" "+M[5]+" "+M[4]+" "+M[3]);
-            			
-            		if (millor < 8) {
-            			Direction dir = directions[millor];
-            			if (rc.senseRubble(loc.add(dir)) >= 100) rc.clearRubble(dir);
-            			else rc.move(directions[millor]);
-            		}
-	            	
+            		calculateDanger();
+            		addTargetPriority();
+    	            addRubblePriority();
+	            	chooseDirection();
             	}
             	
             	
