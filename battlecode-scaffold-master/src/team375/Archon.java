@@ -353,11 +353,8 @@ public class Archon extends RobotPlayer{
             		M0 = 1; M1 = 0; M2 = 1; M3 = 0; M4 = 1; M5 = 0; M6 = 1; M7 = 0; M8 = 2;
             		for (int j = 0; j < nenemies; ++j) {
 	        			RobotInfo rob = enemies[j];
-            			int seva_vida = 1;
-            			if (rc.getHealth() > rob.health) seva_vida = 0;
             			dists = eucl[rob.location.x-loc.x + 5][rob.location.y-loc.y + 5];
             			perills = null;
-            			// 36 bc fins aqui
         				switch(rob.type) {
 	    					case SOLDIER: perills = eSoldier; break;
 	    					case GUARD: perills = eGuard; break;
@@ -366,17 +363,12 @@ public class Archon extends RobotPlayer{
 	    					case ARCHON: perills = eArchon; break;
 	    					default: break;
             			}
-            			// fins aqui son ?
             			if (perills != null) sumarM();
-            			// fins aqui son 74 bc mes
 	        		}
 	            	for (int j = 0; j < nzombies; ++j) {
 	        			RobotInfo rob = zombies[j];
-	        			int seva_vida = 1;
-            			if (rc.getHealth() > rob.health) seva_vida = 0;
             			dists = eucl[rob.location.x-loc.x + 5][rob.location.y-loc.y + 5];
             			perills = null;
-            			// 36 bc fins aqui
             			switch(rob.type) {
         				case STANDARDZOMBIE: perills = sZombie; break;
         				case FASTZOMBIE: perills = fZombie; break;
@@ -385,30 +377,22 @@ public class Archon extends RobotPlayer{
         				case ZOMBIEDEN: perills = dZombie[zombies_aprop]; break;
         				default: break;
         				}
-            			// fins aqui son ?
             			if (perills != null) sumarM();
-            			// fins aqui son 74 bc mes
 	        		}
 	            	for (int j = 0; j < nallies; ++j) {
 	        			RobotInfo rob = allies[j];
             			dists = eucl[rob.location.x-loc.x + 5][rob.location.y-loc.y + 5];
             			perills = null;
-            			// ? bc fins aqui
         				if (rob.type == RobotType.SOLDIER) perills = aSoldier;
     					else if (rob.type == RobotType.ARCHON) perills = aArchon;
-            			// fins aqui son ?
             			if (perills != null) sumarM();
-            			// fins aqui son 74 bc mes
 	        		}
 	            	for (int j = 0; j < nneutrals; ++j) {
 	        			RobotInfo rob = neutrals[j];
             			dists = eucl[rob.location.x-loc.x + 5][rob.location.y-loc.y + 5];
             			perills = null;
-            			// ? bc fins aqui
             			perills = xNeutral;
-            			// fins aqui son ?
             			if (perills != null) sumarM();
-            			// fins aqui son 74 bc mes
 	        		}
             		
             		int [] M = {M0, M1, M2, M3, M4, M5, M6, M7, M8};
@@ -501,7 +485,7 @@ public class Archon extends RobotPlayer{
                     }
                     */
                 	//Si pot fabricar un robot, el fabrica
-                    if (!hasMoved && rc.hasBuildRequirements(nextRobotType)) {
+                    if (enCombat == 0 && !hasMoved && rc.hasBuildRequirements(nextRobotType)) {
                     	//De moment nomes fabrica soldiers
                         Direction dirToBuild = directions[rand.nextInt(8)];
                         for (int i = 0; i < 8; i++) {
@@ -517,6 +501,8 @@ public class Archon extends RobotPlayer{
                                 dirToBuild = dirToBuild.rotateLeft();
                             }
                         }
+                        rc.broadcastSignal(visionRange);
+                        rc.broadcastSignal(visionRange);
                     } 
                 }
                     /*

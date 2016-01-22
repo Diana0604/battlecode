@@ -16,7 +16,7 @@ public class Soldier extends RobotPlayer {
 	//private static int[][][] taxi = { { { 5, 6, 6, 6, 6, 6, 5, 4, 5} , { 5, 6, 6, 6, 5, 5, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 5, 5} , { 6, 6, 6, 6, 5, 4, 5, 6, 5} } , { { 4, 5, 5, 6, 6, 6, 5, 4, 5} , { 4, 5, 5, 5, 5, 5, 4, 3, 4} , { 4, 5, 5, 5, 4, 4, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 4, 4} , { 5, 5, 5, 5, 4, 3, 4, 5, 4} , { 6, 6, 5, 5, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 4, 4, 5, 5, 5, 4, 3, 4} , { 3, 4, 4, 4, 4, 4, 3, 2, 3} , { 3, 4, 4, 4, 3, 3, 2, 1, 3} , { 3, 4, 4, 4, 3, 2, 1, 2, 3} , { 3, 4, 4, 4, 3, 1, 2, 3, 3} , { 4, 4, 4, 4, 3, 2, 3, 4, 3} , { 5, 5, 4, 4, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 2, 3, 3, 4, 4, 4, 3, 1, 3} , { 1, 3, 3, 3, 3, 3, 1, 1, 2} , { 2, 3, 3, 3, 2, 1, 1, 1, 1} , { 3, 3, 3, 3, 1, 1, 1, 3, 2} , { 4, 4, 3, 3, 2, 1, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 1, 2, 3, 4, 4, 4, 3, 2, 3} , { 1, 1, 2, 3, 3, 3, 2, 1, 1} , { 1, 2, 1, 2, 1, 2, 1, 2, 1} , { 3, 3, 2, 1, 1, 1, 2, 3, 1} , { 4, 4, 3, 2, 1, 2, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 2, 1, 3, 4, 4, 4, 3, 3, 3} , { 1, 1, 1, 3, 3, 3, 3, 3, 2} , { 2, 1, 1, 1, 2, 3, 3, 3, 1} , { 3, 3, 1, 1, 1, 3, 3, 3, 2} , { 4, 4, 3, 1, 2, 3, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 4, 4} , { 3, 2, 3, 4, 4, 4, 4, 4, 3} , { 3, 1, 2, 3, 3, 4, 4, 4, 3} , { 3, 2, 1, 2, 3, 4, 4, 4, 3} , { 3, 3, 2, 1, 3, 4, 4, 4, 3} , { 4, 4, 3, 2, 3, 4, 4, 4, 3} , { 5, 5, 4, 3, 3, 4, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 5, 5} , { 4, 3, 4, 5, 5, 5, 5, 5, 4} , { 4, 3, 3, 4, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 4, 3, 3, 4, 5, 5, 5, 4} , { 5, 5, 4, 3, 4, 5, 5, 5, 4} , { 6, 6, 5, 4, 4, 5, 5, 6, 5} } , { { 5, 4, 5, 6, 6, 6, 6, 6, 5} , { 5, 4, 4, 5, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 5, 4, 4, 5, 6, 6, 6, 5} , { 6, 6, 5, 4, 5, 6, 6, 6, 5} } };
 
 	private static int[][][] eucl = { { { 6, 6, 6, 6, 6, 6, 6, 5, 6} , { 5, 6, 6, 6, 6, 6, 5, 4, 6} , { 5, 6, 6, 6, 6, 5, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 6, 6, 6, 6, 5, 4, 4, 5, 5} , { 6, 6, 6, 6, 5, 4, 5, 6, 6} , { 6, 6, 6, 6, 6, 5, 6, 6, 6} } , { { 5, 6, 6, 6, 6, 6, 5, 4, 6} , { 4, 5, 6, 6, 6, 5, 4, 3, 5} , { 4, 5, 5, 6, 5, 4, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 5, 6, 5, 5, 4, 3, 3, 4, 4} , { 6, 6, 6, 5, 4, 3, 4, 5, 5} , { 6, 6, 6, 6, 5, 4, 5, 6, 6} } , { { 4, 5, 6, 6, 6, 6, 5, 4, 5} , { 3, 4, 5, 6, 5, 5, 4, 3, 4} , { 3, 4, 4, 5, 4, 4, 3, 2, 3} , { 3, 4, 4, 4, 3, 3, 2, 1, 3} , { 3, 4, 4, 4, 3, 2, 1, 2, 3} , { 3, 4, 4, 4, 3, 1, 2, 3, 3} , { 4, 5, 4, 4, 3, 2, 3, 4, 3} , { 5, 6, 5, 4, 3, 3, 4, 5, 4} , { 6, 6, 6, 5, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 2, 3, 3, 4, 4, 4, 3, 1, 3} , { 1, 3, 3, 3, 3, 3, 1, 0, 2} , { 2, 3, 3, 3, 2, 1, 0, 1, 1} , { 3, 3, 3, 3, 1, 0, 1, 3, 2} , { 4, 4, 3, 3, 2, 1, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 1, 2, 3, 4, 4, 4, 3, 2, 3} , { 0, 1, 2, 3, 3, 3, 2, 1, 1} , { 1, 2, 1, 2, 1, 2, 1, 2, 0} , { 3, 3, 2, 1, 0, 1, 2, 3, 1} , { 4, 4, 3, 2, 1, 2, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 2, 1, 3, 4, 4, 4, 3, 3, 3} , { 1, 0, 1, 3, 3, 3, 3, 3, 2} , { 2, 1, 0, 1, 2, 3, 3, 3, 1} , { 3, 3, 1, 0, 1, 3, 3, 3, 2} , { 4, 4, 3, 1, 2, 3, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 6, 5, 5} , { 3, 3, 4, 5, 5, 6, 5, 4, 4} , { 3, 2, 3, 4, 4, 5, 4, 4, 3} , { 3, 1, 2, 3, 3, 4, 4, 4, 3} , { 3, 2, 1, 2, 3, 4, 4, 4, 3} , { 3, 3, 2, 1, 3, 4, 4, 4, 3} , { 4, 4, 3, 2, 3, 4, 4, 5, 3} , { 5, 5, 4, 3, 3, 4, 5, 6, 4} , { 6, 6, 5, 4, 4, 5, 6, 6, 5} } , { { 5, 4, 5, 6, 6, 6, 6, 6, 6} , { 4, 3, 4, 5, 6, 6, 6, 5, 5} , { 4, 3, 3, 4, 5, 6, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 5, 4, 3, 3, 4, 5, 5, 6, 4} , { 6, 5, 4, 3, 4, 5, 6, 6, 5} , { 6, 6, 5, 4, 5, 6, 6, 6, 6} } , { { 6, 5, 6, 6, 6, 6, 6, 6, 6} , { 5, 4, 5, 6, 6, 6, 6, 6, 6} , { 5, 4, 4, 5, 6, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 6, 5, 4, 4, 5, 6, 6, 6, 5} , { 6, 6, 5, 4, 5, 6, 6, 6, 6} , { 6, 6, 6, 5, 6, 6, 6, 6, 6} } };
-	private static final int[] aSoldier = {-1000000, -3, 0, 0, 0, 0, 0};
+	private static final int[][] aSoldier = {{-1000000, -3, 0, 0, 0, 0, 0},{-1000000, -30, 0, 0, 0, 0, 0} };
 	private static final int[] eArchon = {-1000000, 20, 20, 15, 10, 5, 0};
 	private static final int[] eGuard = {-1000000, -1500, -1250, -500, 20, 10, 0};
 	private static final int[] eTurret = {-1000000, -4000, -3900, -3750, -3500, -3250, -3000};
@@ -26,7 +26,7 @@ public class Soldier extends RobotPlayer {
 	private static final int[] bZombie = {-1000000, -8300, -8200, -4000, 20, 10, 0};
 	private static final int[] xNeutral = {-1000000, -3, 0, 0, 0, 0, 0};
 		 
-	private static final int[][] aArchon = {{-1000000, -5, -5, 0, 0, 0, 0}, {-1000000, 5, 5, 5, 5, 5, 0}, {-1000000, 100, 100, 80, 60, 40, 0}};
+	private static final int[][] aArchon = {{-1000000, -5, -5, 0, 0, 0, 0}, {-1000000, 5, 5, 5, 5, 5, 0}, {-1000000, 100, 100, 20, 15, 10, 0}};
 	private static final int[][] eSoldier = {{-1000000, -2100, -2000, -1000, 20, 10, 0},{-1000000, -2100, -2000, -1500, -1250, -1000, 0}};
 	private static final int[][] rZombie = {{-1000000, -3100, -3000, -1500, 20, 10, 0},{-1000000, -3100, -3000, -2000, -1750, -1500, 0}};
 	private static final int[][] dZombie = {{-1000000, -50, -50, 30, 15, 5, 0}, {-1000000, -200, -200, -100, -50, -30, -15}, {-1000000, -1000, -1000, -500, 20, 10, 0}};
@@ -37,7 +37,7 @@ public class Soldier extends RobotPlayer {
 	private static final int[] eTurretInf = {-1000000, 2100, 2000, 1000, 20, 10, 5};
 	private static final int[] eViperInf = {-1000000, 2500, 2300, 2000, 100, 50, 20};
 	private static final int [] eArchonInf = {-1000000, 5000, 3000, 2500, 1000, 500, 100};
-	private static final int[] eArchonInfL = {-1000000, 1000, 900, 800, 700, 500, 600, 500, 400, 300, 200, 100};
+	//private static final int[] eArchonInfL = {-1000000, 1000, 900, 800, 700, 500, 600, 500, 400, 300, 200, 100};
 	
 	private static final int torns_combat = 5;
 	private static final int WEAK = 20;
@@ -82,7 +82,7 @@ public class Soldier extends RobotPlayer {
 		return Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y));
 	}
 
-
+	static int modo = 0;
 	static boolean jo = false;
 	static int torn_maxim = 1;
 	static int mc_maxim = 0;
@@ -158,12 +158,21 @@ public class Soldier extends RobotPlayer {
     						if (sig[i].getID() == sig[i+1].getID()) { 
     							// es un senyal doble: protegir archon
     							buscantCombat = 12;
+    							ls = sig[i].getLocation();
     							protegintArchon = true;
+    							if (ls != null) {
+    								rc.setIndicatorString(0, "Protegint (" + ls.x + "," + ls.y + ")");
+    								rc.setIndicatorString(1, "Protegint (" + ls.x + "," + ls.y + ")");
+    								rc.setIndicatorString(2, "Protegint (" + ls.x + "," + ls.y + ")");
+    								}
+    							i++; // ignorar el seguent pq es el doble
+    							continue;
     						}
     					}
     					// no es senyal doble
     					if (enCombat < torns_combat && buscantCombat == 0) {
     						buscantCombat = 10;
+    						protegintArchon = false;
     						ls = sig[i].getLocation();
     					}
     				}
@@ -179,9 +188,10 @@ public class Soldier extends RobotPlayer {
     					if (m.getMode() == Message.GO_TO) desti = new MapLocation(m.getX(), m.getY());
     				}
     			}
-    			
-    			if (nenemies+nzombies > dens) {
+            	
+    			if (nenemies+nzombies > dens && !protegintArchon) {
         			ls = null;
+        			buscantCombat = 0;
         			if (enCombat < torns_combat) rc.broadcastSignal(visionRange+8);
         			enCombat = torns_combat;
         		}
@@ -211,108 +221,90 @@ public class Soldier extends RobotPlayer {
     			
             	
             	if (rc.isCoreReady()) {
-            		int [] M;
-            		if (!protegintArchon || dying) {
-	                	int meva_vida = 0;
-	                	if (rc.getHealth() < 60/4) meva_vida = 1;
-	            		M0 = 1; M1 = 0; M2 = 1; M3 = 0; M4 = 1; M5 = 0; M6 = 1; M7 = 0; M8 = 2;
-		        		for (int j = 0; j < nenemies; ++j) {
-		        			RobotInfo rob = enemies[j];
-	            			int seva_vida = 1;
-	            			if (rc.getHealth() > rob.health) seva_vida = 0;
-	            			dists = eucl[rob.location.x-loc.x + 4][rob.location.y-loc.y + 4];
-	            			perills = null;
-	            			// 36 bc fins aqui
-	            			
-	            			if (!dying) {
-	            				switch(rob.type) {
-	        					case SOLDIER: perills = eSoldier[meva_vida*seva_vida]; break;
-	        					case GUARD: perills = eGuard; break;
-	        					case TURRET: perills = eTurret; break;
-	        					case VIPER: perills = eViper; break;
-	        					case ARCHON: perills = eArchon; break;
-	        					default: break;
-	        					}
-	            			}
-	            			else {
-	            				switch(rob.type) {
-	        					case SOLDIER: perills = eSoldierInf; break;
-	        					case GUARD: perills = eGuardInf; break;
-	        					case TURRET: perills = eTurretInf; break;
-	        					case VIPER: perills = eViperInf; break;
-	        					case ARCHON: perills = eArchonInf; break;
-	        					default: break;
-	        					}
-	            			}
-	            			// fins aqui son ?
-	            			if (perills != null) sumarM();
-	            			// fins aqui son 74 bc mes
-		        		}
-		        		for (int j = 0; j < nzombies; ++j) {
-		        			RobotInfo rob = zombies[j];
-	            			int seva_vida = 1;
-	            			if (rc.getHealth() > rob.health) seva_vida = 0;
-	            			dists = eucl[rob.location.x-loc.x + 4][rob.location.y-loc.y + 4];
-	            			perills = null;
-	            			// 36 bc fins aqui
-	            			switch(rob.type) {
-	        				case STANDARDZOMBIE: perills = sZombie; break;
-	        				case FASTZOMBIE: perills = fZombie; break;
-	        				case BIGZOMBIE: perills = bZombie; break;
-	        				case RANGEDZOMBIE: perills = rZombie[meva_vida*seva_vida]; break;
-	        				case ZOMBIEDEN: perills = dZombie[zombies_aprop]; break;
-	        				default: break;
-	        				}
-	            			// fins aqui son ?
-	            			if (perills != null) sumarM();
-	            			// fins aqui son 74 bc mes
-		        		}
-		        		for (int j = 0; j < nallies; ++j) {
-		        			RobotInfo rob = allies[j];
-	            			dists = eucl[rob.location.x-loc.x + 4][rob.location.y-loc.y + 4];
-	            			perills = null;
-	            			// ? bc fins aqui
-	            			
-	            			if (!dying) {
-	            				if (rob.type == RobotType.SOLDIER) perills = aSoldier;
-	        					else if (rob.type == RobotType.ARCHON) perills = aArchon[meva_vida];
-	            			}
-	            			else if (rob.type == RobotType.SOLDIER) perills = aSoldierInf;
-	            			// fins aqui son ?
-	            			if (perills != null) sumarM();
-	            			// fins aqui son 74 bc mes
-		        		}
-		        		for (int j = 0; j < nneutrals; ++j) {
-		        			RobotInfo rob = neutrals[j];
-	            			dists = eucl[rob.location.x-loc.x + 4][rob.location.y-loc.y + 4];
-	            			perills = null;
-	            			// ? bc fins aqui
-	            			perills = xNeutral;
-	            			// fins aqui son ?
-	            			if (perills != null) sumarM();
-	            			// fins aqui son 74 bc mes
-		        		}
-
-	            		int [] Maux = {M0, M1, M2, M3, M4, M5, M6, M7, M8};
-	            		M = Maux;
-            		}
-            		else {
-            			// si estan protegint un archon
-            			int Maux[] = new int[8];
-            			for (int i = 0; i < 8; ++i) {
-            				if (!rc.canMove(directions[i])) Maux[i] = -1000000;
-            				else Maux[i] = 0;
+                	int meva_vida = 0;
+                	int tipus_perill_soldats = 0;
+                	if (protegintArchon) tipus_perill_soldats = 1;
+                	if (rc.getHealth() < 60/4) meva_vida = 1;
+            		M0 = 1; M1 = 0; M2 = 1; M3 = 0; M4 = 1; M5 = 0; M6 = 1; M7 = 0; M8 = 2;
+	        		for (int j = 0; j < nenemies; ++j) {
+	        			RobotInfo rob = enemies[j];
+            			int seva_vida = 1;
+            			if (rc.getHealth() > rob.health) seva_vida = 0;
+            			dists = eucl[rob.location.x-loc.x + 4][rob.location.y-loc.y + 4];
+            			perills = null;
+            			// 36 bc fins aqui
+            			
+            			if (!dying) {
+            				switch(rob.type) {
+        					case SOLDIER: perills = eSoldier[meva_vida*seva_vida]; break;
+        					case GUARD: perills = eGuard; break;
+        					case TURRET: perills = eTurret; break;
+        					case VIPER: perills = eViper; break;
+        					case ARCHON: perills = eArchon; break;
+        					default: break;
+        					}
             			}
-            			for (int j = 0; j < nallies; ++j) {
-		        			RobotInfo rob = allies[j];
-	            			dists = eucl[rob.location.x-loc.x + 4][rob.location.y-loc.y + 4];
-	            			if (rob.type == RobotType.ARCHON) {
-	            				perills = aArchon[2];
-	            				sumarM();
-	            			}
-		        		}
-            			M = Maux;
-            		}
+            			else {
+            				switch(rob.type) {
+        					case SOLDIER: perills = eSoldierInf; break;
+        					case GUARD: perills = eGuardInf; break;
+        					case TURRET: perills = eTurretInf; break;
+        					case VIPER: perills = eViperInf; break;
+        					case ARCHON: perills = eArchonInf; break;
+        					default: break;
+        					}
+            			}
+            			// fins aqui son ?
+            			if (perills != null) sumarM();
+            			// fins aqui son 74 bc mes
+	        		}
+	        		for (int j = 0; j < nzombies; ++j) {
+	        			RobotInfo rob = zombies[j];
+            			int seva_vida = 1;
+            			if (rc.getHealth() > rob.health) seva_vida = 0;
+            			dists = eucl[rob.location.x-loc.x + 4][rob.location.y-loc.y + 4];
+            			perills = null;
+            			// 36 bc fins aqui
+            			switch(rob.type) {
+        				case STANDARDZOMBIE: perills = sZombie; break;
+        				case FASTZOMBIE: perills = fZombie; break;
+        				case BIGZOMBIE: perills = bZombie; break;
+        				case RANGEDZOMBIE: perills = rZombie[meva_vida*seva_vida]; break;
+        				case ZOMBIEDEN: perills = dZombie[zombies_aprop]; break;
+        				default: break;
+        				}
+            			// fins aqui son ?
+            			if (perills != null) sumarM();
+            			// fins aqui son 74 bc mes
+	        		}
+	        		for (int j = 0; j < nallies; ++j) {
+	        			RobotInfo rob = allies[j];
+            			dists = eucl[rob.location.x-loc.x + 4][rob.location.y-loc.y + 4];
+            			perills = null;
+            			// ? bc fins aqui
+            			
+            			if (!dying) {
+            				if (rob.type == RobotType.SOLDIER) perills = aSoldier[tipus_perill_soldats];
+        					else if (rob.type == RobotType.ARCHON) perills = aArchon[meva_vida];
+            			}
+            			else if (rob.type == RobotType.SOLDIER) perills = aSoldierInf;
+            			// fins aqui son ?
+            			if (perills != null) sumarM();
+            			// fins aqui son 74 bc mes
+	        		}
+	        		for (int j = 0; j < nneutrals; ++j) {
+	        			RobotInfo rob = neutrals[j];
+            			dists = eucl[rob.location.x-loc.x + 4][rob.location.y-loc.y + 4];
+            			perills = null;
+            			// ? bc fins aqui
+            			perills = xNeutral;
+            			// fins aqui son ?
+            			if (perills != null) sumarM();
+            			// fins aqui son 74 bc mes
+	        		}
+
+            		int [] M = {M0, M1, M2, M3, M4, M5, M6, M7, M8};
+            		
             		
             		
             		//estic comencant a llegir senyal pero no esta ben preparat encar
@@ -353,7 +345,11 @@ public class Soldier extends RobotPlayer {
     	            	
 	            	if (enCombat == 0) {
 		        		if (buscantCombat > 0) {
-							int dir = inversaDirections(loc.directionTo(ls));
+		        			if (ls == null) {
+		        				System.out.printf("\n\n\n%d\nModo: %d\n\n", buscantCombat,modo);
+		        				if (protegintArchon)  System.out.printf("Protegint archon\n");
+		        			}
+							int dir = inversaDirections(rc.getLocation().directionTo(ls));
 		    				M[dir] += 80;
 		    				M[(dir+1)%8] += 75;
 		    				M[(dir+7)%8] += 75;
@@ -419,6 +415,7 @@ public class Soldier extends RobotPlayer {
 	            		}
 	            		if (vida != 1000000) obj = zombies[debil];
             		}
+            		if (proper == 12345);
             		if (obj != null) {
             			rc.attackLocation(obj.location);
             		}
