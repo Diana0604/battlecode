@@ -83,7 +83,26 @@ public class Archon extends RobotPlayer{
     
     //De les 8 direccions retorna la que tingui menys perill
     public static Direction safestDirection(){
-    	
+    	Direction dir = Direction.NORTH;
+    	int safeDir = -1;
+    	int lowestDanger = 100;
+    	for (int i = 0; i < 8; i++){
+    		if (!rc.canMove(dir)) {
+    			dir = dir.rotateLeft();
+    			continue;
+    		}
+    		int aux = danger[dir.dx+1][dir.dy+1];
+    		if (aux < lowestDanger){
+    			lowestDanger = aux;
+    			safeDir = i;
+    		}
+    		dir = dir.rotateLeft();
+    	}
+    	if (safeDir < 0) return Direction.NONE;
+    	Direction bestDir = Direction.NORTH;
+    	for (int i = 0; i < safeDir; i++) bestDir = bestDir.rotateLeft();
+    	//System.out.println("La millor direccio es "+bestDir);
+    	return bestDir;
     }
     
     //Tria un robot per construir
@@ -337,6 +356,15 @@ public class Archon extends RobotPlayer{
     	}
 	}
 	
+	private static void addPartsPriority() {
+		if (!urgencia) {
+    		M[8] += rc.senseParts(loc)*0.3;
+    		for (int k = 0; k < 8; ++k) {
+    			M[k] += rc.senseParts(loc.add(directions[k]))*0.3;
+    		}
+    	}
+	}
+	
 	private static void chooseDirection() throws GameActionException {
 		int millor = 8;
 		for (int i = 0; i < 8; i++) {
@@ -405,150 +433,57 @@ public class Archon extends RobotPlayer{
 
         while (true) {
             try {
-            	//nearbyFriends = rc.senseNearbyRobots(visionRange, myTeam);
-            	//nearbyEnemies = rc.senseNearbyRobots(visionRange,enemyTeam);
-                //nearbyZombies = rc.senseNearbyRobots(visionRange,Team.ZOMBIE);
-                //nearbyNeutrals = rc.senseNearbyRobots(visionRange,Team.NEUTRAL);
-            	
                 loc = rc.getLocation();
                 construirArrays();
                 variablesCombat();
             	variablesRondes();
                 
-            	if (rc.isCoreReady()) {
-            		calculateDanger();
-            		addTargetPriority();
-    	            addRubblePriority();
-	            	chooseDirection();
-            	}
+        	 // Ordre d'importancia:
+           	 // 1. Si hi ha un robot neutral, l'activa
+           	 // 2. Si pot fabricar un robot, el fabrica
+           	 // 3. Es mou/neteja segons prioritats/perills de robots propers, objectius, rubble i parts
+           	 // Sempre: intenta reparar soldats propers	
             	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	
-            	boolean hasMoved = false;
-            	/*
-            	
-                //nearbyFriends = rc.senseNearbyRobots(visionRange,myTeam);
-                nearbyEnemies = rc.senseNearbyRobots(visionRange,enemyTeam);
-                nearbyZombies = rc.senseNearbyRobots(visionRange,Team.ZOMBIE);
-                nearbyNeutrals = rc.senseNearbyRobots(visionRange,Team.NEUTRAL);
-                danger = new int[3][3];
-                calculateDanger();
-                readSignals();
-                updateTargetLocation();
-                if (leader)	sendSignals();
-                //System.out.println("Perill = "+danger[1][1]);
-                */
-                if (rc.isCoreReady()) {
-                	//
-                	 // Ordre d'importancia:
-                	 // 1. Si hi ha un robot neutral, l'activa
-                	 // 2. Si pot fabricar un robot, el fabrica
-                	 // 3. Si esta en perill, fuig
-                	 // 4. Recull parts adjacents
-                	 // 5. Va a la target location (si no hi es ja)
-                	 // 5. Neteja rubble adjacent
-                	 // Sempre: intenta reparar soldats propers	
-                	 /*
-                	Boolean hasMoved = false;
-                	RobotInfo[] adjacentNeutrals = rc.senseNearbyRobots(2, Team.NEUTRAL);
-                    //if (targetLocation != null) System.out.println("TargetLocation = "+targetLocation.x+" "+targetLocation.y);
-                	
-                	//Si esta al costat d'un robot neutral, l'activa
-                	if (adjacentNeutrals.length != 0){
-                    	rc.activate(adjacentNeutrals[0].location);
-                    	rc.setIndicatorString(0,"Ha activat un robot neutral");
-                    	hasMoved = true;
-                    }
-                    */
-                	//Si pot fabricar un robot, el fabrica
-                    if (enCombat == 0 && !hasMoved && rc.hasBuildRequirements(nextRobotType)) {
-                    	//De moment nomes fabrica soldiers
-                        Direction dirToBuild = directions[rand.nextInt(8)];
-                        for (int i = 0; i < 8; i++) {
-                            // If possible, build in this direction
-                            if (rc.canBuild(dirToBuild, nextRobotType)) {
-                                rc.build(dirToBuild, nextRobotType);
-                                chooseNextRobotType();
-                            	rc.setIndicatorString(0,"Ha construit un soldat");
-                                hasMoved = true;
-                                break;
-                            } else {
-                                // Rotate the direction to try
-                                dirToBuild = dirToBuild.rotateLeft();
-                            }
-                        }
-                        rc.broadcastSignal(visionRange);
-                        rc.broadcastSignal(visionRange);
-                    } 
-                }
-                    /*
-                    //Si esta en perill, fuig
-                    if (!hasMoved && danger[1][1] >= DANGER_THRESHHOLD){
-                    	Direction dir = safestDirection();
-                    	if (dir != Direction.NONE && danger[dir.dx+1][dir.dy+1] < danger[1][1]){
-                    		hasMoved = true;
-                    		rc.move(dir);
-                        	rc.setIndicatorString(0,"Hi havia perill i ha fugit");
-                    	}
-                    }
-                    
-                    //Si esta al costat d'unes parts, les agafa
-                    if (!hasMoved){
-                    	Direction dir = Direction.NORTH;
-                    	for (int i = 0; i < 8; i++){
-                    		if (rc.senseParts(rc.getLocation().add(dir)) > 0 && rc.canMove(dir)){
-                    			rc.move(dir);
-                    			hasMoved = true;
-                            	rc.setIndicatorString(0,"Ha anat a agafar unes parts");
-                    			break;
-                    		}
-                    		dir = dir.rotateLeft();
-                    	}
-                    }
 
-                    //Si pot anar cap a la target location, hi va
-                    //Si no pot directament, intenta les dues direccions del costat
-                    if (!hasMoved){
-                    	if (targetLocation != null && (!rc.canSense(targetLocation)||( rc.canSense(targetLocation) && rc.senseRobotAtLocation(targetLocation) != null && rc.senseRobotAtLocation(targetLocation).type == RobotType.ARCHON))){
-                    		Direction dir = rc.getLocation().directionTo(targetLocation);
-                    		if (directionDanger(dir) > 0 || !rc.canMove(dir)) dir = dir.rotateLeft();
-                    		if (directionDanger(dir) > 0 || !rc.canMove(dir)) dir = dir.rotateRight().rotateRight();
-                    		if (rc.canMove(dir) && directionDanger(dir) == 0) {
-                    			rc.move(dir);
-                    			rc.setIndicatorString(0, "Ha anat a la target location");
-                    			hasMoved = true;
-                    		}
-                    	}
-                    }
-                    
-                    //Si pot netejar rubble en alguna direccio, la neteja
-                    //Aixo ho vaig ficar perque fes algo pero no se si cal ni si es bo jajaja
-                    if (!hasMoved){
-                    	Direction dir = Direction.NORTH;
-                    	for (int i = 0; i < 8; i++){
-                    		if (rc.senseRubble(rc.getLocation().add(dir)) > GameConstants.RUBBLE_SLOW_THRESH){
-                    			rc.clearRubble(dir);
-                    			hasMoved = true;
-                            	rc.setIndicatorString(0,"Ha netejat rubble");
-                    			break;
-                    		}
-                    		dir = dir.rotateLeft();
-                    	}
-                    }
-                    
-                    
-                    if (!hasMoved)
-                    	rc.setIndicatorString(0,"No ha fet res aquest torn");
-                    
-                }else{
+                if (rc.isCoreReady()) {
+	            	Boolean hasMoved = false;
+	            	RobotInfo[] adjacentNeutrals = rc.senseNearbyRobots(2, Team.NEUTRAL);
+	            	//Si esta al costat d'un robot neutral, l'activa
+	            	if (adjacentNeutrals.length != 0){
+	                	rc.activate(adjacentNeutrals[0].location);
+	                	rc.setIndicatorString(0,"Ha activat un robot neutral");
+	                	hasMoved = true;
+	                }
+	            	//Si pot fabricar un robot, el fabrica
+                    if (!hasMoved && rc.hasBuildRequirements(nextRobotType)) {
+	                	//De moment nomes fabrica soldiers
+	                    Direction dirToBuild = directions[rand.nextInt(8)];
+	                    for (int i = 0; i < 8; i++) {
+	                        // If possible, build in this direction
+	                        if (rc.canBuild(dirToBuild, nextRobotType)) {
+	                            rc.build(dirToBuild, nextRobotType);
+	                            chooseNextRobotType();
+	                        	rc.setIndicatorString(0,"Ha construit un soldat");
+	                            hasMoved = true;
+	                            break;
+	                        } else {
+	                            // Rotate the direction to try
+	                            dirToBuild = dirToBuild.rotateLeft();
+	                        }
+	                    }
+	                    rc.broadcastSignal(visionRange);
+	                    rc.broadcastSignal(visionRange);
+	                } 
+	            	if (!hasMoved) {
+	            		calculateDanger();
+	            		addTargetPriority();
+	    	            addRubblePriority();
+		            	addPartsPriority();
+	    	            chooseDirection();
+	            	}
+                    if (!hasMoved) rc.setIndicatorString(0,"No ha fet res aquest torn");
+                }
+                else {
                 	rc.setIndicatorString(0,"Tenia core delay");
                 }
 
@@ -567,7 +502,7 @@ public class Archon extends RobotPlayer{
                 	}
                 	i++;
                 }
-                */
+                
                 Clock.yield();
             } catch (Exception e) {
                 System.out.println(e.getMessage());
