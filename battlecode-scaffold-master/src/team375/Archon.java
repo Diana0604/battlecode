@@ -277,30 +277,13 @@ public class Archon extends RobotPlayer{
 	private static int enCombat = 0, buscantCombat = 0;
 	private static MapLocation ls = null; //location del signal
     
+	
     
 	public static void playArchon(){
 		try {
 			rondes_zombies = rc.getZombieSpawnSchedule().getRounds();
 			
-			MapLocation[] initAllies = rc.getInitialArchonLocations(myTeam);
-			MapLocation[] initEnemies = rc.getInitialArchonLocations(enemyTeam);
-			MapLocation millor = rc.getLocation();
-			int maxima = 0;
-			for (MapLocation i: initAllies) {
-				int suma = 0;
-				for (MapLocation j: initEnemies) {
-					suma += i.distanceSquaredTo(j);
-				}
-				// Escull el que estigui mes lluny dels enemics, i si dos estan igual, el que tingui x minima, i sino y minima
-				boolean canviar = false;
-				if (suma > maxima) canviar = true;
-				else if (suma == maxima && (i.x < millor.x || (i.x == millor.x && i.y < millor.y))) canviar = true;
-				if (canviar) {
-					maxima = suma;
-					millor = i;
-				}
-			}
-			targetLocation = millor;
+			targetLocation = escollirLider();
 			
 			
 			// Si aquest es l'archon a on tothom es dirigeix, sera el lider

@@ -45,6 +45,7 @@ public class Soldier extends RobotPlayer {
 	private static int [] rondes_zombies;
 	private static int proxima_zombies = 0;
 	private static int enCombat = 0, buscantCombat = 0;
+	private static int protegintArchon = 0;
 	private static MapLocation ls = null; //location del signal
 	private static MapLocation desti = null;
 	private static boolean dying = false;
@@ -155,13 +156,13 @@ public class Soldier extends RobotPlayer {
     				if (sig[i].getMessage() == null) {
     					if (i < sig.length-1) {
     						if (sig[i].getID() == sig[i+1].getID()) { 
-    							// es un senyal doble
-    							i++;
-    							continue;
+    							// es un senyal doble: protegir archon
+    							buscantCombat = 12;
+    							protegintArchon = 1;
     						}
     					}
     					// no es senyal doble
-    					if (enCombat < torns_combat && ls == null) {
+    					if (enCombat < torns_combat && buscantCombat == 0) {
     						buscantCombat = 10;
     						ls = sig[i].getLocation();
     					}
@@ -186,7 +187,10 @@ public class Soldier extends RobotPlayer {
         		}
     			else {
     				if (enCombat > 0) --enCombat;
-    				if (buscantCombat == 0) ls = null;
+    				if (buscantCombat == 0) {
+    					ls = null;
+    					protegintArchon = 0;
+    				}
     				else --buscantCombat;
     			}
             	
@@ -206,9 +210,9 @@ public class Soldier extends RobotPlayer {
     			
     			
             	
-            	int meva_vida = 0;
-            	if (rc.getHealth() < 60/4) meva_vida = 1;
             	if (rc.isCoreReady()) {
+                	int meva_vida = 0;
+                	if (rc.getHealth() < 60/4) meva_vida = 1;
             		M0 = 1; M1 = 0; M2 = 1; M3 = 0; M4 = 1; M5 = 0; M6 = 1; M7 = 0; M8 = 2;
 	        		int BC1 = Clock.getBytecodeNum();
 	        		for (int j = 0; j < nenemies; ++j) {
@@ -334,7 +338,7 @@ public class Soldier extends RobotPlayer {
     	            	compt_bc += BC2-BC1;
     	            	
 	            	if (enCombat == 0) {
-		        		if (ls != null) {
+		        		if (buscantCombat > 0) {
 							int dir = inversaDirections(loc.directionTo(ls));
 		    				M[dir] += 80;
 		    				M[(dir+1)%8] += 75;
@@ -349,7 +353,7 @@ public class Soldier extends RobotPlayer {
 						}
 	        		}
 	            	
-	            	boolean urgencia = (enCombat > 0) || ls != null;
+	            	boolean urgencia = (enCombat > 0) || (buscantCombat > 0);
             		if (rc.senseRubble(loc) >= 50) M[8] -= 30;
             		for (int k = 0; k < 8; ++k) {
             			double rubble = rc.senseRubble(loc.add(directions[k]));

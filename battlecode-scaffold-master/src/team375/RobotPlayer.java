@@ -26,7 +26,28 @@ public class RobotPlayer {
     static RobotInfo[] nearbyNeutrals;
     
     
-	
+    private static MapLocation escollirLider() {
+		MapLocation[] initAllies = rc.getInitialArchonLocations(myTeam);
+		MapLocation[] initEnemies = rc.getInitialArchonLocations(enemyTeam);
+		MapLocation millor = null;
+		int maxima = 0;
+		for (MapLocation i: initAllies) {
+			int suma = 0;
+			for (MapLocation j: initEnemies) {
+				suma += i.distanceSquaredTo(j);
+			}
+			// Escull el que estigui mes lluny dels enemics, i si dos estan igual, el que tingui x minima, i sino y minima
+			boolean canviar = false;
+			if (suma > maxima) canviar = true;
+			else if (suma == maxima && (i.x < millor.x || (i.x == millor.x && i.y < millor.y))) canviar = true;
+			if (canviar) {
+				maxima = suma;
+				millor = i;
+			}
+		}
+		return millor;
+	}
+    
     public static void run(RobotController rc2) {
         // You can instantiate variables here.
     	rc = rc2;
