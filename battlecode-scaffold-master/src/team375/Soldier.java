@@ -415,7 +415,6 @@ public class Soldier extends RobotPlayer {
 	            		}
 	            		if (vida != 1000000) obj = zombies[debil];
             		}
-            		if (proper == 12345);
             		if (obj != null) {
             			rc.attackLocation(obj.location);
             		}
