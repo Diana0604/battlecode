@@ -26,7 +26,7 @@ public class RobotPlayer {
     static RobotInfo[] nearbyNeutrals;
     
     
-    private static MapLocation escollirLider() {
+    protected static MapLocation escollirLider() {
 		MapLocation[] initAllies = rc.getInitialArchonLocations(myTeam);
 		MapLocation[] initEnemies = rc.getInitialArchonLocations(enemyTeam);
 		MapLocation millor = null;
