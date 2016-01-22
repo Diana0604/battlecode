@@ -324,6 +324,25 @@ public class Archon extends RobotPlayer{
 		}
 	}
 	
+	private static boolean buildRobot() throws GameActionException {
+		Direction dirToBuild = directions[rand.nextInt(8)];
+        for (int i = 0; i < 8; i++) {
+            // If possible, build in this direction
+            if (rc.canBuild(dirToBuild, nextRobotType)) {
+                rc.build(dirToBuild, nextRobotType);
+                chooseNextRobotType();
+            	rc.setIndicatorString(0,"Ha construit un soldat");
+		        rc.broadcastSignal(visionRange);
+		        rc.broadcastSignal(visionRange);
+                return true;
+            } else {
+                // Rotate the direction to try
+                dirToBuild = dirToBuild.rotateLeft();
+            }
+        }
+        return false;
+	}
+	
 	private static void addTargetPriority() {
 		molt_aprop = false;
     	if (enCombat == 0) {
@@ -365,20 +384,15 @@ public class Archon extends RobotPlayer{
     	}
 	}
 	
-	private static void chooseDirection() throws GameActionException {
+	private static Direction chooseDirection() {
 		int millor = 8;
 		for (int i = 0; i < 8; i++) {
 			if (rc.canMove(directions[i]) || (!urgencia && rc.senseRubble(loc.add(directions[i])) >= 100)) {
 				if (M[i] > M[millor]) millor = i;
 			}
 		}
-    	rc.setIndicatorString(0, ""+M[7]+" "+M[0]+" "+M[1]+" "+M[6]+" "+M[8]+" "+M[2]+" "+M[5]+" "+M[4]+" "+M[3]);
-			
-		if (millor < 8) {
-			Direction dir = directions[millor];
-			if (rc.senseRubble(loc.add(dir)) >= 100) rc.clearRubble(dir);
-			else rc.move(directions[millor]);
-		}
+		if (millor == 8) return null;
+    	return directions[millor];
 	}
 	
 	private static int[][][] eucl = { { {7,7,7,7,7,7,7,6,7} , {6,7,7,7,7,7,6,6,7} , {6,7,7,7,7,6,6,5,6} , {6,7,7,7,6,6,5,5,6} , {6,7,7,7,6,5,5,5,6} , {6,7,7,7,6,5,5,5,6} , {6,7,7,7,6,5,5,5,6} , {6,7,7,7,6,5,5,6,6} , {7,7,7,7,6,5,6,6,6} , {7,7,7,7,6,6,6,7,7} , {7,7,7,7,7,6,7,7,7} } , { {6,7,7,7,7,7,6,6,7} , {6,6,7,7,7,6,6,5,6} , {5,6,6,7,6,6,5,4,6} , {5,6,6,6,6,5,4,4,5} , {5,6,6,6,5,4,4,4,5} , {5,6,6,6,5,4,4,4,5} , {5,6,6,6,5,4,4,4,5} , {6,6,6,6,5,4,4,5,5} , {6,7,6,6,5,4,5,6,6} , {7,7,7,6,6,5,6,6,6} , {7,7,7,7,6,6,6,7,7} } , { {6,6,7,7,7,7,6,5,6} , {5,6,6,7,6,6,5,4,6} , {4,5,6,6,6,5,4,3,5} , {4,5,5,6,5,4,3,3,4} , {4,5,5,5,4,3,3,3,4} , {4,5,5,5,4,3,3,3,4} , {4,5,5,5,4,3,3,3,4} , {5,6,5,5,4,3,3,4,4} , {6,6,6,5,4,3,4,5,5} , {6,7,6,6,5,4,5,6,6} , {7,7,7,6,6,5,6,7,6} } , { {5,6,6,7,7,7,6,5,6} , {4,5,6,6,6,6,5,4,5} , {3,4,5,6,5,5,4,3,4} , {3,4,4,5,4,4,3,2,3} , {3,4,4,4,3,3,2,1,3} , {3,4,4,4,3,2,1,2,3} , {3,4,4,4,3,1,2,3,3} , {4,5,4,4,3,2,3,4,3} , {5,6,5,4,3,3,4,5,4} , {6,6,6,5,4,4,5,6,5} , {7,7,6,6,5,5,6,7,6} } , { {5,5,6,7,7,7,6,5,6} , {4,4,5,6,6,6,5,4,5} , {3,3,4,5,5,5,4,3,4} , {2,3,3,4,4,4,3,1,3} , {1,3,3,3,3,3,1,0,2} , {2,3,3,3,2,1,0,1,1} , {3,3,3,3,1,0,1,3,2} , {4,4,3,3,2,1,3,4,3} , {5,5,4,3,3,3,4,5,4} , {6,6,5,4,4,4,5,6,5} , {7,7,6,5,5,5,6,7,6} } , { {5,5,6,7,7,7,6,5,6} , {4,4,5,6,6,6,5,4,5} , {3,3,4,5,5,5,4,3,4} , {1,2,3,4,4,4,3,2,3} , {0,1,2,3,3,3,2,1,1} , {1,2,1,2,1,2,1,2,0} , {3,3,2,1,0,1,2,3,1} , {4,4,3,2,1,2,3,4,3} , {5,5,4,3,3,3,4,5,4} , {6,6,5,4,4,4,5,6,5} , {7,7,6,5,5,5,6,7,6} } , { {5,5,6,7,7,7,6,5,6} , {4,4,5,6,6,6,5,4,5} , {3,3,4,5,5,5,4,3,4} , {2,1,3,4,4,4,3,3,3} , {1,0,1,3,3,3,3,3,2} , {2,1,0,1,2,3,3,3,1} , {3,3,1,0,1,3,3,3,2} , {4,4,3,1,2,3,3,4,3} , {5,5,4,3,3,3,4,5,4} , {6,6,5,4,4,4,5,6,5} , {7,7,6,5,5,5,6,7,6} } , { {5,5,6,7,7,7,6,6,6} , {4,4,5,6,6,6,6,5,5} , {3,3,4,5,5,6,5,4,4} , {3,2,3,4,4,5,4,4,3} , {3,1,2,3,3,4,4,4,3} , {3,2,1,2,3,4,4,4,3} , {3,3,2,1,3,4,4,4,3} , {4,4,3,2,3,4,4,5,3} , {5,5,4,3,3,4,5,6,4} , {6,6,5,4,4,5,6,6,5} , {7,7,6,5,5,6,6,7,6} } , { {6,5,6,7,7,7,7,6,6} , {5,4,5,6,6,7,6,6,6} , {4,3,4,5,6,6,6,5,5} , {4,3,3,4,5,6,5,5,4} , {4,3,3,3,4,5,5,5,4} , {4,3,3,3,4,5,5,5,4} , {4,3,3,3,4,5,5,5,4} , {5,4,3,3,4,5,5,6,4} , {6,5,4,3,4,5,6,6,5} , {6,6,5,4,5,6,6,7,6} , {7,7,6,5,6,6,7,7,6} } , { {6,6,6,7,7,7,7,7,7} , {6,5,6,6,7,7,7,6,6} , {5,4,5,6,6,7,6,6,6} , {5,4,4,5,6,6,6,6,5} , {5,4,4,4,5,6,6,6,5} , {5,4,4,4,5,6,6,6,5} , {5,4,4,4,5,6,6,6,5} , {6,5,4,4,5,6,6,6,5} , {6,6,5,4,5,6,6,7,6} , {7,6,6,5,6,6,7,7,6} , {7,7,6,6,6,7,7,7,7} } , { {7,6,7,7,7,7,7,7,7} , {6,6,6,7,7,7,7,7,7} , {6,5,6,6,7,7,7,7,6} , {6,5,5,6,6,7,7,7,6} , {6,5,5,5,6,7,7,7,6} , {6,5,5,5,6,7,7,7,6} , {6,5,5,5,6,7,7,7,6} , {6,6,5,5,6,7,7,7,6} , {7,6,6,5,6,7,7,7,6} , {7,7,6,6,6,7,7,7,7} , {7,7,7,6,7,7,7,7,7} } };
@@ -456,30 +470,20 @@ public class Archon extends RobotPlayer{
 	                }
 	            	//Si pot fabricar un robot, el fabrica
                     if (!hasMoved && rc.hasBuildRequirements(nextRobotType)) {
-	                	//De moment nomes fabrica soldiers
-	                    Direction dirToBuild = directions[rand.nextInt(8)];
-	                    for (int i = 0; i < 8; i++) {
-	                        // If possible, build in this direction
-	                        if (rc.canBuild(dirToBuild, nextRobotType)) {
-	                            rc.build(dirToBuild, nextRobotType);
-	                            chooseNextRobotType();
-	                        	rc.setIndicatorString(0,"Ha construit un soldat");
-	                            hasMoved = true;
-	                            break;
-	                        } else {
-	                            // Rotate the direction to try
-	                            dirToBuild = dirToBuild.rotateLeft();
-	                        }
-	                    }
-	                    rc.broadcastSignal(visionRange);
-	                    rc.broadcastSignal(visionRange);
-	                } 
+	                	hasMoved = buildRobot();
+	                }
+                    //Es mou (o es queda quiet) a la casella amb mes prioritat
 	            	if (!hasMoved) {
 	            		calculateDanger();
 	            		addTargetPriority();
 	    	            addRubblePriority();
 		            	addPartsPriority();
-	    	            chooseDirection();
+	    	            Direction dir = chooseDirection();
+	    	            rc.setIndicatorString(0, ""+M[7]+" "+M[0]+" "+M[1]+" "+M[6]+" "+M[8]+" "+M[2]+" "+M[5]+" "+M[4]+" "+M[3]);
+	    				if (dir != null) {
+	    	    			if (rc.senseRubble(loc.add(dir)) >= 100) rc.clearRubble(dir);
+	    	    			else rc.move(dir);
+	    	    		}
 	            	}
                     if (!hasMoved) rc.setIndicatorString(0,"No ha fet res aquest torn");
                 }
