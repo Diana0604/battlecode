@@ -12,6 +12,8 @@ public class Archon extends RobotPlayer{
 	//Arraylist amb les posicions dels archons neutrals que coneix
 	static ArrayList<MapLocation> neutralArchons = new ArrayList<>();
 	
+	static ArrayList<MapLocation> corners = new ArrayList<>();
+	
 	//Array 3x3 amb els perills adjacents
     static int[][] danger;
     
@@ -23,11 +25,6 @@ public class Archon extends RobotPlayer{
     
     //tipus del proxim robot que construira
     static RobotType nextRobotType = RobotType.SCOUT;
-    
-    //Retorna el perill que hi ha en una direccio
-    private static int directionDanger(Direction dir){
-    	return danger[dir.dx+1][dir.dy+1];
-    }
     
     //Calcula el perill i el posa en la array de 3x3
     public static void calculateDanger(){
@@ -130,16 +127,13 @@ public class Archon extends RobotPlayer{
 			int y = m.getY();
 			int idControl = m.getidControl();
 			int id = m.getid();
-			
 			//Si el signal distingeix per tipus, i no esta dirigit als archons, l'ignora
 			if (typeControl == 1){
 				if (!m.toArchon()) continue;
 			}
-			
 			//Si el signal distingeix per ID del receptor i no esta dirigit a ell, l'ignora
 			if (idControl == 1 && id != rc.getID()) continue;
     		
-			
     		if (m.getSenderArchon() == 1){
     			//Ha rebut signal d'un archon, per tant no es el lier
     			leader = false;
@@ -147,20 +141,30 @@ public class Archon extends RobotPlayer{
     				//si l'archon li ordena d'anar a un lloc, el posa com a objectiu
     				targetLocation = new MapLocation(x,y);
     			}
+    			else if (mode == Message.STAGE2) {
+    				stage = 2;
+    				targetLocation = new MapLocation(x,y);
+    			}
     		}else{
     			//L'ha enviat un scout
     			//System.out.println("rep missatge de scout");
     			if (mode == Message.FOUND){
+    				MapLocation objecte = new MapLocation(x,y);
     				if (object == Message.DEN){
     					//Si un scout li diu que ha trobat un den, l'afegeix a la llista
-    					if (!dens.contains(object)){
-    						dens.add(new MapLocation(x,y));
+    					if (!dens.contains(objecte)){
+    						dens.add(objecte);
     					}
     				}
-    				if (object == Message.NEUTRAL_ARCHON){
+    				else if (object == Message.NEUTRAL_ARCHON){
     					//Si un scout li diu que ha trobat un archon neutral, l'afegeix a la llista
-    					if (!neutralArchons.contains(object)){
-    						neutralArchons.add(new MapLocation(x,y));
+    					if (!neutralArchons.contains(objecte)){
+    						neutralArchons.add(objecte);
+    					}
+    				}
+    				else if (object == Message.CORNER) {
+    					if (!corners.contains(objecte)){
+    						corners.add(objecte);
     					}
     				}
     			}
@@ -169,7 +173,7 @@ public class Archon extends RobotPlayer{
     }
     
     //Si envia signals es perque es lider. Diu a tots els robots propers d'anar a la target location que te
-    private static void sendSignals() throws GameActionException{
+    private static void sendSignals() throws GameActionException {
     	if (targetLocation != null){
     		int mode = Message.GO_TO;
 			int object = Message.NONE;
@@ -246,6 +250,45 @@ public class Archon extends RobotPlayer{
     	}
     }
     
+    
+    private static void trobarAltraCorner() {
+    	int x = corners.get(0).x^corners.get(1).x^corners.get(2).x;
+    	int y = corners.get(0).y^corners.get(1).y^corners.get(2).y;
+    	corners.add(new MapLocation(x,y));
+    }
+
+    private static void decidirCorner() throws GameActionException {
+    	int dist = 1000000;
+    	MapLocation millor = null;
+    	for (MapLocation i:corners) {
+    		int nova = i.distanceSquaredTo(targetLocation);
+    		if (nova < dist) {
+    			dist = nova;
+    			millor = i;
+    		}
+    	}
+    	if (leader) {
+    		if (millor != null) targetLocation = millor;
+        	stage = 2;
+        	rc.broadcastSignal(visionRange);
+        	rc.broadcastSignal(visionRange);
+        	enviarSignalStage2();
+    	}
+    }
+    
+    private static void enviarSignalStage2() throws GameActionException {
+    	int mode = Message.STAGE2;
+		int object = Message.NONE;
+		int typeControl = Message.NONE;
+		int robotType = Message.NONE;
+		int x = targetLocation.x;
+		int y = targetLocation.y;
+		int idControl = Message.NONE;
+		int id = Message.NONE;
+		Message m = new Message(rc.getLocation(), mode, object, robotType, x, y, id, typeControl, idControl, 1);
+		int[] coded = m.encode();
+		rc.broadcastMessageSignal(coded[0], coded[1], 12800);
+    }
     
 	private static int inversaDirections (Direction d) {
 		switch(d) {
@@ -412,7 +455,10 @@ public class Archon extends RobotPlayer{
 	private static final int[][] dZombie = {{-1000000, -200, -200, -100, -20, -10, 0, 0}, {-1000000, -2000, -2000, -1000, -500, -300, -150, 0}};
 	
 	private static final int torns_combat = 5;
+	private static int molts_soldats;
+	private static int torn_limit = 200;
 	
+	private static int stage = 1;
 	private static RobotInfo[] robots, allies, enemies, neutrals, zombies;
 	private static int nallies, nenemies, nzombies, nneutrals, ndens;
 	private static int torn, zombies_aprop;
@@ -430,15 +476,11 @@ public class Archon extends RobotPlayer{
     
 	public static void playArchon(){
 		try {
+			molts_soldats = 8*rc.getInitialArchonLocations(myTeam).length + 5;
 			rondes_zombies = rc.getZombieSpawnSchedule().getRounds();
-			
 			targetLocation = escollirLider();
-			
-			
 			// Si aquest es l'archon a on tothom es dirigeix, sera el lider
-			if (rc.getLocation().x == targetLocation.x && rc.getLocation().y == targetLocation.y) leader = true;
-			else leader = false;
-			if (leader) rc.broadcastSignal(visionRange);
+			if (rc.getLocation().x == targetLocation.x && rc.getLocation().y == targetLocation.y) rc.broadcastSignal(visionRange);
 			
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -458,6 +500,17 @@ public class Archon extends RobotPlayer{
            	 // 3. Es mou/neteja segons prioritats/perills de robots propers, objectius, rubble i parts
            	 // Sempre: intenta reparar soldats propers	
             	
+            	readSignals();
+            	if (stage == 1) {
+	            	if (rc.getRoundNum() < torn_limit) {
+	            		if (corners.size() == 3) trobarAltraCorner();
+	            		if (corners.size() == 4) decidirCorner();
+	            	}
+	            	else {
+	            		decidirCorner();
+	            	}
+            	}
+            	if (leader) sendSignals();
 
                 if (rc.isCoreReady()) {
 	            	Boolean hasMoved = false;
@@ -469,7 +522,7 @@ public class Archon extends RobotPlayer{
 	                	hasMoved = true;
 	                }
 	            	//Si pot fabricar un robot, el fabrica
-                    if (!hasMoved && rc.hasBuildRequirements(nextRobotType)) {
+                    if (!hasMoved && rc.getRobotCount() < molts_soldats && rc.hasBuildRequirements(nextRobotType)) {
 	                	hasMoved = buildRobot();
 	                }
                     //Es mou (o es queda quiet) a la casella amb mes prioritat
@@ -506,7 +559,7 @@ public class Archon extends RobotPlayer{
                 	}
                 	i++;
                 }
-                
+
                 Clock.yield();
             } catch (Exception e) {
                 System.out.println(e.getMessage());
