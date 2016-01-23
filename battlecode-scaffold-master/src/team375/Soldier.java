@@ -1,5 +1,7 @@
 package team375;
 
+import java.util.ArrayList;
+
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameConstants;
@@ -42,6 +44,7 @@ public class Soldier extends RobotPlayer {
 	private static final int torns_combat = 5;
 	private static final int WEAK = 20;
 	
+	private static int stage = 1;
 	private static int [] rondes_zombies;
 	private static int proxima_zombies = 0;
 	private static int enCombat = 0, buscantCombat = 0;
@@ -51,6 +54,7 @@ public class Soldier extends RobotPlayer {
 	private static boolean dying = false;
 	private static int M0, M1, M2, M3, M4, M5, M6, M7, M8;
 	private static int[] perills, dists;
+	private static ArrayList<MapLocation> reg_dens = new ArrayList<>();
 	
 	private static int inversaDirections (Direction d) {
 		switch(d) {
@@ -184,7 +188,12 @@ public class Soldier extends RobotPlayer {
     						desti = new MapLocation(m.getX(), m.getY());
     					}
     					else if (m.getMode() == Message.CLEAR_RUBBLE) {
-    						desti = null;
+    						stage = 3;
+    					}
+    					else if (m.getMode() == Message.REG_DEN) {
+    						if (stage != 4) desti = new MapLocation(m.getX(), m.getY());
+    						stage = 4;
+    						reg_dens.add(new MapLocation(m.getX(), m.getY()));
     					}
     				}
     			}
@@ -305,44 +314,21 @@ public class Soldier extends RobotPlayer {
 
             		int [] M = {M0, M1, M2, M3, M4, M5, M6, M7, M8};
             		
-            		
-            		
-            		//estic comencant a llegir senyal pero no esta ben preparat encar
-            		/*
-    	            if(dying) for(int i = 0; i < sig.length; ++i)
-    	            {
-    	            	Signal s = sig[i];
-    	            	
-    	            	if(s.getTeam() != myTeam) continue;
-    	            	int[] gm = s.getMessage();
-    	            	Message m = new Message(s.getLocation(), gm[0],gm[1]);
-    	            	if(gm == null || m.getMode() != Message.FOUND) continue;
-    	            	if(m.getObject() != Message.ENEMY_ARCHON) continue;
-    	            	int x = m.getX() + s.getLocation().x -128;
-    	            	int y = m.getY() + s.getLocation().y -128;
-    	            	MapLocation objective = new MapLocation(x,y);
-    	            	int d = taxista(loc, objective);
-    	            	if(d > 10) continue;
-    	            	Direction dir = loc.directionTo(objective);
-    	            	for(int i = 0; i < 8; i++)
-    	            	{
-    	            		if(dir == directions[i])
-    	            		{
-    	            			M[i] += eArchonInfL[d]; continue;
+    	            if (stage == 4 && desti != null) {
+    	            	if (rc.canSenseLocation(desti)) {
+    	            		boolean destruida = true;
+    	            		RobotInfo rob = rc.senseRobotAtLocation(desti);
+    	            		if (rob != null) {
+    	            			if (rob.type == RobotType.ZOMBIEDEN) destruida = false;
     	            		}
-    	            		if(d == 10) continue;
-    	            		if(dir.rotateLeft() == directions[i])
-    	            		{
-    	            			M[i] += eArchonInfL[d + 1];
-    	            		}
-    	            		if(dir.rotateRight() == directions[i])
-    	            		{
-    	            			M[i] += eArchonInfL[d + 1];
+    	            		if (destruida) {
+    	            			reg_dens.remove(desti);
+    	            			if (reg_dens.size() > 0) desti = reg_dens.get(0);
+    	            			else desti = null;
     	            		}
     	            	}
     	            }
-    	            */
-    	            	
+            		
 	            	if (enCombat == 0) {
 		        		if (buscantCombat > 0) {
 		        			if (ls == null) {
@@ -355,36 +341,53 @@ public class Soldier extends RobotPlayer {
 		    				M[(dir+7)%8] += 75;
 						}
 						else if (desti != null) {
-							rc.setIndicatorString(2, "Desti: ("+desti.x+","+desti.y+")");
-							int dir = inversaDirections(loc.directionTo(desti));
-		    				M[dir] += 80;
-		    				M[(dir+1)%8] += 75;
-		    				M[(dir+7)%8] += 75;
+							if (desti.distanceSquaredTo(loc) > visionRange || stage != 3) {
+								rc.setIndicatorString(2, "Desti: ("+desti.x+","+desti.y+")");
+								int dir = inversaDirections(loc.directionTo(desti));
+			    				M[dir] += 80;
+			    				M[(dir+1)%8] += 75;
+			    				M[(dir+7)%8] += 75;
+							}
+							else if (stage == 3) {
+								double maxima = 0;
+								int millor = 0;
+								for (int i = 0; i < 8; ++i) {
+									MapLocation nova = loc.add(directions[i]);
+									if (!rc.onTheMap(nova)) continue;
+									double rubble = rc.senseRubble(nova);
+									if (rubble > maxima) {
+										millor = i;
+										maxima = rubble;
+									}
+								}
+								if (maxima >= 50) rc.clearRubble(directions[millor]);
+							}
 						}
 	        		}
-	            	
-	            	boolean urgencia = (enCombat > 0) || (buscantCombat > 0);
-            		if (rc.senseRubble(loc) >= 50) M[8] -= 30;
-            		for (int k = 0; k < 8; ++k) {
-            			double rubble = rc.senseRubble(loc.add(directions[k]));
-            			if (urgencia && rubble >= 100) M[k] -= 1000000;
-            			else if (rubble >= 50) M[k] -= 30;
-            		}
-	            	
-	            	int millor = 8;
-            		for (int i = 0; i < 8; i++) {
-            			if (rc.canMove(directions[i]) || (!urgencia && rc.senseRubble(loc.add(directions[i])) >= 100)) {
-            				if (M[i] > M[millor]) millor = i;
-            			}
-            		}
-                	rc.setIndicatorString(0, ""+M[7]+" "+M[0]+" "+M[1]+" "+M[6]+" "+M[8]+" "+M[2]+" "+M[5]+" "+M[4]+" "+M[3]);
-            			
-            		if (millor < 8) {
-            			Direction dir = directions[millor];
-            			if (rc.senseRubble(loc.add(dir)) >= 100) rc.clearRubble(dir);
-            			else rc.move(directions[millor]);
-            			//DAVID aixo a vegades (molt poc) em dona una excepcio de can't move too much rubble
-            		}
+	            	if (rc.isCoreReady()) {
+		            	boolean urgencia = (enCombat > 0) || (buscantCombat > 0);
+	            		if (rc.senseRubble(loc) >= 50) M[8] -= 30;
+	            		for (int k = 0; k < 8; ++k) {
+	            			double rubble = rc.senseRubble(loc.add(directions[k]));
+	            			if (urgencia && rubble >= 100) M[k] -= 1000000;
+	            			else if (rubble >= 50) M[k] -= 30;
+	            		}
+		            	
+		            	int millor = 8;
+	            		for (int i = 0; i < 8; i++) {
+	            			if (rc.canMove(directions[i]) || (!urgencia && rc.senseRubble(loc.add(directions[i])) >= 100)) {
+	            				if (M[i] > M[millor]) millor = i;
+	            			}
+	            		}
+	                	rc.setIndicatorString(0, ""+M[7]+" "+M[0]+" "+M[1]+" "+M[6]+" "+M[8]+" "+M[2]+" "+M[5]+" "+M[4]+" "+M[3]);
+	            			
+	            		if (millor < 8) {
+	            			Direction dir = directions[millor];
+	            			if (rc.senseRubble(loc.add(dir)) >= 100) rc.clearRubble(dir);
+	            			else rc.move(directions[millor]);
+	            			//DAVID aixo a vegades (molt poc) em dona una excepcio de can't move too much rubble
+	            		}
+	            	}
 	            	
             	}
         		if (rc.isWeaponReady() && (nzombies > 0 || nenemies > 0)) {

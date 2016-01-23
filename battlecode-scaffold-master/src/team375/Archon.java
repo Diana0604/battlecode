@@ -174,78 +174,41 @@ public class Archon extends RobotPlayer{
     
     //Si envia signals es perque es lider. Diu a tots els robots propers d'anar a la target location que te
     private static void sendSignals() throws GameActionException {
-    	if (targetLocation != null){
-    		int mode = Message.GO_TO;
-			int object = Message.NONE;
-			int typeControl = Message.NONE;
-			int robotType = Message.NONE;
-			int x = targetLocation.x;
-			int y = targetLocation.y;
-			int idControl = Message.NONE;
-			int id = Message.NONE;
-			Message m = new Message(rc.getLocation(), mode, object, robotType, x, y, id, typeControl, idControl, 1);
-			int[] coded = m.encode();
-			rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
+    	if (targetLocation != null && stage <= 2){
+    		enviarGoto(targetLocation);
     	}
     }
     
-    //Actualitza la target location
-    private static void updateTargetLocation() throws GameActionException{
-    	//Si veu que a on hi havia un den ara no hi ha res, esborra el den de la llista
-    	for (int i = 0; i < dens.size(); i++){
-    		MapLocation m = dens.get(i);
-    		//System.out.print(m.x+","+m.y+"  ");
-    		if (rc.canSense(m)){
-    			if (rc.senseRobotAtLocation(m) == null) dens.remove(m);
-    			else if (rc.senseRobotAtLocation(m).type != RobotType.ZOMBIEDEN) dens.remove(m);
-    		}
-    	}
-    	
-    	//Si veu que a on hi havia un archon neutral ara no hi ha res, esborra l'archon neutral de la llista
-    	for (int i = 0; i < neutralArchons.size(); i++){
-    		MapLocation m = neutralArchons.get(i);
-    		//System.out.print(m.x+","+m.y+"  ");
-    		if (rc.canSense(m)){
-    			if (rc.senseRobotAtLocation(m) == null) neutralArchons.remove(m);
-    			else if (rc.senseRobotAtLocation(m).type != RobotType.ARCHON) neutralArchons.remove(m);
-    		}
-    	}
-    	
-    	
-    	//Posa a closestDen el den que te mes proper
-    	MapLocation closestDen = null;
-    	int dist = 1000000;
-    	for (int i = 0; i < dens.size(); i++){
-    		MapLocation m = dens.get(i);
-    		if (rc.getLocation().distanceSquaredTo(m) < dist){
-    			dist = rc.getLocation().distanceSquaredTo(m);
-    			closestDen = m;
-    		}
-    	}
-    	
-    	//Posa a closestNeutralArchon l'archon neutral que te mes proper
-    	MapLocation closestNeutralArchon = null;
-    	dist = 1000000;
-    	for (int i = 0; i < neutralArchons.size(); i++){
-    		MapLocation m = neutralArchons.get(i);
-    		if (rc.getLocation().distanceSquaredTo(m) < dist){
-    			dist = rc.getLocation().distanceSquaredTo(m);
-    			closestNeutralArchon = m;
-    		}
-    	}
-    	
-    	if (closestDen == null){//si no coneix cap den
-    		if (closestNeutralArchon == null) { //si no coneix cap archon neutral
-    			targetLocation = null;
-    		}else targetLocation = closestNeutralArchon;
-    	}else{
-    		if (closestNeutralArchon == null) { //si no coneix cap archon neutral
-    			targetLocation = closestDen;
-    		}else{
-    			//Si te un den i un archon neutral, anira a pel den nomes si la distancia^2 es 4 vegades menor que al archon neutral
-    			if (rc.getLocation().distanceSquaredTo(closestDen)*4 < rc.getLocation().distanceSquaredTo(closestNeutralArchon)){
-    				targetLocation = closestDen;
-    			}else targetLocation = closestNeutralArchon;
+    private static void enviarGoto(MapLocation location) throws GameActionException {
+    	int mode = Message.GO_TO;
+		int object = Message.NONE;
+		int typeControl = Message.NONE;
+		int robotType = Message.NONE;
+		int x = location.x;
+		int y = location.y;
+		int idControl = Message.NONE;
+		int id = Message.NONE;
+		Message m = new Message(rc.getLocation(), mode, object, robotType, x, y, id, typeControl, idControl, 1);
+		int[] coded = m.encode();
+		rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
+    }
+    
+    private static void enviarSoldatsDens() throws GameActionException {
+    	int distancia_maxima = (int)((double)distancia_gran/1.4)/2;
+    	dens.sort(((d1,d2)->(targetLocation.distanceSquaredTo(d1)-targetLocation.distanceSquaredTo(d2))));
+    	int mode = Message.REG_DEN;
+		int object = Message.NONE;
+		int typeControl = 1;
+		int robotType = Message.SOLDIER;
+		int idControl = Message.NONE;
+		int id = Message.NONE;
+    	for (int i = 0; i < Math.min(20,dens.size()); ++i) {
+    		if (targetLocation.distanceSquaredTo(dens.get(i)) < distancia_maxima) {
+    			int x = dens.get(i).x;
+    			int y = dens.get(i).y;
+    			Message m = new Message(rc.getLocation(), mode, object, robotType, x, y, id, typeControl, idControl, 1);
+    			int[] coded = m.encode();
+    			rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
     		}
     	}
     }
@@ -258,6 +221,7 @@ public class Archon extends RobotPlayer{
     }
 
     private static void decidirCorner() throws GameActionException {
+    	calcDistanciaGran(corners.toArray());
     	int dist = 1000000;
     	MapLocation millor = null;
     	for (MapLocation i:corners) {
@@ -289,6 +253,57 @@ public class Archon extends RobotPlayer{
 		int[] coded = m.encode();
 		rc.broadcastMessageSignal(coded[0], coded[1], 12800);
     }
+
+    private static void enviarClearRubble() throws GameActionException {
+    	int mode = Message.CLEAR_RUBBLE;
+		int object = Message.NONE;
+		int typeControl = Message.NONE;
+		int robotType = Message.NONE;
+		int x = targetLocation.x;
+		int y = targetLocation.y;
+		int idControl = Message.NONE;
+		int id = Message.NONE;
+		Message m = new Message(rc.getLocation(), mode, object, robotType, x, y, id, typeControl, idControl, 1);
+		int[] coded = m.encode();
+		rc.broadcastMessageSignal(coded[0], coded[1], visionRange);
+    }
+    
+    private static boolean voltantNet() {
+    	if (ndens > 0) return false;
+    	MapLocation[] ml = MapLocation.getAllMapLocationsWithinRadiusSq(loc, visionRange);
+		for (MapLocation i:ml) {
+			if (rc.senseRubble(i) >= 50) {
+				return false;
+			}
+		}
+		return true;
+    }
+    
+    private static void netejarAdjacent() throws GameActionException {
+    	double maxima = 0;
+		int millor = 0;
+		for (int i = 0; i < 8; ++i) {
+			MapLocation nova = loc.add(directions[i]);
+			if (!rc.onTheMap(nova)) continue;
+			double rubble = rc.senseRubble(nova);
+			if (rubble > maxima) {
+				millor = i;
+				maxima = rubble;
+			}
+		}
+		if (maxima >= 50) rc.clearRubble(directions[millor]);
+    }
+    
+    private static void calcDistanciaGran(Object[] archons) {
+    	distancia_gran = 0;
+    	for (Object i:archons) {
+    		for (Object j:archons) {
+    			int dist = ((MapLocation)i).distanceSquaredTo((MapLocation)j);
+    			if (dist > distancia_gran) distancia_gran = dist;
+    		}
+    	}
+    }
+    
     
 	private static int inversaDirections (Direction d) {
 		switch(d) {
@@ -457,6 +472,7 @@ public class Archon extends RobotPlayer{
 	private static final int torns_combat = 5;
 	private static int molts_soldats;
 	private static int torn_limit = 200;
+	private static int distancia_gran = 0;
 	
 	private static int stage = 1;
 	private static RobotInfo[] robots, allies, enemies, neutrals, zombies;
@@ -476,7 +492,15 @@ public class Archon extends RobotPlayer{
     
 	public static void playArchon(){
 		try {
-			molts_soldats = 8*rc.getInitialArchonLocations(myTeam).length + 5;
+			MapLocation[] archonsMeus = rc.getInitialArchonLocations(myTeam);
+			MapLocation[] archonsSeus = rc.getInitialArchonLocations(enemyTeam);
+			MapLocation[] archons = new MapLocation[archonsMeus.length*2];
+			for (int i = 0; i < archonsMeus.length; i++) {
+				archons[2*i] = archonsMeus[i];
+				archons[2*i+1] = archonsSeus[i];
+			}
+			molts_soldats = 12*archonsMeus.length + 5;
+			calcDistanciaGran(archons);
 			rondes_zombies = rc.getZombieSpawnSchedule().getRounds();
 			targetLocation = escollirLider();
 			// Si aquest es l'archon a on tothom es dirigeix, sera el lider
@@ -489,66 +513,80 @@ public class Archon extends RobotPlayer{
 
         while (true) {
             try {
-                loc = rc.getLocation();
-                construirArrays();
-                variablesCombat();
-            	variablesRondes();
-                
-        	 // Ordre d'importancia:
-           	 // 1. Si hi ha un robot neutral, l'activa
-           	 // 2. Si pot fabricar un robot, el fabrica
-           	 // 3. Es mou/neteja segons prioritats/perills de robots propers, objectius, rubble i parts
-           	 // Sempre: intenta reparar soldats propers	
-            	
-            	readSignals();
-            	if (stage == 1) {
-	            	if (rc.getRoundNum() < torn_limit) {
-	            		if (corners.size() == 3) trobarAltraCorner();
-	            		if (corners.size() == 4) decidirCorner();
+            	if (stage < 4) {
+	                loc = rc.getLocation();
+	                construirArrays();
+	                variablesCombat();
+	            	variablesRondes();
+	                
+	        	 // Ordre d'importancia:
+	           	 // 1. Si hi ha un robot neutral, l'activa
+	           	 // 2. Si pot fabricar un robot, el fabrica
+	           	 // 3. Es mou/neteja segons prioritats/perills de robots propers, objectius, rubble i parts
+	           	 // Sempre: intenta reparar soldats propers	
+	            	
+	            	readSignals();
+	            	if (stage == 1) {
+		            	if (rc.getRoundNum() < torn_limit) {
+		            		if (corners.size() == 3) trobarAltraCorner();
+		            		if (corners.size() == 4) decidirCorner();
+		            	}
+		            	else {
+		            		decidirCorner();
+		            	}
 	            	}
-	            	else {
-	            		decidirCorner();
+	            	else if (stage == 2) {
+	            		if (targetLocation.distanceSquaredTo(loc) <= 15) {
+	            			stage = 3;
+	            			enviarClearRubble();
+	            		}
 	            	}
-            	}
-            	else if (stage == 2) {
-            		if (targetLocation.distanceSquaredTo(loc) <= 15) {
-            			
-            		}
-            	}
-            	if (leader) sendSignals();
-
-                if (rc.isCoreReady()) {
-	            	Boolean hasMoved = false;
-	            	RobotInfo[] adjacentNeutrals = rc.senseNearbyRobots(2, Team.NEUTRAL);
-	            	//Si esta al costat d'un robot neutral, l'activa
-	            	if (adjacentNeutrals.length != 0){
-	                	rc.activate(adjacentNeutrals[0].location);
-	                	rc.setIndicatorString(0,"Ha activat un robot neutral");
-	                	hasMoved = true;
+	            	else if (stage == 3) {
+	            		if (voltantNet()) {
+	            			stage = 4;
+	            			enviarSoldatsDens();
+	            			continue; // acabem el torn
+	            		}
+	            		else {
+	            			if (rc.isCoreReady()) netejarAdjacent();
+	            		}
+	            	}
+	            	
+	            	if (leader) sendSignals();
+	            	
+	                if (rc.isCoreReady()) {
+		            	Boolean hasMoved = false;
+		            	RobotInfo[] adjacentNeutrals = rc.senseNearbyRobots(2, Team.NEUTRAL);
+		            	//Si esta al costat d'un robot neutral, l'activa
+		            	if (adjacentNeutrals.length != 0){
+		                	rc.activate(adjacentNeutrals[0].location);
+		                	rc.setIndicatorString(0,"Ha activat un robot neutral");
+		                	hasMoved = true;
+		                }
+		            	//Si pot fabricar un robot, el fabrica
+	                    if (!hasMoved && rc.getRobotCount() < molts_soldats && rc.hasBuildRequirements(nextRobotType)) {
+		                	hasMoved = buildRobot();
+		                }
+	                    //Es mou (o es queda quiet) a la casella amb mes prioritat
+		            	if (!hasMoved) {
+		            		calculateDanger();
+		            		addTargetPriority();
+		    	            addRubblePriority();
+			            	addPartsPriority();
+		    	            Direction dir = chooseDirection();
+		    	            rc.setIndicatorString(0, ""+M[7]+" "+M[0]+" "+M[1]+" "+M[6]+" "+M[8]+" "+M[2]+" "+M[5]+" "+M[4]+" "+M[3]);
+		    				if (dir != null) {
+		    	    			if (rc.senseRubble(loc.add(dir)) >= 100) rc.clearRubble(dir);
+		    	    			else rc.move(dir);
+		    	    		}
+		            	}
+	                    if (!hasMoved) rc.setIndicatorString(0,"No ha fet res aquest torn");
 	                }
-	            	//Si pot fabricar un robot, el fabrica
-                    if (!hasMoved && rc.getRobotCount() < molts_soldats && rc.hasBuildRequirements(nextRobotType)) {
-	                	hasMoved = buildRobot();
+	                else {
+	                	rc.setIndicatorString(0,"Tenia core delay");
 	                }
-                    //Es mou (o es queda quiet) a la casella amb mes prioritat
-	            	if (!hasMoved) {
-	            		calculateDanger();
-	            		addTargetPriority();
-	    	            addRubblePriority();
-		            	addPartsPriority();
-	    	            Direction dir = chooseDirection();
-	    	            rc.setIndicatorString(0, ""+M[7]+" "+M[0]+" "+M[1]+" "+M[6]+" "+M[8]+" "+M[2]+" "+M[5]+" "+M[4]+" "+M[3]);
-	    				if (dir != null) {
-	    	    			if (rc.senseRubble(loc.add(dir)) >= 100) rc.clearRubble(dir);
-	    	    			else rc.move(dir);
-	    	    		}
-	            	}
-                    if (!hasMoved) rc.setIndicatorString(0,"No ha fet res aquest torn");
-                }
-                else {
-                	rc.setIndicatorString(0,"Tenia core delay");
-                }
-
+	
+            	}
                 //Si pot curar a algun robot, en cura a un de random
                 RobotInfo[] healableRobots = rc.senseNearbyRobots(attackRange, myTeam);
                 Boolean hasHealed = false;
