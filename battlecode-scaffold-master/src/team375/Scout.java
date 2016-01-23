@@ -328,11 +328,14 @@ public class Scout extends RobotPlayer{
 	}
 	
 	public static double getPriority(RobotInfo ri){
+		if (ri.type == RobotType.ZOMBIEDEN) return 0.01;
 		double atac, dist, hp;
 		if (ri.type == RobotType.VIPER) atac = 14; // = 42/3 = atac/cd
+		else if (ri.type.attackDelay == 0) atac = 0;
 		else atac = ri.type.attackPower/ri.type.attackDelay;
 		dist = ri.location.distanceSquaredTo(targetLocation);
 		hp = ri.health;
+		//System.out.println("Ha calculat una prioritat de "+atac+" "+hp+" "+dist);
 		return atac*hp/dist;
 	}
 	
@@ -345,17 +348,23 @@ public class Scout extends RobotPlayer{
     	}
         for (RobotInfo ri: nearbyZombies) {
     		priority.put(ri, getPriority(ri));
+    		//System.out.println(ri.type+" te prioritat "+getPriority(ri));
     	}
         int sentSignals = 0;
         while (sentSignals < 20 && !priority.isEmpty()){
         	RobotInfo ri = null;
         	double x = -1;
+        	//System.out.println("mida = "+priority.size()+", enemics zombies: "+nearbyEnemies.length+" "+nearbyZombies.length);
         	for (RobotInfo info: priority.keySet()){
+        		//System.out.println("Entro al for "+info.type);
         		if (priority.get(info) > x){
+        			//System.out.print(priority.get(info)+" ");
         			x = priority.get(info);
         			ri = info;
         		}
+        		//System.out.println("abcd");
         	}
+        	//if (ri == null) System.out.println("ri null");
         	Message m = new Message(rc.getLocation(), Message.SHOOT, 0, Message.ALL, ri.location.x, ri.location.y, 0,0,0,0);
         	int[] coded = m.encode();
         	rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
@@ -437,7 +446,9 @@ public class Scout extends RobotPlayer{
 	                		rc.move(currentDir);
 	                	}
                 	}
-                	sendSignalsStage2();
+                	if (rc.getLocation().distanceSquaredTo(targetLocation) > 18){
+                		sendSignalsStage2();
+                	}
                 }
                 Clock.yield();
             } catch (Exception e) {
