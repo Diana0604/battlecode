@@ -12,6 +12,7 @@ public class Scout extends RobotPlayer{
 	static ArrayList<MapLocation> myArchonsLocation = new ArrayList<>();
 	static ArrayList<Integer> myArchonsID = new ArrayList<>();
 	static ArrayList<Integer> myArchonsLastSeen = new ArrayList<>();
+	static ArrayList<MapLocation> pastLocations = new ArrayList<>();
 	static Direction currentDir;
 	static Direction nextCorner;
 	static Boolean hasMoved;
@@ -81,8 +82,9 @@ public class Scout extends RobotPlayer{
     }
 	
 	private static Direction randomDiagonalDirection(){
-		Direction dir = directions[rand.nextInt(4)*2+1];
-		
+		Direction dir;
+		if (nextCorner != null) dir = nextCorner.opposite();
+		else dir = directions[rand.nextInt(4)*2+1];
 		if (corners.size() <= 4){
 			while (corners.containsKey(dir)){
 				dir = dir.rotateLeft().rotateLeft();
@@ -96,10 +98,29 @@ public class Scout extends RobotPlayer{
 	
 	private static void searchCorners() throws GameActionException{
 		//System.out.println("Entra "+Clock.getBytecodeNum());
+		if (corners.size() == 3) {
+			calcLastCorner();
+			return;
+		}
+		
+		if (corners.size() == 2){
+			if (corners.containsKey(Direction.NORTH_EAST) && corners.containsKey(Direction.SOUTH_WEST)){ 
+				corners.put(Direction.NORTH_WEST, new MapLocation(corners.get(Direction.SOUTH_WEST).x, corners.get(Direction.NORTH_EAST).y));
+				corners.put(Direction.SOUTH_EAST, new MapLocation(corners.get(Direction.NORTH_EAST).x, corners.get(Direction.SOUTH_WEST).y));
+				return;
+			}
+			if (corners.containsKey(Direction.NORTH_WEST) && corners.containsKey(Direction.SOUTH_EAST)){
+				corners.put(Direction.NORTH_EAST, new MapLocation(corners.get(Direction.SOUTH_EAST).x, corners.get(Direction.NORTH_WEST).y));
+				corners.put(Direction.SOUTH_WEST, new MapLocation(corners.get(Direction.NORTH_WEST).x, corners.get(Direction.SOUTH_EAST).y));
+				return;
+			}
+		}
+		
 		//Ens posem com a objectiu trobar una cantonada, si no en teniem ja
+		//Per defecte sera la direccio oposada, no es random al final xd
 		if (nextCorner == null || !nextCorner.isDiagonal() || corners.containsKey(nextCorner)){
 			nextCorner = randomDiagonalDirection(); 
-			System.out.println("Tria nova direccio "+nextCorner);
+			//System.out.println("Tria nova direccio "+nextCorner);
 		}
 		//System.out.println("Vaig amb direccio " + nextCorner+"  "+Clock.getBytecodeNum());
 		//Comprova que no vegi la cantonada
@@ -124,7 +145,7 @@ public class Scout extends RobotPlayer{
 						    nextCorner.rotateRight().rotateRight().rotateRight(), nextCorner.opposite()};
 		int i = 0;
 		while (i < 8){
-			if (rc.canMove(dirs[i])  && danger[dirs[i].dx+1][dirs[i].dy+1] == 0){
+			if (rc.canMove(dirs[i]) && danger[dirs[i].dx+1][dirs[i].dy+1] == 0 && !pastLocations.contains(rc.getLocation().add(dirs[i]))){
 				currentDir = dirs[i];
 				i = 9;
 			}
@@ -155,7 +176,7 @@ public class Scout extends RobotPlayer{
 		
 		int i = 0;
 		while (i < 8){
-			if (rc.canMove(dirs[i])){
+			if (rc.canMove(dirs[i]) && !pastLocations.contains(rc.getLocation().add(dirs[i])) && danger[dirs[i].dx+1][dirs[i].dy+1] == 0){
 				currentDir = dirs[i];
 				i = 9;
 			}
@@ -328,8 +349,7 @@ public class Scout extends RobotPlayer{
 	                    	//System.out.println("Es mou sense perill");
 	                    	if (corners.size() < 4) {
 	                    		searchCorners();
-	                    	}else if (corners.size() == 3) calcLastCorner();
-	                    	else {
+	                    	}else {
 	                    		returnToLeader();
 	                    		rc.setIndicatorString(0, "Ja ha trobat les 4 cantonades");
 	                    	}
@@ -341,18 +361,20 @@ public class Scout extends RobotPlayer{
 	                    		//System.out.println(currentDir);
 	                    		if (canMove()) {
 	                    			rc.move(currentDir); //Cal tornar a fer el if perque si troba una cantonada envia un missatge i li dona core delay
-	                    			rc.setIndicatorString(0, "Es mou cap a la direccio "+nextCorner);
-	                    			String s1 = "", s2 = "", s3 = "", s4 = "";
-	                    			if (corners.containsKey(Direction.NORTH_EAST)) s1 = "NE";
-	                    			if (corners.containsKey(Direction.NORTH_WEST)) s2 = "NW";
-	                    			if (corners.containsKey(Direction.SOUTH_EAST)) s3 = "SE";
-	                    			if (corners.containsKey(Direction.SOUTH_WEST)) s4 = "SW";
-	                    			rc.setIndicatorString(1, s1+" "+s2+" "+s3+" "+s4);
+	                    			pastLocations.add(rc.getLocation());
+	                    			if (pastLocations.size() > 5) pastLocations.remove(0);
 	                    		}
 	                    	}
 	                    	hasMoved = true;
 	                    }                    
 	                }
+        			rc.setIndicatorString(0, "Es mou cap a la direccio "+nextCorner);
+        			String s1 = "", s2 = "", s3 = "", s4 = "";
+        			if (corners.containsKey(Direction.NORTH_EAST)) s1 = "NE";
+        			if (corners.containsKey(Direction.NORTH_WEST)) s2 = "NW";
+        			if (corners.containsKey(Direction.SOUTH_EAST)) s3 = "SE";
+        			if (corners.containsKey(Direction.SOUTH_WEST)) s4 = "SW";
+        			rc.setIndicatorString(1, s1+" "+s2+" "+s3+" "+s4);
 	                sendSignals();
                 }
                 
