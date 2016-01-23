@@ -1,5 +1,6 @@
 package team375;
 
+import battlecode.common.*;
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -38,14 +39,12 @@ public class Turret extends RobotPlayer {
 				if(!rc.canSense(loc.add(dir))) continue; 
 				//TODO en principi les hauria de sense totes, i de fet aquest es un cas especial que segurament no s'ha construit a la diagonal. Pensar que fer
 				RobotInfo ri = rc.senseRobotAtLocation(loc.add(dir));
-				if(ri.equals(null)) continue;
+				if(ri == null) continue;
 				if(!ri.type.equals(RobotType.ARCHON)) continue;
 				if(!ri.team.equals(myTeam)) continue;
 				ref = dir;
 				break;
 			}
-			
-			if(ref.equals(null)) ref = Direction.NORTH; //TODO parche per neutrals
 			
 		} catch(GameActionException e)
 		{
@@ -60,13 +59,13 @@ public class Turret extends RobotPlayer {
 		try 
 		{
 			Direction left = ref;
-			
+			//if(left == null) left = Direction.NORTH;
 			for(int i = 0; i < 2 && !set; ++i)
 			{
-				left.rotateLeft();
+				left = left.rotateLeft();
 				if(!rc.canSense(loc.add(left))) continue; //TODO de nou, no hauria de passar mai
 				RobotInfo ri = rc.senseRobotAtLocation(loc.add(left));
-				if(!ri.type.equals(null) && ri.team.equals(myTeam) && ri.type.equals(RobotType.TURRET)) continue;
+				if(!(ri == null) && ri.team.equals(myTeam) && ri.type.equals(RobotType.TURRET)) continue;
 				rotation = LEFT;
 				set = true;
 				if(rc.canMove(left))
@@ -92,10 +91,10 @@ public class Turret extends RobotPlayer {
 			
 			for(int i = 0; i < 2 && !set; ++i)
 			{
-				right.rotateRight();
+				right = right.rotateRight();
 				if(!rc.canSense(loc.add(right))) continue; //TODO de nou, no hauria de passar mai
 				RobotInfo ri = rc.senseRobotAtLocation(loc.add(right));
-				if(!ri.type.equals(null) && ri.team.equals(myTeam) && ri.type.equals(RobotType.TURRET)) continue;
+				if(!(ri == null) && ri.team.equals(myTeam) && ri.type.equals(RobotType.TURRET)) continue;
 				rotation = RIGHT;
 				set = true;
 				if(rc.canMove(right))
@@ -179,6 +178,7 @@ public class Turret extends RobotPlayer {
             encallat = 0;
             primer = true;
             TTM = false;
+            ref = Direction.NORTH;
         } catch (Exception e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
@@ -262,7 +262,7 @@ public class Turret extends RobotPlayer {
 	            				if(rc.canSenseLocation(loc.add(ref)))
 	            				{
 	            					RobotInfo ri = rc.senseRobotAtLocation(loc.add(ref));
-	            					if(!ri.equals(null) && ri.team.equals(myTeam) && (ri.type.equals(RobotType.TURRET) || ri.type.equals(RobotType.ARCHON)))
+	            					if(!(ri == null) && ri.team.equals(myTeam) && (ri.type.equals(RobotType.TURRET) || ri.type.equals(RobotType.ARCHON)))
 	            					{
 	            						++turretsFound;
 	            					}
@@ -289,7 +289,7 @@ public class Turret extends RobotPlayer {
 	            				if(rc.canSenseLocation(loc.add(dir)))
 	            				{
 	            					RobotInfo ri = rc.senseRobotAtLocation(loc.add(dir));
-	            					if(!ri.equals(null) && ri.team.equals(myTeam) && (ri.type.equals(RobotType.TURRET) || ri.type.equals(RobotType.SCOUT)))
+	            					if(!(ri == null) && ri.team.equals(myTeam) && (ri.type.equals(RobotType.TURRET) || ri.type.equals(RobotType.SCOUT)))
 	            					{
 	            						++turretsFound;
 	            					}
@@ -327,6 +327,7 @@ public class Turret extends RobotPlayer {
 	            	{
 	            		if(primer) 
 	            		{
+	            			TTM = true;
 	            				rc.pack();
 	            		}
 	            		else 
