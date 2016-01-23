@@ -18,12 +18,11 @@ public class Scout extends RobotPlayer{
 	static Boolean hasMoved;
 	static int[][] danger;
 	static HashMap<Direction, MapLocation> corners = new HashMap<>();
-	static MapLocation leader;
+	static int stage;
 	
-	final static int BROADCAST_DISTANCE = 6400;	//no arriba a tot el mapa si es molt gros, pero sino puja molt el cooldown
+	final static int BROADCAST_DISTANCE = 12800;	//no arriba a tot el mapa si es molt gros, pero sino puja molt el cooldown
 	final static int MAX_TURNS = 30;
 	final static int MAX_SEEN_UNITS = 5;
-	final static int EARLY_GAME_END = 400;
 	
 	/*
 	 * Coses a fer
@@ -81,10 +80,25 @@ public class Scout extends RobotPlayer{
     	return bestDir;
     }
 	
+	private static MapLocation baricentre(Team a){
+		MapLocation[] locs = rc.getInitialArchonLocations(a);
+		int x=0, y=0;
+		for (MapLocation arch: locs){
+			x += arch.x;
+			y += arch.x;
+		}
+		return new MapLocation(x/locs.length,y/locs.length);
+	}
+	
 	private static Direction randomDiagonalDirection(){
 		Direction dir;
-		if (nextCorner != null) dir = nextCorner.opposite();
-		else dir = directions[rand.nextInt(4)*2+1];
+		if (nextCorner == null){
+			dir = baricentre(enemyTeam).directionTo(baricentre(myTeam));
+			if (!dir.isDiagonal()){
+				if (rand.nextInt(2) == 0) dir.rotateLeft();
+				else dir.rotateRight();
+			}
+		}else dir = nextCorner.opposite();
 		if (corners.size() <= 4){
 			while (corners.containsKey(dir)){
 				dir = dir.rotateLeft().rotateLeft();
@@ -168,7 +182,7 @@ public class Scout extends RobotPlayer{
 	}
 	
 	private static void returnToLeader(){
-		Direction dirToLeader = rc.getLocation().directionTo(leader);
+		Direction dirToLeader = rc.getLocation().directionTo(targetLocation);
 		
 		Direction[] dirs = {dirToLeader, dirToLeader.rotateLeft(), dirToLeader.rotateRight(), dirToLeader.rotateLeft().rotateLeft(),
 							dirToLeader.rotateRight().rotateRight(), dirToLeader.rotateLeft().rotateLeft().rotateLeft(),
@@ -252,16 +266,21 @@ public class Scout extends RobotPlayer{
 			//Si el signal distingeix per ID del receptor i no esta dirigit a ell, l'ignora
 			if (idControl == 1 && id != rc.getID()) continue;
     		
-			if (m.getSenderArchon() == 1) continue;
-			
-			if (mode == Message.FOUND && object == Message.CORNER){
-				addCorner(x,y);
+			if (m.getSenderArchon() == 1) {
+				if (mode == Message.STAGE2){
+					targetLocation = new MapLocation(x,y);
+					stage = 2;
+				}
+			}else{			
+				if (mode == Message.FOUND && object == Message.CORNER){
+					addCorner(x,y);
+				}
 			}
 			
 		}
 	}
 	
-	private static void sendSignals() throws GameActionException{
+	private static void sendSignalsStage1() throws GameActionException{
 		for (RobotInfo ri: nearbyNeutrals){
 			if (ri.type == RobotType.ARCHON && !seenUnits.contains(ri.ID)){
 				addUnitToSeenList(ri.ID);
@@ -308,13 +327,14 @@ public class Scout extends RobotPlayer{
 		}
 	}
 	
-	private static Boolean earlyGame(){
-		return rc.getRoundNum() < EARLY_GAME_END;
+	public static void sendSignalsStage2(){
+		
 	}
 	
 	public static void playScout() {
 		try {
-			leader = escollirLider();
+			targetLocation = escollirLider();
+			stage = 1;
         } catch (Exception e) {
             // Throwing an uncaught exception makes the robot die, so we need to catch exceptions.
             // Caught exceptions will result in a bytecode penalty.
@@ -324,8 +344,8 @@ public class Scout extends RobotPlayer{
 
         while (true) {
 	        try {
-                rc.setIndicatorString(0, "");
-	        	if (earlyGame()){
+                if (stage == 1){
+		        	rc.setIndicatorString(0, "");
 		        	nearbyEnemies = rc.senseNearbyRobots(visionRange,enemyTeam);
 	                nearbyZombies = rc.senseNearbyRobots(visionRange,Team.ZOMBIE);
 	                nearbyNeutrals = rc.senseNearbyRobots(visionRange,Team.NEUTRAL);
@@ -334,7 +354,7 @@ public class Scout extends RobotPlayer{
 	                if (rc.isCoreReady()) {
 	                	hasMoved = false;
 	                	danger = new int[3][3];
-	                	calculateDanger();
+	                	//calculateDanger();
 	                	
 	                	if (danger[1][1] > 0 ){
 	                		Direction dir = safestDirection();
@@ -368,16 +388,24 @@ public class Scout extends RobotPlayer{
 	                    	hasMoved = true;
 	                    }                    
 	                }
-        			rc.setIndicatorString(0, "Es mou cap a la direccio "+nextCorner);
-        			String s1 = "", s2 = "", s3 = "", s4 = "";
-        			if (corners.containsKey(Direction.NORTH_EAST)) s1 = "NE";
-        			if (corners.containsKey(Direction.NORTH_WEST)) s2 = "NW";
-        			if (corners.containsKey(Direction.SOUTH_EAST)) s3 = "SE";
-        			if (corners.containsKey(Direction.SOUTH_WEST)) s4 = "SW";
-        			rc.setIndicatorString(1, s1+" "+s2+" "+s3+" "+s4);
-	                sendSignals();
+	    			rc.setIndicatorString(0, "Es mou cap a la direccio "+nextCorner);
+	    			String s1 = "", s2 = "", s3 = "", s4 = "";
+	    			if (corners.containsKey(Direction.NORTH_EAST)) s1 = "NE";
+	    			if (corners.containsKey(Direction.NORTH_WEST)) s2 = "NW";
+	    			if (corners.containsKey(Direction.SOUTH_EAST)) s3 = "SE";
+	    			if (corners.containsKey(Direction.SOUTH_WEST)) s4 = "SW";
+	    			rc.setIndicatorString(1, s1+" "+s2+" "+s3+" "+s4);
+	                sendSignalsStage1();
+                }else if (stage == 2){
+                	rc.setIndicatorString(0, "");
+                	if (rc.isCoreReady()){
+	                	if (rc.getLocation().distanceSquaredTo(targetLocation) > 18){
+	                		returnToLeader();
+	                		rc.move(currentDir);
+	                	}
+                	}
+                	sendSignalsStage2();
                 }
-                
                 Clock.yield();
             } catch (Exception e) {
                 System.out.println(e.getMessage());
