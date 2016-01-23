@@ -42,6 +42,7 @@ public class Soldier extends RobotPlayer {
 	private static final int torns_combat = 5;
 	private static final int WEAK = 20;
 	
+	private static int stage = 1;
 	private static int [] rondes_zombies;
 	private static int proxima_zombies = 0;
 	private static int enCombat = 0, buscantCombat = 0;
@@ -184,7 +185,7 @@ public class Soldier extends RobotPlayer {
     						desti = new MapLocation(m.getX(), m.getY());
     					}
     					else if (m.getMode() == Message.CLEAR_RUBBLE) {
-    						desti = null;
+    						stage = 3;
     					}
     				}
     			}
@@ -355,36 +356,53 @@ public class Soldier extends RobotPlayer {
 		    				M[(dir+7)%8] += 75;
 						}
 						else if (desti != null) {
-							rc.setIndicatorString(2, "Desti: ("+desti.x+","+desti.y+")");
-							int dir = inversaDirections(loc.directionTo(desti));
-		    				M[dir] += 80;
-		    				M[(dir+1)%8] += 75;
-		    				M[(dir+7)%8] += 75;
+							if (desti.distanceSquaredTo(loc) > visionRange) {
+								rc.setIndicatorString(2, "Desti: ("+desti.x+","+desti.y+")");
+								int dir = inversaDirections(loc.directionTo(desti));
+			    				M[dir] += 80;
+			    				M[(dir+1)%8] += 75;
+			    				M[(dir+7)%8] += 75;
+							}
+							else if (stage == 3) {
+								double maxima = 0;
+								int millor = 0;
+								for (int i = 0; i < 8; ++i) {
+									MapLocation nova = loc.add(directions[i]);
+									if (!rc.onTheMap(nova)) continue;
+									double rubble = rc.senseRubble(nova);
+									if (rubble > maxima) {
+										millor = i;
+										maxima = rubble;
+									}
+								}
+								if (maxima > 0) rc.clearRubble(directions[millor]);
+							}
 						}
 	        		}
-	            	
-	            	boolean urgencia = (enCombat > 0) || (buscantCombat > 0);
-            		if (rc.senseRubble(loc) >= 50) M[8] -= 30;
-            		for (int k = 0; k < 8; ++k) {
-            			double rubble = rc.senseRubble(loc.add(directions[k]));
-            			if (urgencia && rubble >= 100) M[k] -= 1000000;
-            			else if (rubble >= 50) M[k] -= 30;
-            		}
-	            	
-	            	int millor = 8;
-            		for (int i = 0; i < 8; i++) {
-            			if (rc.canMove(directions[i]) || (!urgencia && rc.senseRubble(loc.add(directions[i])) >= 100)) {
-            				if (M[i] > M[millor]) millor = i;
-            			}
-            		}
-                	rc.setIndicatorString(0, ""+M[7]+" "+M[0]+" "+M[1]+" "+M[6]+" "+M[8]+" "+M[2]+" "+M[5]+" "+M[4]+" "+M[3]);
-            			
-            		if (millor < 8) {
-            			Direction dir = directions[millor];
-            			if (rc.senseRubble(loc.add(dir)) >= 100) rc.clearRubble(dir);
-            			else rc.move(directions[millor]);
-            			//DAVID aixo a vegades (molt poc) em dona una excepcio de can't move too much rubble
-            		}
+	            	if (rc.isCoreReady()) {
+		            	boolean urgencia = (enCombat > 0) || (buscantCombat > 0);
+	            		if (rc.senseRubble(loc) >= 50) M[8] -= 30;
+	            		for (int k = 0; k < 8; ++k) {
+	            			double rubble = rc.senseRubble(loc.add(directions[k]));
+	            			if (urgencia && rubble >= 100) M[k] -= 1000000;
+	            			else if (rubble >= 50) M[k] -= 30;
+	            		}
+		            	
+		            	int millor = 8;
+	            		for (int i = 0; i < 8; i++) {
+	            			if (rc.canMove(directions[i]) || (!urgencia && rc.senseRubble(loc.add(directions[i])) >= 100)) {
+	            				if (M[i] > M[millor]) millor = i;
+	            			}
+	            		}
+	                	rc.setIndicatorString(0, ""+M[7]+" "+M[0]+" "+M[1]+" "+M[6]+" "+M[8]+" "+M[2]+" "+M[5]+" "+M[4]+" "+M[3]);
+	            			
+	            		if (millor < 8) {
+	            			Direction dir = directions[millor];
+	            			if (rc.senseRubble(loc.add(dir)) >= 100) rc.clearRubble(dir);
+	            			else rc.move(directions[millor]);
+	            			//DAVID aixo a vegades (molt poc) em dona una excepcio de can't move too much rubble
+	            		}
+	            	}
 	            	
             	}
         		if (rc.isWeaponReady() && (nzombies > 0 || nenemies > 0)) {

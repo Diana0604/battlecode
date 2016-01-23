@@ -289,6 +289,20 @@ public class Archon extends RobotPlayer{
 		int[] coded = m.encode();
 		rc.broadcastMessageSignal(coded[0], coded[1], 12800);
     }
+
+    private static void enviarClearRubble() throws GameActionException {
+    	int mode = Message.CLEAR_RUBBLE;
+		int object = Message.NONE;
+		int typeControl = Message.NONE;
+		int robotType = Message.NONE;
+		int x = targetLocation.x;
+		int y = targetLocation.y;
+		int idControl = Message.NONE;
+		int id = Message.NONE;
+		Message m = new Message(rc.getLocation(), mode, object, robotType, x, y, id, typeControl, idControl, 1);
+		int[] coded = m.encode();
+		rc.broadcastMessageSignal(coded[0], coded[1], visionRange);
+    }
     
 	private static int inversaDirections (Direction d) {
 		switch(d) {
@@ -512,7 +526,7 @@ public class Archon extends RobotPlayer{
             	}
             	else if (stage == 2) {
             		if (targetLocation.distanceSquaredTo(loc) <= 15) {
-            			
+            			enviarClearRubble();
             		}
             	}
             	if (leader) sendSignals();
