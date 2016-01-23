@@ -327,8 +327,41 @@ public class Scout extends RobotPlayer{
 		}
 	}
 	
-	public static void sendSignalsStage2(){
-		
+	public static double getPriority(RobotInfo ri){
+		double atac, dist, hp;
+		if (ri.type == RobotType.VIPER) atac = 14; // = 42/3 = atac/cd
+		else atac = ri.type.attackPower/ri.type.attackDelay;
+		dist = ri.location.distanceSquaredTo(targetLocation);
+		hp = ri.health;
+		return atac*hp/dist;
+	}
+	
+	public static void sendSignalsStage2() throws GameActionException{
+		nearbyEnemies = rc.senseNearbyRobots(visionRange,enemyTeam);
+        nearbyZombies = rc.senseNearbyRobots(visionRange,Team.ZOMBIE); 
+        HashMap<RobotInfo, Double> priority = new HashMap<>();
+        for (RobotInfo ri: nearbyEnemies) {
+    		priority.put(ri, getPriority(ri));
+    	}
+        for (RobotInfo ri: nearbyZombies) {
+    		priority.put(ri, getPriority(ri));
+    	}
+        int sentSignals = 0;
+        while (sentSignals < 20 && !priority.isEmpty()){
+        	RobotInfo ri = null;
+        	double x = -1;
+        	for (RobotInfo info: priority.keySet()){
+        		if (priority.get(info) > x){
+        			x = priority.get(info);
+        			ri = info;
+        		}
+        	}
+        	Message m = new Message(rc.getLocation(), Message.SHOOT, 0, Message.ALL, ri.location.x, ri.location.y, 0,0,0,0);
+        	int[] coded = m.encode();
+        	rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
+        	sentSignals++;
+        	priority.remove(ri);
+        }
 	}
 	
 	public static void playScout() {
