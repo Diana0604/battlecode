@@ -69,6 +69,8 @@ public class Turret extends RobotPlayer {
 	            					break;
 	            				}
 	            			}
+	            			
+	            			if(ref.equals(null)) ref = Direction.NORTH; //TODO parche per neutrals
 	            		} //TODO en ccas que per algo no estigui a la diagonal, fer algo 
 	            		
 	            		if(diagonal)
