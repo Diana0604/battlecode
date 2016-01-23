@@ -31,6 +31,7 @@ public class Turret extends RobotPlayer {
             attackRange = rc.getType().attackRadiusSquared;
             loc = rc.getLocation();
             set = false;
+            TTM = false;
             encallat = 0;
             primer = true;
         } catch (Exception e) {
@@ -269,7 +270,11 @@ public class Turret extends RobotPlayer {
             	
 	            	else 
 	            	{
-	            		if(primer) rc.pack();
+	            		if(primer) 
+	            		{
+	            			TTM = true;
+	            			rc.pack();
+	            		}
 	            		else 
 	            		{
 	            			if (rc.isWeaponReady()) {
