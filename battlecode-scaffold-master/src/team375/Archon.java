@@ -510,6 +510,11 @@ public class Archon extends RobotPlayer{
 	            		decidirCorner();
 	            	}
             	}
+            	else if (stage == 2) {
+            		if (targetLocation.distanceSquaredTo(loc) <= 15) {
+            			
+            		}
+            	}
             	if (leader) sendSignals();
 
                 if (rc.isCoreReady()) {

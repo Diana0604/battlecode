@@ -160,11 +160,6 @@ public class Soldier extends RobotPlayer {
     							buscantCombat = 12;
     							ls = sig[i].getLocation();
     							protegintArchon = true;
-    							if (ls != null) {
-    								rc.setIndicatorString(0, "Protegint (" + ls.x + "," + ls.y + ")");
-    								rc.setIndicatorString(1, "Protegint (" + ls.x + "," + ls.y + ")");
-    								rc.setIndicatorString(2, "Protegint (" + ls.x + "," + ls.y + ")");
-    								}
     							i++; // ignorar el seguent pq es el doble
     							continue;
     						}
@@ -185,7 +180,12 @@ public class Soldier extends RobotPlayer {
     					}
     					//Si el signal distingeix per ID del receptor i no esta dirigit a ell, l'ignora
     					if (m.getidControl() == 1 && m.getid() != rc.getID()) continue;
-    					if (m.getMode() == Message.GO_TO) desti = new MapLocation(m.getX(), m.getY());
+    					if (m.getMode() == Message.GO_TO || m.getMode() == Message.STAGE2) {
+    						desti = new MapLocation(m.getX(), m.getY());
+    					}
+    					else if (m.getMode() == Message.CLEAR_RUBBLE) {
+    						desti = null;
+    					}
     				}
     			}
             	

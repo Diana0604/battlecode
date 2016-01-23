@@ -28,6 +28,7 @@ public class Message {
 	static int LOCATION = 4;
 	static int SHOOT = 5;
 	static int STAGE2 = 6;
+	static int CLEAR_RUBBLE = 7;
 	
 	/*
 	 * Constants del object
