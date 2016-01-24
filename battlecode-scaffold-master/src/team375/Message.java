@@ -30,6 +30,7 @@ public class Message {
 	static int STAGE2 = 6;
 	static int CLEAR_RUBBLE = 7;
 	static int REG_DEN = 8;
+	static int GO_TURTLE = 9;
 	
 	/*
 	 * Constants del object
