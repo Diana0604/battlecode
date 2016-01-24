@@ -1,14 +1,6 @@
 package team375;
 
 import battlecode.common.*;
-import battlecode.common.Clock;
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
-import battlecode.common.Team;
 
 public class Turret extends RobotPlayer {
 
@@ -169,6 +161,34 @@ public class Turret extends RobotPlayer {
             System.out.println(e.getMessage());
             e.printStackTrace();
         }
+	}
+	
+	public static MapLocation readSignals()
+	{
+		Signal signals[] = rc.emptySignalQueue();
+		//ArrayList<Integer> seen = new ArrayList<Integer>();
+		
+		for(Signal s : signals)
+		{
+			if(s.getTeam() != myTeam) continue;
+			if(s.getMessage() == null) continue;
+			//if(seen.contains(s.getID())) continue;
+			int[] coded = s.getMessage();
+			Message m = new Message(s.getLocation(), coded[0], coded[1]);
+			int mode = m.getMode();
+			if(mode != Message.SHOOT) continue;
+			int x = m.getX();
+			int y = m.getY();
+			MapLocation enemy = new MapLocation(x, y);
+			if(rc.canAttackLocation(enemy)) 
+			{
+				return enemy;
+				//seen.add(s.getID());
+			}
+		}
+		//if(seen.isEmpty()) return null;
+		//Signal[] possible = (Signal[]) .toArray();
+		return null;
 	}
 	
 	public static void playTurret() {
@@ -332,25 +352,33 @@ public class Turret extends RobotPlayer {
 	            		}
 	            		else 
 	            		{
-	            			if (rc.isWeaponReady()) {
-		                    RobotInfo[] enemiesWithinRange = rc.senseNearbyRobots(attackRange, enemyTeam);
-		                    RobotInfo[] zombiesWithinRange = rc.senseNearbyRobots(attackRange, Team.ZOMBIE);
-		                    if (enemiesWithinRange.length > 0) {
-		                        for (RobotInfo enemy : enemiesWithinRange) {
-		                            // Check whether the enemy is in a valid attack range (turrets have a minimum range)
-		                            if (rc.canAttackLocation(enemy.location)) {
-		                                rc.attackLocation(enemy.location);
-		                                break;
-		                            }
-		                        }
-		                    } else if (zombiesWithinRange.length > 0) {
-		                        for (RobotInfo zombie : zombiesWithinRange) {
-		                            if (rc.canAttackLocation(zombie.location)) {
-		                                rc.attackLocation(zombie.location);
-		                                break;
-		                            }
-		                        }
-		                    }
+	            			MapLocation objective = readSignals();
+	            			if(objective != null)
+	            			{
+	            				if(rc.isWeaponReady()) rc.attackLocation(objective);
+	            			}
+	            			else
+	            			{
+		            			if (rc.isWeaponReady()) {
+			                    RobotInfo[] enemiesWithinRange = rc.senseNearbyRobots(attackRange, enemyTeam);
+			                    RobotInfo[] zombiesWithinRange = rc.senseNearbyRobots(attackRange, Team.ZOMBIE);
+			                    if (enemiesWithinRange.length > 0) {
+			                        for (RobotInfo enemy : enemiesWithinRange) {
+			                            // Check whether the enemy is in a valid attack range (turrets have a minimum range)
+			                            if (rc.canAttackLocation(enemy.location)) {
+			                                rc.attackLocation(enemy.location);
+			                                break;
+			                            }
+			                        }
+			                    } else if (zombiesWithinRange.length > 0) {
+			                        for (RobotInfo zombie : zombiesWithinRange) {
+			                            if (rc.canAttackLocation(zombie.location)) {
+			                                rc.attackLocation(zombie.location);
+			                                break;
+			                            }
+			                        }
+			                    }
+	            			}
 	            		}
 	                }
 	            }
