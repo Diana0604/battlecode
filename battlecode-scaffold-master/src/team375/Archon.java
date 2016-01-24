@@ -424,6 +424,25 @@ public class Archon extends RobotPlayer{
         return false;
 	}
 	
+	private static boolean buildTurret() throws GameActionException {
+		Direction dirToBuild = directions[rand.nextInt(8)];
+        for (int i = 0; i < 8; i++) {
+            // If possible, build in this direction
+            if (targetLocation.distanceSquaredTo(loc.add(dirToBuild)) > 2 && rc.canBuild(dirToBuild, RobotType.TURRET)) {
+                rc.build(dirToBuild, RobotType.TURRET);
+                chooseNextRobotType();
+            	rc.setIndicatorString(0,"Ha construit un soldat");
+		        rc.broadcastSignal(visionRange);
+		        rc.broadcastSignal(visionRange);
+                return true;
+            } else {
+                // Rotate the direction to try
+                dirToBuild = dirToBuild.rotateLeft();
+            }
+        }
+        return false;
+	}
+	
 	private static void addTargetPriority() {
 		molt_aprop = false;
     	if (enCombat == 0) {
@@ -619,7 +638,7 @@ public class Archon extends RobotPlayer{
             		//MODO TURTLE
             		
             		if (rc.isCoreReady() && rc.hasBuildRequirements(RobotType.TURRET)) {
-	                	buildRobot(RobotType.TURRET);
+	                	buildTurret();
 	        			if (targetLocation != null) {
 	        				rc.setIndicatorString(2, "Desti: ("+targetLocation.x+","+targetLocation.y+")");
 	        				Direction d = loc.directionTo(targetLocation);
