@@ -146,7 +146,7 @@ public class Archon extends RobotPlayer{
     				targetLocation = new MapLocation(x,y);
     			}
     			else if (mode == Message.GO_TURTLE) {
-    				if (targetLocation.distanceSquaredTo(loc) <= 5) {
+    				if (targetLocation.distanceSquaredTo(loc) <= 2) {
     					stage = 4;
     				}
     			}
@@ -199,7 +199,7 @@ public class Archon extends RobotPlayer{
     }
     
     private static void enviarSoldatsDens() throws GameActionException {
-    	int distancia_maxima = (int)((double)distancia_gran/1.4)/2;
+    	int distancia_maxima = (int)((double)distancia_gran/1.4/2);
     	dens.sort(((d1,d2)->(targetLocation.distanceSquaredTo(d1)-targetLocation.distanceSquaredTo(d2))));
     	int mode = Message.REG_DEN;
 		int object = Message.NONE;
@@ -213,10 +213,11 @@ public class Archon extends RobotPlayer{
     			int y = dens.get(i).y;
     			Message m = new Message(rc.getLocation(), mode, object, robotType, x, y, id, typeControl, idControl, 1);
     			int[] coded = m.encode();
-    			rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
+    			rc.broadcastMessageSignal(coded[0], coded[1], 2*visionRange);
     		}
     	}
     }
+
     
     private static void enviarSignalStage2() throws GameActionException {
     	int mode = Message.STAGE2;
@@ -257,7 +258,7 @@ public class Archon extends RobotPlayer{
 		int id = Message.NONE;
 		Message m = new Message(rc.getLocation(), mode, object, robotType, x, y, id, typeControl, idControl, 1);
 		int[] coded = m.encode();
-		rc.broadcastMessageSignal(coded[0], coded[1], visionRange);
+		rc.broadcastMessageSignal(coded[0], coded[1], 2*visionRange);
     }
     
     
@@ -367,7 +368,10 @@ public class Archon extends RobotPlayer{
     		}
     		else if (robots[i].team == enemyTeam) enemies[nenemies++] = robots[i];
     		else if (robots[i].team == Team.ZOMBIE) {
-    			if (robots[i].type == RobotType.ZOMBIEDEN) ++ndens;
+    			if (robots[i].type == RobotType.ZOMBIEDEN) {
+    				if (!dens.contains(robots[i].location)) dens.add(robots[i].location);
+    				++ndens;
+    			}
     			zombies[nzombies++] = robots[i];
     		}
     		else neutrals[nneutrals++] = robots[i];
@@ -561,13 +565,17 @@ public class Archon extends RobotPlayer{
 	            		}
 	            	}
 	            	else if (stage == 3) {
-	            		if (voltantNet()) {
-	            			stage = 4;
-	            			enviarSoldatsDens();
-	            			continue; // acabem el torn
-	            		}
-	            		else {
-	            			if (rc.isCoreReady()) netejarAdjacent();
+	            		if (targetLocation.distanceSquaredTo(loc) <= 2) {
+		            		if (voltantNet()) {
+		            			stage = 4;
+		            			enviarGoTurtle();
+		            			enviarSoldatsDens();
+		            			rc.setIndicatorString(2, ""+dens.size());
+		            			continue; // acabem el torn
+		            		}
+		            		else {
+		            			if (rc.isCoreReady()) netejarAdjacent();
+		            		}
 	            		}
 	            	}
 
@@ -614,7 +622,13 @@ public class Archon extends RobotPlayer{
 	                	buildRobot(RobotType.TURRET);
 	                }
         			enviarGoTurtle();
-            		
+        			if (targetLocation != null) {
+        				rc.setIndicatorString(2, "Desti: ("+targetLocation.x+","+targetLocation.y+")");
+        				Direction d = loc.directionTo(targetLocation);
+        				if (rc.canMove(d)) rc.move(d);
+        				else if (rc.canMove(d.rotateLeft())) rc.move(d.rotateLeft());
+        				else if (rc.canMove(d.rotateRight())) rc.move(d.rotateRight());
+        			}
             		
             		
             	}

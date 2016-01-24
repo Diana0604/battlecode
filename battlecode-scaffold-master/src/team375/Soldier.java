@@ -52,7 +52,7 @@ public class Soldier extends RobotPlayer {
 	private static int enCombat = 0, buscantCombat = 0;
 	private static boolean protegintArchon = false;
 	private static MapLocation ls = null; //location del signal
-	private static MapLocation desti = null;
+	private static MapLocation desti = null, cantonada = null;
 	private static boolean dying = false;
 	private static int M0, M1, M2, M3, M4, M5, M6, M7, M8;
 	private static int[] perills, dists;
@@ -190,15 +190,24 @@ public class Soldier extends RobotPlayer {
     						desti = new MapLocation(m.getX(), m.getY());
     					}
     					else if (m.getMode() == Message.CLEAR_RUBBLE) {
+    						cantonada = desti;
     						stage = 3;
     					}
-    					else if (m.getMode() == Message.REG_DEN) {
-    						if (stage != 4) desti = new MapLocation(m.getX(), m.getY());
+    					else if (m.getMode() == Message.GO_TURTLE) {
     						stage = 4;
+    						desti = null;
+    					}
+    					else if (m.getMode() == Message.REG_DEN) {
     						reg_dens.add(new MapLocation(m.getX(), m.getY()));
     					}
     				}
     			}
+
+            	if (desti == null && stage == 4) {
+            		if (reg_dens.size() > 0) {
+            			desti = reg_dens.get(0);
+            		}
+            	}
             	
     			if (nenemies+nzombies > dens && !protegintArchon) {
         			ls = null;
@@ -371,6 +380,7 @@ public class Soldier extends RobotPlayer {
 						}
 	        		}
 	            	if (rc.isCoreReady()) {
+	            		
 		            	boolean urgencia = (enCombat > 0) || (buscantCombat > 0);
 	            		if (rc.senseRubble(loc) >= 50) M[8] -= 30;
 	            		for (int k = 0; k < 8; ++k) {
@@ -378,13 +388,23 @@ public class Soldier extends RobotPlayer {
 	            			if (urgencia && rubble >= 100) M[k] -= 1000000;
 	            			else if (rubble >= 50) M[k] -= 30;
 	            		}
-		            	
+	            		if (stage >= 3 && cantonada != null) {
+	            			for (int i = 0; i < 8; ++i) {
+	            				int dist = cantonada.distanceSquaredTo(loc.add(directions[i]));
+		            			if (dist == 0) M[i] -= 800000;
+		            			else if (dist <= 2) M[i] -= 400000;
+	            			}
+	            			int dist = cantonada.distanceSquaredTo(loc);
+	            			if (dist == 0) M[8] -= 800000;
+	            			else if (dist <= 2) M[8] -= 400000;
+	            		}
 		            	int millor = 8;
 	            		for (int i = 0; i < 8; i++) {
 	            			if (rc.canMove(directions[i]) || (!urgencia && rc.senseRubble(loc.add(directions[i])) >= 100)) {
 	            				if (M[i] > M[millor]) millor = i;
 	            			}
 	            		}
+	            		
 	                	rc.setIndicatorString(0, ""+M[7]+" "+M[0]+" "+M[1]+" "+M[6]+" "+M[8]+" "+M[2]+" "+M[5]+" "+M[4]+" "+M[3]);
 	            			
 	            		if (millor < 8) {
@@ -470,7 +490,7 @@ public class Soldier extends RobotPlayer {
                 }
                 */
         		//if (torn != rc.getRoundNum()) System.out.print("================Desgraciaaaaaaa===============\n");
-        		
+        		rc.setIndicatorString(2,""+stage);
                 Clock.yield();
             } catch (Exception e) {
                 System.out.println(e.getMessage());
