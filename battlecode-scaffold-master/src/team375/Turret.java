@@ -191,7 +191,7 @@ public class Turret extends RobotPlayer {
             try {
                 // If this robot type can attack, check for enemies within range and attack one
             	
-            	if(TTM)
+            	if(rc.isCoreReady() && TTM)
             	{
             		if(rc.isCoreReady())
             		{
