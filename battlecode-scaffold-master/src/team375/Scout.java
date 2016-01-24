@@ -3,7 +3,6 @@ package team375;
 import battlecode.common.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 
 public class Scout extends RobotPlayer{
@@ -273,6 +272,9 @@ public class Scout extends RobotPlayer{
 					targetLocation = new MapLocation(x,y);
 					stage = 2;
 				}
+				if (mode == Message.GO_TURTLE){
+					stage = 4;
+				}
 			}else{			
 				if (mode == Message.FOUND && object == Message.CORNER){
 					addCorner(x,y);
@@ -341,7 +343,7 @@ public class Scout extends RobotPlayer{
 		return atac*hp/dist;
 	}
 	
-	public static void sendSignalsStage2() throws GameActionException{
+	public static void sendSignalsStage4() throws GameActionException{
 		nearbyEnemies = rc.senseNearbyRobots(visionRange,enemyTeam);
         nearbyZombies = rc.senseNearbyRobots(visionRange,Team.ZOMBIE); 
         HashMap<RobotInfo, Double> priority = new HashMap<>();
@@ -373,6 +375,48 @@ public class Scout extends RobotPlayer{
         	sentSignals++;
         	priority.remove(ri);
         }
+	}
+	
+	private static int countAdjacentTurrets() throws GameActionException{
+		int ret = 0;
+		for (Direction d: directions){
+			if (rc.onTheMap(rc.getLocation().add(d)) && rc.senseRobotAtLocation(rc.getLocation().add(d)) != null) ret++;
+		}
+		return ret;
+	}
+	
+	private static MapLocation getCornerLocation() throws GameActionException{
+		Direction hor, ver;
+		if (!rc.onTheMap(rc.getLocation().add(Direction.NORTH, 7))){
+			ver = Direction.NORTH;
+		}else if (!rc.onTheMap(rc.getLocation().add(Direction.SOUTH, 7))){
+			ver = Direction.SOUTH;
+		}else {
+			ver = null;
+			System.out.println("El scout no pot veure la cantonada erreur");
+		}
+		if (!rc.onTheMap(rc.getLocation().add(Direction.EAST, 7))){
+			hor = Direction.EAST;
+		}else if (!rc.onTheMap(rc.getLocation().add(Direction.WEST, 7))){
+			hor = Direction.WEST;
+		}else {
+			hor = null;
+			System.out.println("El scout no pot veure la cantonada erreur");
+		}
+		
+		Direction cornerDir = Utils.addDirections(hor, ver);
+
+		
+		if (!rc.onTheMap(rc.getLocation().add(cornerDir.rotateLeft(), 7))){
+			if (!rc.onTheMap(rc.getLocation().add(cornerDir.rotateRight(), 7))){
+				int xmax = 7, ymax = 7;
+				while (!rc.onTheMap(rc.getLocation().add(cornerDir.rotateLeft(), xmax--)));
+				while (!rc.onTheMap(rc.getLocation().add(cornerDir.rotateRight(), ymax--)));
+				return rc.getLocation().add(cornerDir.rotateLeft(), xmax+1).add(cornerDir.rotateRight(), ymax+1);
+			}
+		}
+		System.out.println("Error al buscar la cantonada en la fase 4");
+		return null;
 	}
 	
 	public static void playScout() {
@@ -442,15 +486,58 @@ public class Scout extends RobotPlayer{
 	                sendSignalsStage1();
                 }else if (stage == 2){
                 	rc.setIndicatorString(0, "");
+                	rc.setIndicatorString(1, "");
                 	if (rc.isCoreReady()){
 	                	if (rc.getLocation().distanceSquaredTo(targetLocation) > 25){
+	                		rc.setIndicatorString(0, "Va cap al lider - stage 2");
 	                		returnToLeader();
 	                		rc.move(currentDir);
 	                	}
                 	}
-                	if (rc.getLocation().distanceSquaredTo(targetLocation) > 18){
-                		sendSignalsStage2();
-                	}
+                }else if (stage == 4){
+                	sendSignalsStage4();
+                	Boolean hasMoved = false;
+                	if (rc.isCoreReady()){
+	                	MapLocation corner = getCornerLocation();
+	                	Direction d = rc.getLocation().directionTo(corner);
+	                	Direction[] dirs = {d, d.rotateLeft(), d.rotateRight(), d.rotateLeft().rotateLeft(),
+											d.rotateRight().rotateRight(), d.rotateLeft().rotateLeft().rotateLeft(),
+											d.rotateRight().rotateRight().rotateRight(), d.opposite()};
+	                	if (rc.getLocation().distanceSquaredTo(corner) <= 8){
+	                		rc.setIndicatorString(0, "M'allunyo de la cantonada pq estic molt a prop");
+	                		Direction dir = corner.directionTo(rc.getLocation());
+	                		if (rc.canMove(dir)) rc.move(dir);
+	                		else if (rc.canMove(dir.rotateLeft())) rc.move(dir.rotateLeft());
+	                		else if (rc.canMove(dir.rotateRight())) rc.move(dir.rotateRight());
+	                		else {
+	                			System.out.println("Em volia allunyar de la cantonada pero no em puc moure");
+	                			rc.setIndicatorString(0, "Em volia allunyar de la cantonada pero no em puc moure");
+	                		}
+	                		hasMoved = true;
+	                	}else if (Math.abs(corner.x-rc.getLocation().x) == Math.abs(corner.y - rc.getLocation().y)){ //si soc a la diagonal m'aparto
+	                		for (int i = 1; i < 8; i++){ //comenca a 1 perque no vagi per la diagonal cap als archons
+	                			if (rc.canMove(dirs[i]) && rc.getLocation().add(dirs[i]).distanceSquaredTo(corner) > 8){
+	                				rc.move(dirs[i]);
+	                				hasMoved = true;
+	                				rc.setIndicatorString(0, "M'aparto de la diagonal");
+	                			}
+	                		}
+	                		if (!hasMoved) {
+	                			rc.setIndicatorString(0, "Em volia apartar de la diagonal pero no puc");
+	                			System.out.println("Em volia apartar de la diagonal pero no puc");
+	                		}
+	                	}
+	                	if (!hasMoved && countAdjacentTurrets() >= 3){
+	                		for (int i = 0; i < 8; i++){
+	                			if (rc.canMove(dirs[i]) && rc.getLocation().add(dirs[i]).distanceSquaredTo(corner) > 8){
+	                				rc.move(dirs[i]);
+	                				hasMoved = true;
+	                				rc.setIndicatorString(0, "Tinc mes de dues torres al voltant, per tant m'aparto");
+	                			}
+	                		}
+	                	}
+	                	rc.setIndicatorString(0, "No molesto per tant no em moc");
+                	}else rc.setIndicatorString(0, "Tinc core delay");	
                 }
                 Clock.yield();
             } catch (Exception e) {
@@ -459,4 +546,5 @@ public class Scout extends RobotPlayer{
             }
         }
 	}
+
 }
