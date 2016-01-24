@@ -382,12 +382,12 @@ public class Archon extends RobotPlayer{
 		}
 	}
 	
-	private static boolean buildRobot() throws GameActionException {
+	private static boolean buildRobot(RobotType robtype) throws GameActionException {
 		Direction dirToBuild = directions[rand.nextInt(8)];
         for (int i = 0; i < 8; i++) {
             // If possible, build in this direction
-            if (rc.canBuild(dirToBuild, nextRobotType)) {
-                rc.build(dirToBuild, nextRobotType);
+            if (rc.canBuild(dirToBuild, robtype)) {
+                rc.build(dirToBuild, robtype);
                 chooseNextRobotType();
             	rc.setIndicatorString(0,"Ha construit un soldat");
 		        rc.broadcastSignal(visionRange);
@@ -565,7 +565,7 @@ public class Archon extends RobotPlayer{
 		                }
 		            	//Si pot fabricar un robot, el fabrica
 	                    if (!hasMoved && rc.getRobotCount() < molts_soldats && rc.hasBuildRequirements(nextRobotType)) {
-		                	hasMoved = buildRobot();
+		                	hasMoved = buildRobot(nextRobotType);
 		                }
 	                    //Es mou (o es queda quiet) a la casella amb mes prioritat
 		            	if (!hasMoved) {
@@ -586,6 +586,15 @@ public class Archon extends RobotPlayer{
 	                	rc.setIndicatorString(0,"Tenia core delay");
 	                }
 	
+            	}
+            	else {
+            		//MODO TURTLE
+            		if (rc.isCoreReady() && rc.hasBuildRequirements(RobotType.TURRET)) {
+	                	buildRobot(RobotType.TURRET);
+	                }
+            		
+            		
+            		
             	}
                 //Si pot curar a algun robot, en cura a un de random
                 RobotInfo[] healableRobots = rc.senseNearbyRobots(attackRange, myTeam);
