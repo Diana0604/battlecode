@@ -62,7 +62,7 @@ public class Turret extends RobotPlayer {
 				if(!(ri == null) && ri.team.equals(myTeam) && ri.type.equals(RobotType.TURRET)) continue;
 				rotation = LEFT;
 				set = true;
-				if(rc.canMove(left))
+				if(rc.isCoreReady() && rc.canMove(left))
 				{
 					hasMoved = true;
 					diagonal = false;
@@ -91,7 +91,7 @@ public class Turret extends RobotPlayer {
 				if(!(ri == null) && ri.team.equals(myTeam) && ri.type.equals(RobotType.TURRET)) continue;
 				rotation = RIGHT;
 				set = true;
-				if(rc.canMove(right))
+				if(rc.isCoreReady() && rc.canMove(right))
 				{
 					hasMoved = true;
 					diagonal = false;
@@ -116,7 +116,7 @@ public class Turret extends RobotPlayer {
 			for(int i = 0; i < 2; ++i)
 			{
 				dir = dir.rotateLeft();
-				if(rc.canMove(dir))
+				if(rc.isCoreReady() && rc.canMove(dir))
 				{
 					encallat = 0;
 					diagonal = false;
@@ -144,7 +144,7 @@ public class Turret extends RobotPlayer {
 			for(int i = 0; i < 2; ++i)
 			{
 				dir = dir.rotateRight();
-				if(rc.canMove(dir))
+				if(rc.isCoreReady() && rc.canMove(dir))
 				{
 					encallat = 0;
 					diagonal = false;
@@ -232,7 +232,7 @@ public class Turret extends RobotPlayer {
 	            			
 	            			if(!set)
 	            			{
-	            				if(rc.canMove(ref.opposite())) 
+	            				if(rc.isCoreReady() && rc.canMove(ref.opposite())) 
 	            				{
 	            					hasMoved = true;
 	            					encallat = 0;
@@ -250,7 +250,7 @@ public class Turret extends RobotPlayer {
 	            				
 	            				if(encallat > MAXENCALLAT)
 	            				{
-	            					if(rc.canMove(ref.opposite()))
+	            					if(rc.isCoreReady() && rc.canMove(ref.opposite()))
 	            					{
 	            						encallat = 0;
 	            						set = false;
@@ -271,7 +271,7 @@ public class Turret extends RobotPlayer {
 	            		{
 	            			turretsFound = 0;
 	            			
-	            			if(rc.canMove(ref))
+	            			if(rc.isCoreReady() && rc.canMove(ref))
 	            			{
 	            				hasMoved = true;
 	            				encallat = 0;
@@ -297,7 +297,7 @@ public class Turret extends RobotPlayer {
 	            			{
 	            				if(rotation == RIGHT) dir = ref.rotateRight();
 	            				else dir = ref.rotateLeft();
-	            				if(rc.canMove(dir))
+	            				if(rc.isCoreReady() && rc.canMove(dir))
 	            				{
 	            					hasMoved = true; 
 	            					encallat = 0;
@@ -349,7 +349,6 @@ public class Turret extends RobotPlayer {
 	           		if(primer) 
 	           		{
 	           			++pack;
-	           			System.out.println(pack + "=======================PACKING=========================");
 	           			TTM = true;
 	           			rc.pack();
 	           		}
@@ -393,4 +392,6 @@ public class Turret extends RobotPlayer {
         }
 	}
 }
+
+
 
