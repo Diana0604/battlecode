@@ -8,6 +8,7 @@ public class Utils {
 	}
 	 
 	//Suma dues direccions si una es horitzontal i l'altra vertical. Si no es compleix aixo, retorna null
+	//ES MOLT CUTRE HO SE SORRY
 	public static Direction addDirections(Direction a, Direction b){
 		if (a == null || b == null){
 			System.out.println("Error, intentes sumar direccions nuls");

@@ -499,6 +499,7 @@ public class Scout extends RobotPlayer{
                 	Boolean hasMoved = false;
                 	if (rc.isCoreReady()){
 	                	MapLocation corner = getCornerLocation();
+	                	System.out.println("La cantonada es " +corner);
 	                	Direction d = rc.getLocation().directionTo(corner);
 	                	Direction[] dirs = {d, d.rotateLeft(), d.rotateRight(), d.rotateLeft().rotateLeft(),
 											d.rotateRight().rotateRight(), d.rotateLeft().rotateLeft().rotateLeft(),
@@ -533,6 +534,13 @@ public class Scout extends RobotPlayer{
 	                				rc.move(dirs[i]);
 	                				hasMoved = true;
 	                				rc.setIndicatorString(0, "Tinc mes de dues torres al voltant, per tant m'aparto");
+	                			}
+	                		}
+	                	}
+	                	if (!hasMoved){
+	                		for (int i = 0; i < 8; i++){
+	                			if (rc.senseRubble(rc.getLocation().add(dirs[i])) > 0){
+	                				rc.clearRubble(dirs[i]);
 	                			}
 	                		}
 	                	}
