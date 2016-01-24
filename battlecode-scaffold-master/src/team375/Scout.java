@@ -85,7 +85,7 @@ public class Scout extends RobotPlayer{
 		int x=0, y=0;
 		for (MapLocation arch: locs){
 			x += arch.x;
-			y += arch.x;
+			y += arch.y;
 		}
 		return new MapLocation(x/locs.length,y/locs.length);
 	}
@@ -94,9 +94,11 @@ public class Scout extends RobotPlayer{
 		Direction dir;
 		if (nextCorner == null){
 			dir = baricentre(enemyTeam).directionTo(baricentre(myTeam));
+			//System.out.println("d1 = "+dir);
 			if (!dir.isDiagonal()){
-				if (rand.nextInt(2) == 0) dir.rotateLeft();
-				else dir.rotateRight();
+				//System.out.println("Entra al if");
+				if (rand.nextInt(2) == 0) dir = dir.rotateLeft();
+				else dir = dir.rotateRight();
 			}
 		}else dir = nextCorner.opposite();
 		if (corners.size() <= 4){
