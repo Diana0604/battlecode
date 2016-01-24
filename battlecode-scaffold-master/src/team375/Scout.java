@@ -443,7 +443,7 @@ public class Scout extends RobotPlayer{
                 }else if (stage == 2){
                 	rc.setIndicatorString(0, "");
                 	if (rc.isCoreReady()){
-	                	if (rc.getLocation().distanceSquaredTo(targetLocation) > 18){
+	                	if (rc.getLocation().distanceSquaredTo(targetLocation) > 25){
 	                		returnToLeader();
 	                		rc.move(currentDir);
 	                	}
