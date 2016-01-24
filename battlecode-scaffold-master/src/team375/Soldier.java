@@ -398,6 +398,16 @@ public class Soldier extends RobotPlayer {
 	            			if (dist == 0) M[8] -= 800000;
 	            			else if (dist <= 2) M[8] -= 400000;
 	            		}
+	            		if (stage == 1 && desti != null) {
+	            			for (int i = 0; i < 8; ++i) {
+	            				int dist = desti.distanceSquaredTo(loc.add(directions[i]));
+		            			if (dist == 0) M[i] -= 800000;
+		            			else if (dist <= 2) M[i] -= 400000;
+	            			}
+	            			int dist = desti.distanceSquaredTo(loc);
+	            			if (dist == 0) M[8] -= 800000;
+	            			else if (dist <= 2) M[8] -= 400000;
+	            		}
 		            	int millor = 8;
 	            		for (int i = 0; i < 8; i++) {
 	            			if (rc.canMove(directions[i]) || (!urgencia && rc.senseRubble(loc.add(directions[i])) >= 100)) {

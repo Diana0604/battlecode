@@ -565,7 +565,7 @@ public class Archon extends RobotPlayer{
 	            		}
 	            	}
 	            	else if (stage == 3) {
-	            		if (targetLocation.distanceSquaredTo(loc) <= 2) {
+	            		if (targetLocation.distanceSquaredTo(loc) <= 5) {
 		            		if (voltantNet()) {
 		            			stage = 4;
 		            			enviarGoTurtle();
@@ -620,15 +620,16 @@ public class Archon extends RobotPlayer{
             		
             		if (rc.isCoreReady() && rc.hasBuildRequirements(RobotType.TURRET)) {
 	                	buildRobot(RobotType.TURRET);
+	        			if (targetLocation != null) {
+	        				rc.setIndicatorString(2, "Desti: ("+targetLocation.x+","+targetLocation.y+")");
+	        				Direction d = loc.directionTo(targetLocation);
+	        				if (rc.canMove(d)) rc.move(d);
+	        				else if (rc.canMove(d.rotateLeft())) rc.move(d.rotateLeft());
+	        				else if (rc.canMove(d.rotateRight())) rc.move(d.rotateRight());
+	        			}
 	                }
         			enviarGoTurtle();
-        			if (targetLocation != null) {
-        				rc.setIndicatorString(2, "Desti: ("+targetLocation.x+","+targetLocation.y+")");
-        				Direction d = loc.directionTo(targetLocation);
-        				if (rc.canMove(d)) rc.move(d);
-        				else if (rc.canMove(d.rotateLeft())) rc.move(d.rotateLeft());
-        				else if (rc.canMove(d.rotateRight())) rc.move(d.rotateRight());
-        			}
+        			
             		
             		
             	}
