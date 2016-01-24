@@ -145,6 +145,11 @@ public class Archon extends RobotPlayer{
     				stage = 2;
     				targetLocation = new MapLocation(x,y);
     			}
+    			else if (mode == Message.GO_TURTLE) {
+    				if (targetLocation.distanceSquaredTo(loc) <= 5) {
+    					stage = 4;
+    				}
+    			}
     		}else{
     			//L'ha enviat un scout
     			//System.out.println("rep missatge de scout");
@@ -213,33 +218,6 @@ public class Archon extends RobotPlayer{
     	}
     }
     
-    
-    private static void trobarAltraCorner() {
-    	int x = corners.get(0).x^corners.get(1).x^corners.get(2).x;
-    	int y = corners.get(0).y^corners.get(1).y^corners.get(2).y;
-    	corners.add(new MapLocation(x,y));
-    }
-
-    private static void decidirCorner() throws GameActionException {
-    	calcDistanciaGran(corners.toArray());
-    	int dist = 1000000;
-    	MapLocation millor = null;
-    	for (MapLocation i:corners) {
-    		int nova = i.distanceSquaredTo(targetLocation);
-    		if (nova < dist) {
-    			dist = nova;
-    			millor = i;
-    		}
-    	}
-    	if (leader) {
-    		if (millor != null) targetLocation = millor;
-        	stage = 2;
-        	rc.broadcastSignal(visionRange);
-        	rc.broadcastSignal(visionRange);
-        	enviarSignalStage2();
-    	}
-    }
-    
     private static void enviarSignalStage2() throws GameActionException {
     	int mode = Message.STAGE2;
 		int object = Message.NONE;
@@ -266,6 +244,47 @@ public class Archon extends RobotPlayer{
 		Message m = new Message(rc.getLocation(), mode, object, robotType, x, y, id, typeControl, idControl, 1);
 		int[] coded = m.encode();
 		rc.broadcastMessageSignal(coded[0], coded[1], visionRange);
+    }
+    
+    private static void enviarGoTurtle() throws GameActionException {
+    	int mode = Message.GO_TURTLE;
+		int object = Message.NONE;
+		int typeControl = Message.NONE;
+		int robotType = Message.NONE;
+		int x = targetLocation.x;
+		int y = targetLocation.y;
+		int idControl = Message.NONE;
+		int id = Message.NONE;
+		Message m = new Message(rc.getLocation(), mode, object, robotType, x, y, id, typeControl, idControl, 1);
+		int[] coded = m.encode();
+		rc.broadcastMessageSignal(coded[0], coded[1], visionRange);
+    }
+    
+    
+    private static void trobarAltraCorner() {
+    	int x = corners.get(0).x^corners.get(1).x^corners.get(2).x;
+    	int y = corners.get(0).y^corners.get(1).y^corners.get(2).y;
+    	corners.add(new MapLocation(x,y));
+    }
+
+    private static void decidirCorner() throws GameActionException {
+    	calcDistanciaGran(corners.toArray());
+    	int dist = 1000000;
+    	MapLocation millor = null;
+    	for (MapLocation i:corners) {
+    		int nova = i.distanceSquaredTo(targetLocation);
+    		if (nova < dist) {
+    			dist = nova;
+    			millor = i;
+    		}
+    	}
+    	if (leader) {
+    		if (millor != null) targetLocation = millor;
+        	stage = 2;
+        	rc.broadcastSignal(visionRange);
+        	rc.broadcastSignal(visionRange);
+        	enviarSignalStage2();
+    	}
     }
     
     private static boolean voltantNet() {
@@ -499,7 +518,7 @@ public class Archon extends RobotPlayer{
 				archons[2*i] = archonsMeus[i];
 				archons[2*i+1] = archonsSeus[i];
 			}
-			molts_soldats = 12*archonsMeus.length + 5;
+			molts_soldats = 8*archonsMeus.length + 4;
 			calcDistanciaGran(archons);
 			rondes_zombies = rc.getZombieSpawnSchedule().getRounds();
 			targetLocation = escollirLider();
@@ -536,7 +555,7 @@ public class Archon extends RobotPlayer{
 		            	}
 	            	}
 	            	else if (stage == 2) {
-	            		if (targetLocation.distanceSquaredTo(loc) <= 15) {
+	            		if (targetLocation.distanceSquaredTo(loc) <= 2) {
 	            			stage = 3;
 	            			enviarClearRubble();
 	            		}
@@ -551,6 +570,7 @@ public class Archon extends RobotPlayer{
 	            			if (rc.isCoreReady()) netejarAdjacent();
 	            		}
 	            	}
+
 	            	
 	            	if (leader) sendSignals();
 	            	
@@ -589,9 +609,11 @@ public class Archon extends RobotPlayer{
             	}
             	else {
             		//MODO TURTLE
+            		
             		if (rc.isCoreReady() && rc.hasBuildRequirements(RobotType.TURRET)) {
 	                	buildRobot(RobotType.TURRET);
 	                }
+        			enviarGoTurtle();
             		
             		
             		
