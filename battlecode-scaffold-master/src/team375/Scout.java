@@ -344,6 +344,11 @@ public class Scout extends RobotPlayer{
 	}
 	
 	public static void sendSignalsStage4() throws GameActionException{
+		Message m = new Message(rc.getLocation(), Message.IM_HERE, 0, Message.ARCHON, 0, 0, 0,0,0,0);
+    	int[] coded = m.encode();
+    	rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
+    	
+		
 		nearbyEnemies = rc.senseNearbyRobots(visionRange,enemyTeam);
         nearbyZombies = rc.senseNearbyRobots(visionRange,Team.ZOMBIE); 
         HashMap<RobotInfo, Double> priority = new HashMap<>();
@@ -354,7 +359,7 @@ public class Scout extends RobotPlayer{
     		priority.put(ri, getPriority(ri));
     		//System.out.println(ri.type+" te prioritat "+getPriority(ri));
     	}
-        int sentSignals = 0;
+        int sentSignals = 1;
         while (sentSignals < 20 && !priority.isEmpty()){
         	RobotInfo ri = null;
         	double x = -1;
