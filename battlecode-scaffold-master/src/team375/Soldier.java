@@ -191,9 +191,13 @@ public class Soldier extends RobotPlayer {
     					if (m.getMode() == Message.GO_TO || m.getMode() == Message.STAGE2) {
     						desti = new MapLocation(m.getX(), m.getY());
     					}
-    					else if (m.getMode() == Message.CLEAR_RUBBLE) {
+    					else if (m.getMode() == Message.STAGE3) {
     						cantonada = new MapLocation(m.getX(), m.getY());
-    						desti = cantonada;
+    						desti = null;
+    						stage = 3;
+    					}
+    					else if (m.getMode() == Message.CLEAR_RUBBLE) {
+    						desti = new MapLocation(m.getX(), m.getY());
     						stage = 3;
     					}
     					else if (m.getMode() == Message.GO_TURTLE) {
@@ -333,6 +337,7 @@ public class Soldier extends RobotPlayer {
 
             		int [] M = {M0, M1, M2, M3, M4, M5, M6, M7, M8};
             		
+            		// Si busquem dens i trobem que una ja esta destruida, anem a la seguent
     	            if (stage == 4 && desti != null) {
     	            	if (rc.canSenseLocation(desti)) {
     	            		boolean destruida = true;
@@ -347,31 +352,19 @@ public class Soldier extends RobotPlayer {
     	            		}
     	            	}
     	            }
-    	            else if (stage == 4 && desti == null) {
-        				//stage = 5;
-        				//desti = cantonada;
-    	            }
             		
 	            	if (enCombat == 0) {
+	            		// Si busquem combat, anem cap a on hem d'ajudar
 		        		if (buscantCombat > 0) {
-		        			if (ls == null) {
-		        				System.out.printf("\n\n\n%d\nModo: %d\n\n", buscantCombat,modo);
-		        				if (protegintArchon)  System.out.printf("Protegint archon\n");
-		        			}
 							int dir = inversaDirections(rc.getLocation().directionTo(ls));
 		    				M[dir] += 80;
 		    				M[(dir+1)%8] += 75;
 		    				M[(dir+7)%8] += 75;
 						}
-						else if (desti != null) {
-							if (desti.distanceSquaredTo(loc) > visionRange+10 || stage != 3) {
-								//rc.setIndicatorString(2, "Desti: ("+desti.x+","+desti.y+")");
-								int dir = inversaDirections(loc.directionTo(desti));
-			    				M[dir] += 80;
-			    				M[(dir+1)%8] += 75;
-			    				M[(dir+7)%8] += 75;
-							}
-							else if (stage == 3) {
+		        		// Si no busquem combat
+						else {
+							// Si estem en stage 3, mirem si tenim merda a prop. Si en tenim, la netegem, si no en tenim, seguim
+							if (stage == 3) {
 								double maxima = 0;
 								int millor = 0;
 								for (int i = 0; i < 8; ++i) {
@@ -383,15 +376,23 @@ public class Soldier extends RobotPlayer {
 										maxima = rubble;
 									}
 								}
+								// Si hi ha rubble per netejar, fem desti=null, perque no hem d'anar enlloc
 								if (maxima >= 50) {
+									desti = null;
 									rc.clearRubble(directions[millor]);
 		            				rc.setIndicatorString(2, "Clear rubble at ("+loc.add(directions[millor]).x+","+loc.add(directions[millor]).y+")");
 								}
 							}
+							if (desti != null) {
+								int dir = inversaDirections(loc.directionTo(desti));
+			    				M[dir] += 80;
+			    				M[(dir+1)%8] += 75;
+			    				M[(dir+7)%8] += 75;
+							}
 						}
 	        		}
 	            	if (rc.isCoreReady()) {
-	            		
+	            		// fiquem prioritat segons la urgencia, per si ens interessa anar rapid als llocs o treure rubble
 		            	boolean urgencia = (enCombat > 0) || (buscantCombat > 0);
 	            		if (rc.senseRubble(loc) >= 50) M[8] -= 30;
 	            		for (int k = 0; k < 8; ++k) {
@@ -399,23 +400,15 @@ public class Soldier extends RobotPlayer {
 	            			if (urgencia && rubble >= 100) M[k] -= 1000000;
 	            			else if (rubble >= 50) M[k] -= 30;
 	            		}
+	            		// si estem en stage 3 o 4, no apropar-nos a la cantonada
 	            		if (stage >= 3 && cantonada != null) {
 	            			for (int i = 0; i < 8; ++i) {
 	            				int dist = cantonada.distanceSquaredTo(loc.add(directions[i]));
 		            			if (dist == 0) M[i] -= 800000;
 		            			else if (dist <= 2) M[i] -= 400000;
+		            			else if (dist <= 5) M[i] -= 200000;
 	            			}
 	            			int dist = cantonada.distanceSquaredTo(loc);
-	            			if (dist == 0) M[8] -= 800000;
-	            			else if (dist <= 2) M[8] -= 400000;
-	            		}
-	            		if (stage == 1 && desti != null) {
-	            			for (int i = 0; i < 8; ++i) {
-	            				int dist = desti.distanceSquaredTo(loc.add(directions[i]));
-		            			if (dist == 0) M[i] -= 800000;
-		            			else if (dist <= 2) M[i] -= 400000;
-	            			}
-	            			int dist = desti.distanceSquaredTo(loc);
 	            			if (dist == 0) M[8] -= 800000;
 	            			else if (dist <= 2) M[8] -= 400000;
 	            		}
@@ -438,7 +431,6 @@ public class Soldier extends RobotPlayer {
 	            				rc.move(directions[millor]);
 	            				rc.setIndicatorString(2, "Move to ("+loc.add(dir).x+","+loc.add(dir).y+")");
 	            			}
-	            			//DAVID aixo a vegades (molt poc) em dona una excepcio de can't move too much rubble
 	            		}
 	            	}
 	            	

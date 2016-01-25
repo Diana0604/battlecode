@@ -31,6 +31,7 @@ public class Message {
 	static int CLEAR_RUBBLE = 7;
 	static int REG_DEN = 8;
 	static int GO_TURTLE = 9;
+	static int STAGE3 = 10;
 	
 	/*
 	 * Constants del object
