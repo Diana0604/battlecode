@@ -414,12 +414,13 @@ public class Archon extends RobotPlayer{
 		Direction dirToBuild = directions[rand.nextInt(8)];
         for (int i = 0; i < 8; i++) {
             // If possible, build in this direction
-            if (rc.canBuild(dirToBuild, robtype)) {
+            if ((stage < 3 || targetLocation.distanceSquaredTo(loc.add(dirToBuild)) > 2) && rc.canBuild(dirToBuild, robtype)) {
                 rc.build(dirToBuild, robtype);
                 chooseNextRobotType();
             	rc.setIndicatorString(0,"Ha construit un soldat");
 		        rc.broadcastSignal(visionRange);
 		        rc.broadcastSignal(visionRange);
+		        if (stage == 3) enviarClearRubble();
                 return true;
             } else {
                 // Rotate the direction to try
@@ -672,7 +673,7 @@ public class Archon extends RobotPlayer{
                 	}
                 	i++;
                 }
-
+                rc.setIndicatorString(0, "stage " + stage);
                 Clock.yield();
             } catch (Exception e) {
                 System.out.println(e.getMessage());

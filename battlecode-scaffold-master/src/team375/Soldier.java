@@ -20,6 +20,7 @@ public class Soldier extends RobotPlayer {
 	private static int[][][] eucl = { { { 6, 6, 6, 6, 6, 6, 6, 5, 6} , { 5, 6, 6, 6, 6, 6, 5, 4, 6} , { 5, 6, 6, 6, 6, 5, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 6, 6, 6, 6, 5, 4, 4, 5, 5} , { 6, 6, 6, 6, 5, 4, 5, 6, 6} , { 6, 6, 6, 6, 6, 5, 6, 6, 6} } , { { 5, 6, 6, 6, 6, 6, 5, 4, 6} , { 4, 5, 6, 6, 6, 5, 4, 3, 5} , { 4, 5, 5, 6, 5, 4, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 5, 6, 5, 5, 4, 3, 3, 4, 4} , { 6, 6, 6, 5, 4, 3, 4, 5, 5} , { 6, 6, 6, 6, 5, 4, 5, 6, 6} } , { { 4, 5, 6, 6, 6, 6, 5, 4, 5} , { 3, 4, 5, 6, 5, 5, 4, 3, 4} , { 3, 4, 4, 5, 4, 4, 3, 2, 3} , { 3, 4, 4, 4, 3, 3, 2, 1, 3} , { 3, 4, 4, 4, 3, 2, 1, 2, 3} , { 3, 4, 4, 4, 3, 1, 2, 3, 3} , { 4, 5, 4, 4, 3, 2, 3, 4, 3} , { 5, 6, 5, 4, 3, 3, 4, 5, 4} , { 6, 6, 6, 5, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 2, 3, 3, 4, 4, 4, 3, 1, 3} , { 1, 3, 3, 3, 3, 3, 1, 0, 2} , { 2, 3, 3, 3, 2, 1, 0, 1, 1} , { 3, 3, 3, 3, 1, 0, 1, 3, 2} , { 4, 4, 3, 3, 2, 1, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 1, 2, 3, 4, 4, 4, 3, 2, 3} , { 0, 1, 2, 3, 3, 3, 2, 1, 1} , { 1, 2, 1, 2, 1, 2, 1, 2, 0} , { 3, 3, 2, 1, 0, 1, 2, 3, 1} , { 4, 4, 3, 2, 1, 2, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 2, 1, 3, 4, 4, 4, 3, 3, 3} , { 1, 0, 1, 3, 3, 3, 3, 3, 2} , { 2, 1, 0, 1, 2, 3, 3, 3, 1} , { 3, 3, 1, 0, 1, 3, 3, 3, 2} , { 4, 4, 3, 1, 2, 3, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 6, 5, 5} , { 3, 3, 4, 5, 5, 6, 5, 4, 4} , { 3, 2, 3, 4, 4, 5, 4, 4, 3} , { 3, 1, 2, 3, 3, 4, 4, 4, 3} , { 3, 2, 1, 2, 3, 4, 4, 4, 3} , { 3, 3, 2, 1, 3, 4, 4, 4, 3} , { 4, 4, 3, 2, 3, 4, 4, 5, 3} , { 5, 5, 4, 3, 3, 4, 5, 6, 4} , { 6, 6, 5, 4, 4, 5, 6, 6, 5} } , { { 5, 4, 5, 6, 6, 6, 6, 6, 6} , { 4, 3, 4, 5, 6, 6, 6, 5, 5} , { 4, 3, 3, 4, 5, 6, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 5, 4, 3, 3, 4, 5, 5, 6, 4} , { 6, 5, 4, 3, 4, 5, 6, 6, 5} , { 6, 6, 5, 4, 5, 6, 6, 6, 6} } , { { 6, 5, 6, 6, 6, 6, 6, 6, 6} , { 5, 4, 5, 6, 6, 6, 6, 6, 6} , { 5, 4, 4, 5, 6, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 6, 5, 4, 4, 5, 6, 6, 6, 5} , { 6, 6, 5, 4, 5, 6, 6, 6, 6} , { 6, 6, 6, 5, 6, 6, 6, 6, 6} } };
 	private static final int[][] aSoldier = {{-1000000, -3, 0, 0, 0, 0, 0},{-1000000, -30, 0, 0, 0, 0, 0} };
 	private static final int[] eArchon = {-1000000, 20, 20, 15, 10, 5, 0};
+	private static final int[] aArchonClearRubble = {-1000000, -10000, -9000, -0, 0, 0, 0};
 	private static final int[] aArchonTurtle = {-1000000, -10000, -9000, -7500, -5000, -2500, 0};
 	private static final int[] aTurretTurtle = {-1000000, -10000, -9000, -7500, -5000, -2500, 0};
 	private static final int[] eGuard = {-1000000, -1500, -1250, -500, 20, 10, 0};
@@ -306,7 +307,8 @@ public class Soldier extends RobotPlayer {
             			if (!dying) {
             				if (rob.type == RobotType.SOLDIER) perills = aSoldier[tipus_perill_soldats];
         					else if (rob.type == RobotType.ARCHON) {
-        						if (stage != 4) perills = aArchon[meva_vida];
+        						if (stage < 3) perills = aArchon[meva_vida];
+        						else if (stage == 3) perills = aArchonClearRubble;
         						else perills = aArchonTurtle;
         					}
         					else if (rob.type == RobotType.TURRET || rob.type == RobotType.TTM) perills = aTurretTurtle;
@@ -375,7 +377,10 @@ public class Soldier extends RobotPlayer {
 										maxima = rubble;
 									}
 								}
-								if (maxima >= 50) rc.clearRubble(directions[millor]);
+								if (maxima >= 50) {
+									rc.clearRubble(directions[millor]);
+		            				rc.setIndicatorString(2, "Clear rubble at ("+loc.add(directions[millor]).x+","+loc.add(directions[millor]).y+")");
+								}
 							}
 						}
 	        		}
@@ -419,8 +424,14 @@ public class Soldier extends RobotPlayer {
 	            			
 	            		if (millor < 8) {
 	            			Direction dir = directions[millor];
-	            			if (rc.senseRubble(loc.add(dir)) >= 100) rc.clearRubble(dir);
-	            			else rc.move(directions[millor]);
+	            			if (rc.senseRubble(loc.add(dir)) >= 100) {
+	            				rc.clearRubble(dir);
+	            				rc.setIndicatorString(2, "Clear rubble at ("+loc.add(dir).x+","+loc.add(dir).y+")");
+	            			}
+	            			else {
+	            				rc.move(directions[millor]);
+	            				rc.setIndicatorString(2, "Move to ("+loc.add(dir).x+","+loc.add(dir).y+")");
+	            			}
 	            			//DAVID aixo a vegades (molt poc) em dona una excepcio de can't move too much rubble
 	            		}
 	            	}
@@ -460,53 +471,12 @@ public class Soldier extends RobotPlayer {
             		}
             	}
             	
-            	/*
-                int fate = rand.nextInt(1000);
-                boolean shouldAttack = false;
-                // If this robot type can attack, check for enemies within range and attack one
-                if (attackRange > 0) {
-                    RobotInfo[] enemiesWithinRange = rc.senseNearbyRobots(attackRange, enemyTeam);
-                    RobotInfo[] zombiesWithinRange = rc.senseNearbyRobots(attackRange, Team.ZOMBIE);
-                    if (enemiesWithinRange.length > 0) {
-                        shouldAttack = true;
-                        // Check if weapon is ready
-                        if (rc.isWeaponReady()) {
-                            rc.attackLocation(enemiesWithinRange[rand.nextInt(enemiesWithinRange.length)].location);
-                        }
-                    } else if (zombiesWithinRange.length > 0) {
-                        shouldAttack = true;
-                        // Check if weapon is ready
-                        if (rc.isWeaponReady()) {
-                            rc.attackLocation(zombiesWithinRange[rand.nextInt(zombiesWithinRange.length)].location);
-                        }
-                    }
-                }
-                if (!shouldAttack) {
-                    if (rc.isCoreReady()) {
-                        if (fate < 600) {
-                            // Choose a random direction to try to move in
-                            Direction dirToMove = directions[fate % 8];
-                            // Check the rubble in that direction
-                            if (rc.senseRubble(loc.add(dirToMove)) >= GameConstants.RUBBLE_OBSTRUCTION_THRESH) {
-                                // Too much rubble, so I should clear it
-                                rc.clearRubble(dirToMove);
-                                // Check if I can move in this direction
-                            } else if (rc.canMove(dirToMove)) {
-                                // Move
-                                rc.move(dirToMove);
-                            }
-                        }
-                    }
-                }
-                */
-        		//if (torn != rc.getRoundNum()) System.out.print("================Desgraciaaaaaaa===============\n");
         		rc.setIndicatorString(2,""+stage);
                 Clock.yield();
             } catch (Exception e) {
                 System.out.println(e.getMessage());
                 e.printStackTrace();
             }
-            //System.out.printf("\nMitjana de diferencia de bc: %f\n", (double)compt_bc/compt_no);
         }
 	}
 
