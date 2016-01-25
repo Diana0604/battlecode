@@ -530,6 +530,7 @@ public class Scout extends RobotPlayer{
 	                				rc.move(dirs[i]);
 	                				hasMoved = true;
 	                				rc.setIndicatorString(0, "M'aparto de la diagonal");
+	                				break;
 	                			}
 	                		}
 	                		if (!hasMoved) {
