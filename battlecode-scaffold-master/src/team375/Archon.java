@@ -603,16 +603,22 @@ public class Archon extends RobotPlayer{
 	            	
 	                if (rc.isCoreReady()) {
 		            	Boolean hasMoved = false;
-		            	/*RobotInfo[] adjacentNeutrals = rc.senseNearbyRobots(2, Team.NEUTRAL);
+		            	RobotInfo[] adjacentNeutrals = rc.senseNearbyRobots(2, Team.NEUTRAL);
 		            	//Si esta al costat d'un robot neutral, l'activa
 		            	if (adjacentNeutrals.length != 0){
-		                	rc.activate(adjacentNeutrals[0].location);
-		                	rc.setIndicatorString(0,"Ha activat un robot neutral");
-		                	hasMoved = true;
-		                }*/
+		                	for (RobotInfo i:adjacentNeutrals) {
+		                		if (i.type == RobotType.ARCHON) {
+		                			rc.activate(adjacentNeutrals[0].location);
+				                	rc.setIndicatorString(0,"Ha activat un robot neutral");
+				                	hasMoved = true;
+		                		}
+		                	}
+		                }
 		            	//Si pot fabricar un robot, el fabrica
 	                    if (!hasMoved && rc.getRobotCount() < molts_soldats && rc.hasBuildRequirements(nextRobotType)) {
-		                	hasMoved = buildRobot(nextRobotType);
+		                	if ((enCombat == 0 && buscantCombat == 0) || rc.senseNearbyRobots(visionRange, myTeam).length == 0) {
+		                		hasMoved = buildRobot(nextRobotType);
+		                	}
 		                }
 	                    //Es mou (o es queda quiet) a la casella amb mes prioritat
 		            	if (!hasMoved) {
@@ -663,7 +669,7 @@ public class Archon extends RobotPlayer{
 	            			}
                 		}
             		}
-            		
+            		rc.setIndicatorString(1, "Scouts: "+num_scouts);
             		if (nextRobotType == RobotType.SOLDIER) chooseNextRobotType();
             		if (rc.isCoreReady()) {
             			if (rc.hasBuildRequirements(RobotType.TURRET)) buildTurtle();
