@@ -543,6 +543,7 @@ public class Scout extends RobotPlayer{
 	                				rc.move(dirs[i]);
 	                				hasMoved = true;
 	                				rc.setIndicatorString(0, "Tinc mes de dues torres al voltant, per tant m'aparto");
+	                				break;
 	                			}
 	                		}
 	                	}
@@ -550,6 +551,9 @@ public class Scout extends RobotPlayer{
 	                		for (int i = 0; i < 8; i++){
 	                			if (rc.senseRubble(rc.getLocation().add(dirs[i])) > 0){
 	                				rc.clearRubble(dirs[i]);
+	                				hasMoved = true;
+	        	                	rc.setIndicatorString(0, "He netejat rubble");
+	        	                	break;
 	                			}
 	                		}
 	                	}
