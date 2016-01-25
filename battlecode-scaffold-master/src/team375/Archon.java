@@ -298,6 +298,7 @@ public class Archon extends RobotPlayer{
     	MapLocation[] ml = MapLocation.getAllMapLocationsWithinRadiusSq(loc, visionRange);
 		for (MapLocation i:ml) {
 			if (rc.senseRubble(i) >= 50) {
+				rc.setIndicatorString(1, "("+i.x+","+i.y+")");
 				return false;
 			}
 		}

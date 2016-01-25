@@ -20,7 +20,7 @@ public class Soldier extends RobotPlayer {
 	private static int[][][] eucl = { { { 6, 6, 6, 6, 6, 6, 6, 5, 6} , { 5, 6, 6, 6, 6, 6, 5, 4, 6} , { 5, 6, 6, 6, 6, 5, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 5, 6, 6, 6, 5, 4, 4, 4, 5} , { 6, 6, 6, 6, 5, 4, 4, 5, 5} , { 6, 6, 6, 6, 5, 4, 5, 6, 6} , { 6, 6, 6, 6, 6, 5, 6, 6, 6} } , { { 5, 6, 6, 6, 6, 6, 5, 4, 6} , { 4, 5, 6, 6, 6, 5, 4, 3, 5} , { 4, 5, 5, 6, 5, 4, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 4, 5, 5, 5, 4, 3, 3, 3, 4} , { 5, 6, 5, 5, 4, 3, 3, 4, 4} , { 6, 6, 6, 5, 4, 3, 4, 5, 5} , { 6, 6, 6, 6, 5, 4, 5, 6, 6} } , { { 4, 5, 6, 6, 6, 6, 5, 4, 5} , { 3, 4, 5, 6, 5, 5, 4, 3, 4} , { 3, 4, 4, 5, 4, 4, 3, 2, 3} , { 3, 4, 4, 4, 3, 3, 2, 1, 3} , { 3, 4, 4, 4, 3, 2, 1, 2, 3} , { 3, 4, 4, 4, 3, 1, 2, 3, 3} , { 4, 5, 4, 4, 3, 2, 3, 4, 3} , { 5, 6, 5, 4, 3, 3, 4, 5, 4} , { 6, 6, 6, 5, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 2, 3, 3, 4, 4, 4, 3, 1, 3} , { 1, 3, 3, 3, 3, 3, 1, 0, 2} , { 2, 3, 3, 3, 2, 1, 0, 1, 1} , { 3, 3, 3, 3, 1, 0, 1, 3, 2} , { 4, 4, 3, 3, 2, 1, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 1, 2, 3, 4, 4, 4, 3, 2, 3} , { 0, 1, 2, 3, 3, 3, 2, 1, 1} , { 1, 2, 1, 2, 1, 2, 1, 2, 0} , { 3, 3, 2, 1, 0, 1, 2, 3, 1} , { 4, 4, 3, 2, 1, 2, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 5, 4, 5} , { 3, 3, 4, 5, 5, 5, 4, 3, 4} , { 2, 1, 3, 4, 4, 4, 3, 3, 3} , { 1, 0, 1, 3, 3, 3, 3, 3, 2} , { 2, 1, 0, 1, 2, 3, 3, 3, 1} , { 3, 3, 1, 0, 1, 3, 3, 3, 2} , { 4, 4, 3, 1, 2, 3, 3, 4, 3} , { 5, 5, 4, 3, 3, 3, 4, 5, 4} , { 6, 6, 5, 4, 4, 4, 5, 6, 5} } , { { 4, 4, 5, 6, 6, 6, 6, 5, 5} , { 3, 3, 4, 5, 5, 6, 5, 4, 4} , { 3, 2, 3, 4, 4, 5, 4, 4, 3} , { 3, 1, 2, 3, 3, 4, 4, 4, 3} , { 3, 2, 1, 2, 3, 4, 4, 4, 3} , { 3, 3, 2, 1, 3, 4, 4, 4, 3} , { 4, 4, 3, 2, 3, 4, 4, 5, 3} , { 5, 5, 4, 3, 3, 4, 5, 6, 4} , { 6, 6, 5, 4, 4, 5, 6, 6, 5} } , { { 5, 4, 5, 6, 6, 6, 6, 6, 6} , { 4, 3, 4, 5, 6, 6, 6, 5, 5} , { 4, 3, 3, 4, 5, 6, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 4, 3, 3, 3, 4, 5, 5, 5, 4} , { 5, 4, 3, 3, 4, 5, 5, 6, 4} , { 6, 5, 4, 3, 4, 5, 6, 6, 5} , { 6, 6, 5, 4, 5, 6, 6, 6, 6} } , { { 6, 5, 6, 6, 6, 6, 6, 6, 6} , { 5, 4, 5, 6, 6, 6, 6, 6, 6} , { 5, 4, 4, 5, 6, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 5, 4, 4, 4, 5, 6, 6, 6, 5} , { 6, 5, 4, 4, 5, 6, 6, 6, 5} , { 6, 6, 5, 4, 5, 6, 6, 6, 6} , { 6, 6, 6, 5, 6, 6, 6, 6, 6} } };
 	private static final int[][] aSoldier = {{-1000000, -3, 0, 0, 0, 0, 0},{-1000000, -30, 0, 0, 0, 0, 0} };
 	private static final int[] eArchon = {-1000000, 20, 20, 15, 10, 5, 0};
-	private static final int[] aArchonClearRubble = {-1000000, -10000, -9000, -0, 0, 0, 0};
+	private static final int[] aArchonClearRubble = {-1000000, -10000, -9000, -5000, 0, 0, 0};
 	private static final int[] aArchonTurtle = {-1000000, -10000, -9000, -7500, -5000, -2500, 0};
 	private static final int[] aTurretTurtle = {-1000000, -10000, -9000, -7500, -5000, -2500, 0};
 	private static final int[] eGuard = {-1000000, -1500, -1250, -500, 20, 10, 0};
@@ -122,6 +122,7 @@ public class Soldier extends RobotPlayer {
             try {
             	rc.setIndicatorString(0, ""); rc.setIndicatorString(1, ""); rc.setIndicatorString(2, "");
             	MapLocation loc = rc.getLocation();
+            	//if (stage == 5 && cantonada.distanceSquaredTo(loc) < 50 && cantonada.distanceSquaredTo(loc) > 35) return;
             	
             	int nallies = 0, nenemies = 0, nzombies = 0, nneutrals = 0, dens = 0;
             	RobotInfo[] robots = rc.senseNearbyRobots();
@@ -191,7 +192,8 @@ public class Soldier extends RobotPlayer {
     						desti = new MapLocation(m.getX(), m.getY());
     					}
     					else if (m.getMode() == Message.CLEAR_RUBBLE) {
-    						cantonada = desti;
+    						cantonada = new MapLocation(m.getX(), m.getY());
+    						desti = cantonada;
     						stage = 3;
     					}
     					else if (m.getMode() == Message.GO_TURTLE) {
@@ -345,6 +347,10 @@ public class Soldier extends RobotPlayer {
     	            		}
     	            	}
     	            }
+    	            else if (stage == 4 && desti == null) {
+        				//stage = 5;
+        				//desti = cantonada;
+    	            }
             		
 	            	if (enCombat == 0) {
 		        		if (buscantCombat > 0) {
@@ -358,8 +364,8 @@ public class Soldier extends RobotPlayer {
 		    				M[(dir+7)%8] += 75;
 						}
 						else if (desti != null) {
-							if (desti.distanceSquaredTo(loc) > visionRange || stage != 3) {
-								rc.setIndicatorString(2, "Desti: ("+desti.x+","+desti.y+")");
+							if (desti.distanceSquaredTo(loc) > visionRange+10 || stage != 3) {
+								//rc.setIndicatorString(2, "Desti: ("+desti.x+","+desti.y+")");
 								int dir = inversaDirections(loc.directionTo(desti));
 			    				M[dir] += 80;
 			    				M[(dir+1)%8] += 75;
@@ -471,7 +477,7 @@ public class Soldier extends RobotPlayer {
             		}
             	}
             	
-        		rc.setIndicatorString(2,""+stage);
+        		rc.setIndicatorString(1,""+stage);
                 Clock.yield();
             } catch (Exception e) {
                 System.out.println(e.getMessage());
