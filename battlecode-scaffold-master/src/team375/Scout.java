@@ -399,7 +399,7 @@ public class Scout extends RobotPlayer{
 			ver = Direction.SOUTH;
 		}else {
 			ver = null;
-			System.out.println("El scout no pot veure la cantonada erreur");
+			//System.out.println("El scout no pot veure la cantonada erreur");
 		}
 		if (!rc.onTheMap(rc.getLocation().add(Direction.EAST, 7))){
 			hor = Direction.EAST;
@@ -407,7 +407,7 @@ public class Scout extends RobotPlayer{
 			hor = Direction.WEST;
 		}else {
 			hor = null;
-			System.out.println("El scout no pot veure la cantonada erreur");
+			//System.out.println("El scout no pot veure la cantonada erreur");
 		}
 		
 		Direction cornerDir = Utils.addDirections(hor, ver);
@@ -421,7 +421,7 @@ public class Scout extends RobotPlayer{
 				return rc.getLocation().add(cornerDir.rotateLeft(), xmax+1).add(cornerDir.rotateRight(), ymax+1);
 			}
 		}
-		System.out.println("Error al buscar la cantonada en la fase 4");
+		//System.out.println("Error al buscar la cantonada en la fase 4");
 		return null;
 	}
 	
@@ -438,7 +438,7 @@ public class Scout extends RobotPlayer{
 
         while (true) {
 	        try {
-	        	System.out.println("stage "+stage);
+	        	//System.out.println("stage "+stage);
                 if (stage == 1){
 		        	rc.setIndicatorString(0, "");
 		        	nearbyEnemies = rc.senseNearbyRobots(visionRange,enemyTeam);
@@ -508,7 +508,7 @@ public class Scout extends RobotPlayer{
                 	Boolean hasMoved = false;
                 	if (rc.isCoreReady()){
 	                	MapLocation corner = getCornerLocation();
-	                	System.out.println("La cantonada es " +corner);
+	                	//System.out.println("La cantonada es " +corner);
 	                	Direction d = rc.getLocation().directionTo(corner);
 	                	Direction[] dirs = {d, d.rotateLeft(), d.rotateRight(), d.rotateLeft().rotateLeft(),
 											d.rotateRight().rotateRight(), d.rotateLeft().rotateLeft().rotateLeft(),
@@ -520,7 +520,7 @@ public class Scout extends RobotPlayer{
 	                		else if (rc.canMove(dir.rotateLeft())) rc.move(dir.rotateLeft());
 	                		else if (rc.canMove(dir.rotateRight())) rc.move(dir.rotateRight());
 	                		else {
-	                			System.out.println("Em volia allunyar de la cantonada pero no em puc moure");
+	                			//System.out.println("Em volia allunyar de la cantonada pero no em puc moure");
 	                			rc.setIndicatorString(0, "Em volia allunyar de la cantonada pero no em puc moure");
 	                		}
 	                		hasMoved = true;
@@ -534,7 +534,7 @@ public class Scout extends RobotPlayer{
 	                		}
 	                		if (!hasMoved) {
 	                			rc.setIndicatorString(0, "Em volia apartar de la diagonal pero no puc");
-	                			System.out.println("Em volia apartar de la diagonal pero no puc");
+	                			//System.out.println("Em volia apartar de la diagonal pero no puc");
 	                		}
 	                	}
 	                	if (!hasMoved && countAdjacentTurrets() >= 3){

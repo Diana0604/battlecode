@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import battlecode.common.*;
 
+// FICAR ALGO DE PERILL AL VOLTANT DELS ARCHONS PQ ELS SOLDATS ELS DEIXIN PASSAR
+
 public class Archon extends RobotPlayer{
 	
 	//Arraylist amb les posicions dels dens que coneix
