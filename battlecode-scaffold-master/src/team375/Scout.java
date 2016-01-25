@@ -191,7 +191,7 @@ public class Scout extends RobotPlayer{
 		
 		int i = 0;
 		while (i < 8){
-			if (rc.canMove(dirs[i]) && !pastLocations.contains(rc.getLocation().add(dirs[i])) && danger[dirs[i].dx+1][dirs[i].dy+1] == 0){
+			if (rc.canMove(dirs[i]) && danger[dirs[i].dx+1][dirs[i].dy+1] == 0){
 				currentDir = dirs[i];
 				i = 9;
 			}
@@ -501,14 +501,17 @@ public class Scout extends RobotPlayer{
 	                	if (rc.getLocation().distanceSquaredTo(targetLocation) > 25){
 	                		rc.setIndicatorString(0, "Va cap al lider - stage 2");
 	                		returnToLeader();
-	                		rc.move(currentDir);
-	                		hasMoved = true;
+	                		if (currentDir != null && rc.canMove(currentDir)){
+		                		rc.move(currentDir);
+		                		hasMoved = true;
+	                		}
 	                	}else {
 	                		if (rc.getLocation().distanceSquaredTo(targetLocation) < 25){
 	                			MapLocation corner = getCornerLocation();
 	                			if (corner != null){
 	                				if (rc.canMove(corner.directionTo(rc.getLocation()))){
 	                					rc.move(corner.directionTo(rc.getLocation()));
+	                					hasMoved = true;
 	                				}
 	                			}
 	                		}
@@ -517,7 +520,7 @@ public class Scout extends RobotPlayer{
 	                			Direction dir = directions[rand.nextInt(8)];
 	                			if (rc.canMove(dir) && !hasMoved) {
 	                				rc.move(dir);
-	                				hasMoved = false;
+	                				hasMoved = true;
 	                				rc.setIndicatorString(0, "Esta a prop del lider i es mou random - stage 2");
 	                			}
 	                		}

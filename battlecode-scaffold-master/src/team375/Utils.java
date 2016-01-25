@@ -11,7 +11,7 @@ public class Utils {
 	//ES MOLT CUTRE HO SE SORRY
 	public static Direction addDirections(Direction a, Direction b){
 		if (a == null || b == null){
-			System.out.println("Error, intentes sumar direccions nuls");
+			//System.out.println("Error, intentes sumar direccions nuls");
 			return null;
 		}
 		if (a.isDiagonal() || b.isDiagonal()){
