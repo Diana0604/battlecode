@@ -4,28 +4,23 @@ import battlecode.common.*;
 
 public class Turret extends RobotPlayer {
 
-	private static final int LEFT = 1;
-	private static final int RIGHT = 0;
+	//GENERAL
+	
+	//TTM
+	
+	//TURRET
 	private static final int MAXENCALLAT = 8; //per provar
-	private static final int FIGHT = 2;
 	
 	private static boolean hasMoved;
 	private static int encallat;
-	private static boolean set;
-	private static int rotation;
 	private static boolean diagonal;
 	private static boolean primer;
 	
 	private static boolean TTM;
 	private static MapLocation loc;
 	
-	private static int pack;
-	
-	
-	//DEF
 	private static Direction ref;
 	private static int inici;
-	private static boolean turretsFound;
 	private static boolean dins;
 	static MapLocation Corner;
 	static boolean d1;
@@ -118,62 +113,14 @@ public class Turret extends RobotPlayer {
 		return enemy;
 	}
 	
-	public static boolean analitza()
-	{
-		try {
-			int turrets = 0;
-			Direction t1 = null;
-			Direction t2 = null;
-			for(Direction d : directions)
-			{
-				if(d.isDiagonal()) continue;
-				if(rc.canSense(loc.add(d)))
-				{
-					RobotInfo ri = rc.senseRobotAtLocation(loc.add(d));
-					if(ri != null && ri.team.equals(myTeam) && ri.type.equals(RobotType.TURRET))
-					{
-						if(turrets == 0) t1 = d;
-						else t2 = d;
-						++turrets;
-						
-					}
-				}
-			}
-			
-			if(turrets == 2)
-			{
-				if(t1.equals(t2.rotateLeft().rotateLeft()))
-				{
-					ref = t2.rotateLeft();
-					diagonal = true;
-					return true;
-				}
-				if(t1.equals(t2.rotateRight().rotateRight()))
-				{
-					ref = t2.rotateRight();
-					diagonal = true;
-					return true;
-				}
-			}
-		} catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-		}
-		return false;
-	}
-	
 	public static void playTurret() {
 		try {
             attackRange = rc.getType().attackRadiusSquared;
-            set = false;
             encallat = 0;
             primer = true;
             TTM = false;
             inici  = 2;
-            //ref = Direction.NORTH;
-            pack = 0;
             dins = true;
-            turretsFound = false;
             diagonal = false;
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -330,27 +277,51 @@ public class Turret extends RobotPlayer {
             		{
             			if(diagonal && !hasMoved)
             			{
-            				Direction dir = ref.rotateLeft().rotateLeft().rotateLeft();
-            				if(rc.canMove(dir)) 
+            				int fate = rand.nextInt(1000);
+            				if(fate%2 == 0)
             				{
-            					diagonal = false;
-            					hasMoved = true;
-            					ref = dir;
-            					rc.move(dir);
+	            				Direction dir = ref.rotateLeft().rotateLeft().rotateLeft();
+	            				if(rc.canMove(dir)) 
+	            				{
+	            					diagonal = false;
+	            					hasMoved = true;
+	            					ref = dir;
+	            					rc.move(dir);
+	            				}
+	            				if(!hasMoved)
+	            				{
+	            					dir = ref.rotateRight().rotateRight().rotateRight();
+	                				if(rc.canMove(dir)) 
+	                				{
+	                					ref = dir;
+	                					diagonal = false;
+	                					hasMoved = true;
+	                					rc.move(dir);
+	                				}
+	            				}
             				}
-            				
-            				if(!hasMoved)
+            				else
             				{
-            					dir = ref.rotateRight().rotateRight().rotateRight();
-                				if(rc.canMove(dir)) 
-                				{
-                					ref = dir;
-                					diagonal = false;
-                					hasMoved = true;
-                					rc.move(dir);
-                				}
+            					Direction dir = ref.rotateRight().rotateRight().rotateRight();
+	            				if(rc.canMove(dir)) 
+	            				{
+	            					diagonal = false;
+	            					hasMoved = true;
+	            					ref = dir;
+	            					rc.move(dir);
+	            				}
+	            				if(!hasMoved)
+	            				{
+	            					dir = ref.rotateLeft().rotateLeft().rotateLeft();
+	                				if(rc.canMove(dir)) 
+	                				{
+	                					ref = dir;
+	                					diagonal = false;
+	                					hasMoved = true;
+	                					rc.move(dir);
+	                				}
+	            				}
             				}
-            				
             				if(!hasMoved)
             				{
             					if(rc.canMove(ref)) rc.move(ref);
@@ -404,7 +375,6 @@ public class Turret extends RobotPlayer {
 	            {
 	           		if(primer) 
 	           		{
-	           			++pack;
 	           			TTM = true;
 	           			rc.pack();
 	           		}
