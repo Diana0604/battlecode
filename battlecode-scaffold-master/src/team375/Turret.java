@@ -190,7 +190,7 @@ public class Turret extends RobotPlayer {
 				if(loc.isAdjacentTo(driver))
 				{
 					Direction d = loc.directionTo(driver);
-					if(d.isDiagonal())
+					if(d.isDiagonal() && analitza())
 					{
 						TTM = true;
 						diagonal = true;
@@ -226,6 +226,50 @@ public class Turret extends RobotPlayer {
 		//if(seen.isEmpty()) return null;
 		//Signal[] possible = (Signal[]) .toArray();
 		return enemy;
+	}
+	
+	public static boolean analitza()
+	{
+		try {
+			int turrets = 0;
+			Direction t1 = null;
+			Direction t2 = null;
+			for(Direction d : directions)
+			{
+				if(d.isDiagonal()) continue;
+				if(rc.canSense(loc.add(d)))
+				{
+					RobotInfo ri = rc.senseRobotAtLocation(loc.add(d));
+					if(ri != null && ri.team.equals(myTeam) && ri.type.equals(RobotType.TURRET))
+					{
+						if(turrets == 0) t1 = d;
+						else t2 = d;
+						++turrets;
+						
+					}
+				}
+			}
+			
+			if(turrets == 2)
+			{
+				if(t1.equals(t2.rotateLeft().rotateLeft()))
+				{
+					ref = t2.rotateLeft();
+					diagonal = true;
+					return true;
+				}
+				if(t1.equals(t2.rotateRight().rotateRight()))
+				{
+					ref = t2.rotateRight();
+					diagonal = true;
+					return true;
+				}
+			}
+		} catch (Exception e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+		}
+		return false;
 	}
 	
 	public static void playTurret() {
