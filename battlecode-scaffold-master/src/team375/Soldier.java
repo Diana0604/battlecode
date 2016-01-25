@@ -122,6 +122,7 @@ public class Soldier extends RobotPlayer {
             try {
             	rc.setIndicatorString(0, ""); rc.setIndicatorString(1, ""); rc.setIndicatorString(2, "");
             	MapLocation loc = rc.getLocation();
+            	//if (stage == 5 && cantonada.distanceSquaredTo(loc) < 50 && cantonada.distanceSquaredTo(loc) > 35) return;
             	
             	int nallies = 0, nenemies = 0, nzombies = 0, nneutrals = 0, dens = 0;
             	RobotInfo[] robots = rc.senseNearbyRobots();
@@ -345,6 +346,10 @@ public class Soldier extends RobotPlayer {
     	            			else desti = null;
     	            		}
     	            	}
+    	            }
+    	            else if (stage == 4 && desti == null) {
+        				//stage = 5;
+        				//desti = cantonada;
     	            }
             		
 	            	if (enCombat == 0) {
