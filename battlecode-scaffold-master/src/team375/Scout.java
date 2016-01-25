@@ -378,13 +378,13 @@ public class Scout extends RobotPlayer{
         }
 	}
 	
-	private static int countAdjacentTurrets() throws GameActionException{
+	private static int countAdjacentTTM() throws GameActionException{
 		int ret = 0;
 		for (Direction d: directions){
 			if (rc.onTheMap(rc.getLocation().add(d)) && rc.senseRobotAtLocation(rc.getLocation().add(d)) != null) {
-				if (rc.senseRobotAtLocation(rc.getLocation().add(d)).type == RobotType.TURRET) ret++;
+				//if (rc.senseRobotAtLocation(rc.getLocation().add(d)).type == RobotType.TURRET) ret++;
 				if (rc.senseRobotAtLocation(rc.getLocation().add(d)).type == RobotType.TTM) ret++;
-				if (rc.senseRobotAtLocation(rc.getLocation().add(d)).type == RobotType.ARCHON) ret++;
+				//if (rc.senseRobotAtLocation(rc.getLocation().add(d)).type == RobotType.ARCHON) ret++;
 				
 			}
 		}
@@ -412,6 +412,7 @@ public class Scout extends RobotPlayer{
 		
 		Direction cornerDir = Utils.addDirections(hor, ver);
 
+		if (cornerDir == null) return null;
 		
 		if (!rc.onTheMap(rc.getLocation().add(cornerDir.rotateLeft(), 7))){
 			if (!rc.onTheMap(rc.getLocation().add(cornerDir.rotateRight(), 7))){
@@ -508,6 +509,11 @@ public class Scout extends RobotPlayer{
                 	Boolean hasMoved = false;
                 	if (rc.isCoreReady()){
 	                	MapLocation corner = getCornerLocation();
+	                	
+	                	if (corner == null) {
+	                		stage = 1;
+	                		continue;
+	                	}
 	                	//System.out.println("La cantonada es " +corner);
 	                	Direction d = rc.getLocation().directionTo(corner);
 	                	Direction[] dirs = {d, d.rotateLeft(), d.rotateRight(), d.rotateLeft().rotateLeft(),
@@ -538,12 +544,13 @@ public class Scout extends RobotPlayer{
 	                			//System.out.println("Em volia apartar de la diagonal pero no puc");
 	                		}
 	                	}
-	                	if (!hasMoved && countAdjacentTurrets() >= 3){
-	                		for (int i = 0; i < 8; i++){
-	                			if (rc.canMove(dirs[i]) && rc.getLocation().add(dirs[i]).distanceSquaredTo(corner) > 8){
-	                				rc.move(dirs[i]);
+	                	if (!hasMoved && countAdjacentTTM() > 0){
+	                		for (int i = 0; i < 50; i++){
+	                			Direction dir = directions[rand.nextInt(8)];
+	                			if (rc.canMove(dir) && rc.getLocation().add(dir).distanceSquaredTo(corner) > 8){
+	                				rc.move(dir);
 	                				hasMoved = true;
-	                				rc.setIndicatorString(0, "Tinc mes de dues torres al voltant, per tant m'aparto");
+	                				rc.setIndicatorString(0, "Tinc una TTM al costat, per tant m'aparto");
 	                				break;
 	                			}
 	                		}
