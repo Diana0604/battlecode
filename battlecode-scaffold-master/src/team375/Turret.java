@@ -9,18 +9,25 @@ public class Turret extends RobotPlayer {
 	private static final int MAXENCALLAT = 5; //per provar
 	private static final int FIGHT = 2;
 	
-	private static int turretsFound;
 	private static boolean hasMoved;
 	private static int encallat;
 	private static boolean set;
 	private static int rotation;
 	private static boolean diagonal;
 	private static boolean primer;
-	private static Direction ref;
+	
 	private static boolean TTM;
 	private static MapLocation loc;
+	
+	private static int pack;
+	
+	
+	//DEF
+	private static Direction ref;
 	private static int inici;
-	private static int unpack;
+	private static boolean turretsFound;
+	public static boolean dins;
+
 	
 	//busca on esta l'archon que l'ha creat
 	public static void buscaRef()
@@ -29,15 +36,19 @@ public class Turret extends RobotPlayer {
 		{
 			for(Direction dir : directions)
 			{
-				if(!dir.isDiagonal()) continue;
 				if(!rc.canSense(loc.add(dir))) continue; 
-				//TODO en principi les hauria de sense totes, i de fet aquest es un cas especial que segurament no s'ha construit a la diagonal. Pensar que fer
 				RobotInfo ri = rc.senseRobotAtLocation(loc.add(dir));
 				if(ri == null) continue;
 				if(!ri.type.equals(RobotType.ARCHON)) continue;
 				if(!ri.team.equals(myTeam)) continue;
-				ref = dir;
-				break;
+				if(!dir.isDiagonal()) 
+				{
+					diagonal = false;
+					ref = dir.opposite();
+					break;
+				}
+				ref = dir.opposite();
+				diagonal = true;
 			}
 			
 		} catch(GameActionException e)
@@ -54,7 +65,7 @@ public class Turret extends RobotPlayer {
 		{
 			Direction left = ref;
 			//if(left == null) left = Direction.NORTH;
-			for(int i = 0; i < 1 && !set; ++i)
+			for(int i = 0; i < 2 && !set; ++i)
 			{
 				left = left.rotateLeft();
 				if(!rc.canSense(loc.add(left))) continue; //TODO de nou, no hauria de passar mai
@@ -112,8 +123,8 @@ public class Turret extends RobotPlayer {
 	{
 		try
 		{
-			Direction dir = ref.rotateLeft();
-			for(int i = 0; i < 1; ++i)
+			Direction dir = ref;
+			for(int i = 0; i < 2; ++i)
 			{
 				dir = dir.rotateLeft();
 				if(rc.isCoreReady() && rc.canMove(dir))
@@ -123,17 +134,6 @@ public class Turret extends RobotPlayer {
 					hasMoved = true;
 					rc.move(dir);
 					break;
-				}
-			}
-			
-			if(!hasMoved)
-			{
-				if(!rc.canSense(loc.add(dir)) && rc.isCoreReady())
-				{
-					hasMoved = true;
-					TTM = false;
-					encallat = 0;
-					rc.unpack();
 				}
 			}
 			//aqui es podria pensar que potser un robot no es mou a un lloc perque en aquell moment hi ha rubble podria esperar i 
@@ -151,7 +151,7 @@ public class Turret extends RobotPlayer {
 	{
 		try
 		{
-			Direction dir = ref.rotateRight();
+			Direction dir = ref;
 			for(int i = 0; i < 2; ++i)
 			{
 				dir = dir.rotateRight();
@@ -164,18 +164,6 @@ public class Turret extends RobotPlayer {
 					break;
 				}
 			}
-			
-			if(!hasMoved)
-			{
-				if(!rc.canSense(loc.add(dir)) && rc.isCoreReady())
-				{
-					hasMoved = true;
-					encallat = 0;
-					TTM = false;
-					rc.unpack();
-				}
-			}
-			
 			//aqui es podria pensar que potser un robot no es mou a un lloc perque en aquell moment hi ha rubble podria esperar i 
 			//anarhi despres.
 			//pero en realitat si no s'hi mou i es mou mes enlla, despres una altra turret ja hi arribara TODO comentar
@@ -192,11 +180,35 @@ public class Turret extends RobotPlayer {
 	{
 		Signal signals[] = rc.emptySignalQueue();
 		//ArrayList<Integer> seen = new ArrayList<Integer>();
-		
+		MapLocation enemy = null;
 		for(Signal s : signals)
 		{
 			if(s.getTeam() != myTeam) continue;
-			if(s.getMessage() == null) continue;
+			if(s.getMessage() == null) 
+			{
+				MapLocation driver = s.getLocation();
+				if(loc.isAdjacentTo(driver))
+				{
+					Direction d = loc.directionTo(driver);
+					if(d.isDiagonal())
+					{
+						TTM = true;
+						diagonal = true;
+						dins = false;
+						ref = d.opposite();
+						inici = -1;
+						try {
+							rc.pack();
+						} catch (GameActionException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						return null;
+					}
+				}
+				continue;
+			}
+			if(TTM) continue;
 			//if(seen.contains(s.getID())) continue;
 			int[] coded = s.getMessage();
 			Message m = new Message(s.getLocation(), coded[0], coded[1]);
@@ -204,16 +216,16 @@ public class Turret extends RobotPlayer {
 			if(mode != Message.SHOOT) continue;
 			int x = m.getX();
 			int y = m.getY();
-			MapLocation enemy = new MapLocation(x, y);
-			if(rc.canAttackLocation(enemy)) 
+			MapLocation e = new MapLocation(x,y);
+			if(rc.canAttackLocation(e)) 
 			{
-				return enemy;
+				enemy = new MapLocation(x, y);
 				//seen.add(s.getID());
 			}
 		}
 		//if(seen.isEmpty()) return null;
 		//Signal[] possible = (Signal[]) .toArray();
-		return null;
+		return enemy;
 	}
 	
 	public static void playTurret() {
@@ -223,9 +235,11 @@ public class Turret extends RobotPlayer {
             encallat = 0;
             primer = true;
             TTM = false;
-            ref = Direction.NORTH;
-            unpack = 3;
-            inici = 5;
+            inici  = 3;
+            //ref = Direction.NORTH;
+            pack = 0;
+            dins = true;
+            turretsFound = false;
         } catch (Exception e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
@@ -233,196 +247,226 @@ public class Turret extends RobotPlayer {
 
         while (true) {
         	loc = rc.getLocation();
+        	hasMoved = false;
             // This is a loop to prevent the run() method from returning. Because of the Clock.yield()
             // at the end of it, the loop will iterate once per game round.
             try {
-                if(TTM)
+                if(TTM && rc.isCoreReady())
             	{
-            		if(rc.isCoreReady())
+            		if(primer)
             		{
-            			hasMoved = false;
+            			primer = false;
+            			buscaRef();
+            			if(ref == null)
+            			{
+            				hasMoved = true;
+            				TTM = false;
+            				rc.unpack();
+            			}
+            		}
             		
-	            		if(primer) 
+            		if(dins)
+            		{
+	            		if(!hasMoved && !diagonal && inici > 0)
 	            		{
-	            			primer = false;
-	            			diagonal = true;
-	            			buscaRef();
-	            		} //TODO en ccas que per algo no estigui a la diagonal, fer algo 
-	            		
-	            		if(inici > 0)
-	            		{
-	            			if(rc.isCoreReady() && rc.canMove(ref.opposite()))
+	            			int turrets = 0;
+	            			Direction t1 = null;
+	            			Direction t2 = null;
+	            			for(Direction d : directions)
 	            			{
-	            				--inici;
-	            				hasMoved = true;
-	            				rc.move(ref.opposite());
-	            			}
-
-	            			if(rc.isCoreReady() && rc.canMove(ref.opposite().rotateLeft()))
-	            			{
-	            				--inici;
-	            				hasMoved = true;
-	            				rc.move(ref.opposite().rotateLeft());
+	            				if(d.isDiagonal()) continue;
+	            				if(rc.canSense(loc.add(d)))
+	            				{
+	            					RobotInfo ri = rc.senseRobotAtLocation(loc.add(d));
+	            					if(ri != null && ri.team.equals(myTeam) && ri.type.equals(RobotType.TURRET))
+	            					{
+	            						if(turrets == 0) t1 = d;
+	            						else t2 = d;
+	            						++turrets;
+	            						
+	            					}
+	            				}
 	            			}
 	            			
-	            			if(rc.isCoreReady() && rc.canMove(ref.opposite().rotateRight()))
+	            			if(turrets == 2)
 	            			{
-	            				--inici;
-	            				hasMoved = true;
-	            				rc.move(ref.opposite().rotateRight());
+	            				if(t1.equals(t2.rotateLeft().rotateLeft()))
+	            				{
+	            					ref = t2.rotateLeft();
+	            					diagonal = true;
+	            					inici = 1;
+	            				}
+	            				if(t1.equals(t2.rotateRight().rotateRight()))
+	            				{
+	            					ref = t2.rotateRight();
+	            					diagonal = true;
+	            					inici = 1;
+	            				}
 	            			}
 	            		}
 	            		
-	            		if(!hasMoved && diagonal)
+	            		if(diagonal && inici == 0)
 	            		{
-	            			if(!set) tryLeft();
-	            			if(!set) tryRight();
-	            			
-	            			if(!set)
+	            			dins = false;
+	            		}
+	            		
+	            		if(!hasMoved && (inici > 0)) //TODO treure diagonal (prova)
+	            		{
+	            			if(rc.canMove(ref)) 
 	            			{
-	            				if(rc.isCoreReady() && rc.canMove(ref.opposite())) 
+	            				hasMoved = true;
+	            				--inici;
+	            				encallat = 0;
+	            				rc.move(ref);
+	            			}
+	            		}
+	            		
+	            		
+	            		
+	            		if(diagonal && inici > 0 && !hasMoved)
+	            		{
+	            			rc.broadcastSignal(2);
+	            		}
+	            		
+	            		if(!hasMoved && inici > 0)
+	            		{
+	            			if(!diagonal)
+	            			{
+	            				if(rc.canMove(ref.rotateLeft()))
 	            				{
 	            					hasMoved = true;
+	            					--inici;
 	            					encallat = 0;
-	            					rc.move(ref.opposite());
-	            				}
-	            				else ++encallat;
-	            			}
-	            			
-	            			//TODO si arriba a MAXENCALLAT a la diagonal liada parda perque crea embus :S
-	            			
-	            			if(set)
-	            			{
-	            				if(rotation == LEFT) goLeft();
-	            				if(rotation == RIGHT) goRight();
-	            				
-	            				if(encallat > MAXENCALLAT)
-	            				{
-	            					if(rc.isCoreReady() && rc.canMove(ref.opposite()))
-	            					{
-	            						encallat = 0;
-	            						set = false;
-	            						hasMoved = true;
-	            						rc.move(ref.opposite()); //si fa MOLT que estic alla no val la pena seguir-ho intentant
-	            					}
+	            					rc.move(ref.rotateLeft());
 	            					
-	            					if(!hasMoved) //aixo voldria dir que la turret no s'ha construit quan tocava o algo aixi
-	            					{
-	            						TTM = false;
-	            						rc.unpack();
-	            					}
+	            				}
+	            				//MapLocation m = loc.add(ref.rotateLeft());
+	            				if(!hasMoved && rc.canMove(ref.rotateRight()))
+	            				{
+	            					hasMoved = true;
+	            					--inici;
+	            					encallat = 0;
+	            					rc.move(ref.rotateRight());
+	            					
 	            				}
 	            			}
 	            		}
-	            		
-	            		if(!diagonal && !hasMoved)
+            		
+	            		if(!hasMoved && !diagonal && inici == 0)
 	            		{
-		            		boolean count = false;
-		            		for(Direction d : directions)
-		            		{
-		            			if(rc.canSenseLocation(loc.add(d)))
-		            			{
-		            				RobotInfo ri = rc.senseRobotAtLocation(loc.add(d));
-		            				if(ri == null) continue;
-		            				if(!ri.team.equals(myTeam)) continue;
-		            				if(ri.type.equals(RobotType.ARCHON) || ri.type.equals(RobotType.TURRET) || ri.type.equals(TTM))
-		            				{
-		            					count = true;
-		            					break;
-		            				}
-		            			}
-		            		}
-		            		
-		            		if(!count)
-		            		{
-		            			hasMoved = true;
-		            			TTM = false;
-		            			rc.unpack();
-		            		}
+	            			TTM = false;
+	            			hasMoved = true;
+	            			rc.unpack();
+	            		}
+            		
+	            		if(!diagonal && !hasMoved && inici > 0 && turretsFound) 
+	            		{
+	            			if(rc.canMove(ref.rotateLeft().rotateLeft()))
+	            			{
+	            				ref = ref.rotateLeft().rotateLeft();
+	            			}
+	            			
+	            			else
+	                		{
+	                			if(rc.canMove(ref.rotateRight().rotateRight()))
+	                			{
+	                				ref = ref.rotateRight().rotateRight();
+	                			}
+	                		}
+	            			inici = -1;
 	            		}
 	            		
-	            		if(!hasMoved && !diagonal)
+	            		if(!diagonal && !hasMoved && inici > 0 && !turretsFound)  //TODO AQUI PERDO UN TORN
 	            		{
-	            			turretsFound = 0;
+	            			if(rc.canMove(ref.rotateLeft().rotateLeft()))
+	            			{
+	            				ref = ref.rotateLeft().rotateLeft();
+	            				inici = 5;
+	            			}
 	            			
-	            			if(rc.isCoreReady() && rc.canMove(ref))
+	            			else
+	                		{
+	                			if(rc.canMove(ref.rotateRight().rotateRight()))
+	                			{
+	                				ref = ref.rotateRight().rotateRight();
+	                				inici = 5;
+	                			}
+	                		}
+	            			turretsFound = true;
+	            		}
+            		
+            		
+	            		if(inici == -1) 
+	            		{
+	            			if(!rc.onTheMap(loc.add(ref))) ref = ref.opposite();
+	            			inici = 5; //TODO no es mou ara 
+	            		}
+	            		
+	            		if(!hasMoved && !diagonal && inici == -1)
+	            		{
+	            			if(rc.canMove(ref))
 	            			{
 	            				hasMoved = true;
 	            				encallat = 0;
 	            				rc.move(ref);
 	            			}
-	            			
-	            			if(!hasMoved)
-	            			{
-	            				if(rc.canSenseLocation(loc.add(ref)))
-	            				{
-	            					RobotInfo ri = rc.senseRobotAtLocation(loc.add(ref));
-	            					if(!(ri == null) && ri.team.equals(myTeam) && (ri.type.equals(RobotType.TURRET) || ri.type.equals(RobotType.ARCHON)))
-	            					{
-	            						++turretsFound;
-	            					}
-	            				}
-	            				else ++turretsFound;
-	            			}
-	            			
-	            			Direction dir = null;
-	            			
-	            			if(!hasMoved)
-	            			{
-	            				if(rotation == RIGHT) dir = ref.rotateRight();
-	            				else dir = ref.rotateLeft();
-	            				if(rc.isCoreReady() && rc.canMove(dir))
-	            				{
-	            					hasMoved = true; 
-	            					encallat = 0;
-	            					rc.move(dir);
-	            				}
-	            			}
-	            			
-	            			if(!hasMoved)
-	            			{
-	            				if(rc.canSenseLocation(loc.add(dir)))
-	            				{
-	            					RobotInfo ri = rc.senseRobotAtLocation(loc.add(dir));
-	            					if(!(ri == null) && ri.team.equals(myTeam) && (ri.type.equals(RobotType.TURRET) || ri.type.equals(RobotType.SCOUT)))
-	            					{
-	            						++turretsFound;
-	            					}
-	            				}
-	            				else ++turretsFound;
-	            			}
-	            			
-	            			if(!hasMoved)
-	            			{
-	            				if(turretsFound >= FIGHT)
-	            				{
-	            					hasMoved = true;
-	            					encallat = 0;
-	            					TTM = false;
-	            					rc.unpack();
-	            				}
-	            			}
-	            			
-	            			if(!hasMoved)
-	            			{
-	            				++encallat;
-	            				if(encallat > MAXENCALLAT)
-	            				{
-	            					hasMoved = true;
-	            					encallat = 0;
-	            					TTM = false;
-	            					rc.unpack();
-	            				}
-	            			}
 	            		}
             		}
+            		
+            		else 
+            		{
+            			rc.setIndicatorString(0, "ESTIC FORA");
+            			System.out.println("ALGU ESTA FORAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            			if(diagonal)
+            			{
+            				Direction dir = ref.rotateLeft().rotateLeft().rotateLeft();
+            				if(rc.canMove(dir)) 
+            				{
+            					diagonal = false;
+            					hasMoved = true;
+            					ref = dir;
+            					rc.move(dir);
+            				}
+            				
+            				if(!hasMoved)
+            				{
+            					dir = ref.rotateRight().rotateRight().rotateRight();
+                				if(rc.canMove(dir)) 
+                				{
+                					ref = dir;
+                					diagonal = false;
+                					hasMoved = true;
+                					rc.move(dir);
+                				}
+            				}
+            				
+            				if(!hasMoved)
+            				{
+            					if(rc.canMove(ref)) rc.move(ref);
+            				}
+            			}
+            			
+            			if(!diagonal)
+            			{
+            				if(rc.canMove(ref))
+            				{
+            					rc.move(ref);
+            				}
+            				else
+            				{
+            					TTM = false;
+            					rc.unpack();
+            				}
+            			}
+            		}
+            		
+            		
             	}
-            	
-                else 
+                if(!TTM)
 	            {
 	           		if(primer) 
 	           		{
-	           			//++pack;
+	           			++pack;
 	           			TTM = true;
 	           			rc.pack();
 	           		}
@@ -435,7 +479,7 @@ public class Turret extends RobotPlayer {
 	           			}
 	           			else
 	           			{
-		           			if (rc.isWeaponReady()) {
+		           			if (!TTM && rc.isWeaponReady()) {
 		                    RobotInfo[] enemiesWithinRange = rc.senseNearbyRobots(attackRange, enemyTeam);
 		                    RobotInfo[] zombiesWithinRange = rc.senseNearbyRobots(attackRange, Team.ZOMBIE);
 		                    if (enemiesWithinRange.length > 0) {
@@ -466,6 +510,3 @@ public class Turret extends RobotPlayer {
         }
 	}
 }
-
-
-
