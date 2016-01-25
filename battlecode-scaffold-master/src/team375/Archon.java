@@ -521,7 +521,14 @@ public class Archon extends RobotPlayer{
 	}
     
 	private static boolean voltantNet() {
-    	if (ndens > 0) return false;
+    	if (ndens > 0) {
+    		for (MapLocation d:dens) {
+    			if (rc.canSense(d)) {
+    				posicio_bruta = d;
+    	    		return false;
+    			}
+    		}
+    	}
     	MapLocation[] ml = MapLocation.getAllMapLocationsWithinRadiusSq(loc, visionRange);
 		for (MapLocation i:ml) {
 			if (rc.senseRubble(i) >= 50) {
@@ -606,13 +613,9 @@ public class Archon extends RobotPlayer{
 		            	RobotInfo[] adjacentNeutrals = rc.senseNearbyRobots(2, Team.NEUTRAL);
 		            	//Si esta al costat d'un robot neutral, l'activa
 		            	if (adjacentNeutrals.length != 0){
-		                	for (RobotInfo i:adjacentNeutrals) {
-		                		if (i.type == RobotType.ARCHON) {
-		                			rc.activate(adjacentNeutrals[0].location);
-				                	rc.setIndicatorString(0,"Ha activat un robot neutral");
-				                	hasMoved = true;
-		                		}
-		                	}
+                			rc.activate(adjacentNeutrals[0].location);
+		                	rc.setIndicatorString(0,"Ha activat un robot neutral");
+		                	hasMoved = true;
 		                }
 		            	//Si pot fabricar un robot, el fabrica
 	                    if (!hasMoved && rc.getRobotCount() < molts_soldats && rc.hasBuildRequirements(nextRobotType)) {
