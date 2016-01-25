@@ -134,7 +134,7 @@ public class Archon extends RobotPlayer{
             	rc.setIndicatorString(0,"Ha construit un soldat");
 		        rc.broadcastSignal(visionRange);
 		        rc.broadcastSignal(visionRange);
-		        if (stage == 3) enviarClearRubble();
+		        if (stage == 3) enviarSignalStage3();
                 return true;
             } else {
                 // Rotate the direction to try
