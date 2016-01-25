@@ -98,31 +98,7 @@ public class Turret extends RobotPlayer {
 		for(Signal s : signals)
 		{
 			if(s.getTeam() != myTeam) continue;
-			if(s.getMessage() == null) 
-			{
-				MapLocation driver = s.getLocation();
-				if(loc.isAdjacentTo(driver))
-				{
-					Direction d = loc.directionTo(driver);
-					if(d.isDiagonal() && analitza())
-					{
-						TTM = true;
-						diagonal = true;
-						dins = false;
-						ref = d.opposite();
-						inici = -1;
-						try {
-							rc.pack();
-						} catch (GameActionException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						return null;
-					}
-				}
-				continue;
-			}
-			if(TTM) continue;
+			if(s.getMessage() == null) continue;
 			//if(seen.contains(s.getID())) continue;
 			int[] coded = s.getMessage();
 			Message m = new Message(s.getLocation(), coded[0], coded[1]);
@@ -193,7 +169,7 @@ public class Turret extends RobotPlayer {
             encallat = 0;
             primer = true;
             TTM = false;
-            inici  = 3;
+            inici  = 2;
             //ref = Direction.NORTH;
             pack = 0;
             dins = true;
@@ -331,12 +307,17 @@ public class Turret extends RobotPlayer {
             			
             			if(!hasMoved)
             			{
-            				if(inici > 0)
+            				//if(inici > 0)
             				{
             					if(rc.canMove(ref))
             					{
-            						--inici;
-            						if(inici == 0) dins = false;
+            						//--inici;
+            						//if(!diagonal) --inici;
+            						//if(inici <= 0) 
+            						if(diagonal && loc.distanceSquaredTo(Corner) >= 3)
+            						{
+            							dins = false;
+            						}
             						hasMoved = true;
             						rc.move(ref);
             					}
