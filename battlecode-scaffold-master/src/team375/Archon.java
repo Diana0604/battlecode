@@ -237,12 +237,16 @@ public class Archon extends RobotPlayer{
 	}
 	
 	public static void chooseNextRobotType(){
-    	int n = rand.nextInt(12); // 1 de cada 12 robots seran scouts
-    	if (n == 0) nextRobotType = RobotType.SCOUT;
-    	else {
-    		if (stage < 4) nextRobotType = RobotType.SOLDIER;
-    		else nextRobotType = RobotType.TURRET;
-    	}
+		if (stage < 4) {
+	    	int n = rand.nextInt(12); // 1 de cada 12 robots seran scouts
+	    	if (n == 0) nextRobotType = RobotType.SCOUT;
+	    	else nextRobotType = RobotType.SOLDIER;
+		}
+		else {
+			int n = rand.nextInt(3);
+	    	if (n == 0 && num_scouts < 5) nextRobotType = RobotType.SCOUT;
+	    	else nextRobotType = RobotType.TURRET;
+		}
     }
 	
 	private static void construirArrays() {
