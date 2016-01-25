@@ -373,6 +373,7 @@ public class Scout extends RobotPlayer{
         	int[] coded = m.encode();
         	rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
         	sentSignals++;
+        	rc.setIndicatorString(1, "Objectiu amb mes prioritat a "+ri.location);
         	priority.remove(ri);
         }
 	}
@@ -380,7 +381,12 @@ public class Scout extends RobotPlayer{
 	private static int countAdjacentTurrets() throws GameActionException{
 		int ret = 0;
 		for (Direction d: directions){
-			if (rc.onTheMap(rc.getLocation().add(d)) && rc.senseRobotAtLocation(rc.getLocation().add(d)) != null) ret++;
+			if (rc.onTheMap(rc.getLocation().add(d)) && rc.senseRobotAtLocation(rc.getLocation().add(d)) != null) {
+				if (rc.senseRobotAtLocation(rc.getLocation().add(d)).type == RobotType.TURRET) ret++;
+				if (rc.senseRobotAtLocation(rc.getLocation().add(d)).type == RobotType.TTM) ret++;
+				if (rc.senseRobotAtLocation(rc.getLocation().add(d)).type == RobotType.ARCHON) ret++;
+				
+			}
 		}
 		return ret;
 	}
@@ -432,6 +438,7 @@ public class Scout extends RobotPlayer{
 
         while (true) {
 	        try {
+	        	System.out.println("stage "+stage);
                 if (stage == 1){
 		        	rc.setIndicatorString(0, "");
 		        	nearbyEnemies = rc.senseNearbyRobots(visionRange,enemyTeam);
@@ -485,6 +492,7 @@ public class Scout extends RobotPlayer{
 	    			rc.setIndicatorString(1, s1+" "+s2+" "+s3+" "+s4);
 	                sendSignalsStage1();
                 }else if (stage == 2){
+                	readSignals();
                 	rc.setIndicatorString(0, "");
                 	rc.setIndicatorString(1, "");
                 	if (rc.isCoreReady()){
@@ -495,6 +503,7 @@ public class Scout extends RobotPlayer{
 	                	}
                 	}
                 }else if (stage == 4){
+                	rc.setIndicatorString(1, "");
                 	sendSignalsStage4();
                 	Boolean hasMoved = false;
                 	if (rc.isCoreReady()){
@@ -545,7 +554,7 @@ public class Scout extends RobotPlayer{
 	                		}
 	                	}
 	                	rc.setIndicatorString(0, "No molesto per tant no em moc");
-                	}else rc.setIndicatorString(0, "Tinc core delay");	
+                	}
                 }
                 Clock.yield();
             } catch (Exception e) {
