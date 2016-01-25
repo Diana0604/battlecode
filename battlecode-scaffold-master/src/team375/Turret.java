@@ -459,8 +459,6 @@ public class Turret extends RobotPlayer {
             		
             		else 
             		{
-            			rc.setIndicatorString(0, "ESTIC FORA");
-            			System.out.println("ALGU ESTA FORAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             			if(diagonal)
             			{
             				Direction dir = ref.rotateLeft().rotateLeft().rotateLeft();
