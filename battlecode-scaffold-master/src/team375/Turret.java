@@ -19,8 +19,8 @@ public class Turret extends RobotPlayer {
 	private static Direction ref;
 	private static boolean TTM;
 	private static MapLocation loc;
-	
-	private static int pack;
+	private static int inici;
+	private static int unpack;
 	
 	//busca on esta l'archon que l'ha creat
 	public static void buscaRef()
@@ -54,7 +54,7 @@ public class Turret extends RobotPlayer {
 		{
 			Direction left = ref;
 			//if(left == null) left = Direction.NORTH;
-			for(int i = 0; i < 2 && !set; ++i)
+			for(int i = 0; i < 1 && !set; ++i)
 			{
 				left = left.rotateLeft();
 				if(!rc.canSense(loc.add(left))) continue; //TODO de nou, no hauria de passar mai
@@ -112,8 +112,8 @@ public class Turret extends RobotPlayer {
 	{
 		try
 		{
-			Direction dir = ref;
-			for(int i = 0; i < 2; ++i)
+			Direction dir = ref.rotateLeft();
+			for(int i = 0; i < 1; ++i)
 			{
 				dir = dir.rotateLeft();
 				if(rc.isCoreReady() && rc.canMove(dir))
@@ -123,6 +123,17 @@ public class Turret extends RobotPlayer {
 					hasMoved = true;
 					rc.move(dir);
 					break;
+				}
+			}
+			
+			if(!hasMoved)
+			{
+				if(!rc.canSense(loc.add(dir)) && rc.isCoreReady())
+				{
+					hasMoved = true;
+					TTM = false;
+					encallat = 0;
+					rc.unpack();
 				}
 			}
 			//aqui es podria pensar que potser un robot no es mou a un lloc perque en aquell moment hi ha rubble podria esperar i 
@@ -140,7 +151,7 @@ public class Turret extends RobotPlayer {
 	{
 		try
 		{
-			Direction dir = ref;
+			Direction dir = ref.rotateRight();
 			for(int i = 0; i < 2; ++i)
 			{
 				dir = dir.rotateRight();
@@ -153,6 +164,18 @@ public class Turret extends RobotPlayer {
 					break;
 				}
 			}
+			
+			if(!hasMoved)
+			{
+				if(!rc.canSense(loc.add(dir)) && rc.isCoreReady())
+				{
+					hasMoved = true;
+					encallat = 0;
+					TTM = false;
+					rc.unpack();
+				}
+			}
+			
 			//aqui es podria pensar que potser un robot no es mou a un lloc perque en aquell moment hi ha rubble podria esperar i 
 			//anarhi despres.
 			//pero en realitat si no s'hi mou i es mou mes enlla, despres una altra turret ja hi arribara TODO comentar
@@ -201,7 +224,8 @@ public class Turret extends RobotPlayer {
             primer = true;
             TTM = false;
             ref = Direction.NORTH;
-            pack = 0;
+            unpack = 3;
+            inici = 5;
         } catch (Exception e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
@@ -225,7 +249,31 @@ public class Turret extends RobotPlayer {
 	            			buscaRef();
 	            		} //TODO en ccas que per algo no estigui a la diagonal, fer algo 
 	            		
-	            		if(diagonal)
+	            		if(inici > 0)
+	            		{
+	            			if(rc.isCoreReady() && rc.canMove(ref.opposite()))
+	            			{
+	            				--inici;
+	            				hasMoved = true;
+	            				rc.move(ref.opposite());
+	            			}
+
+	            			if(rc.isCoreReady() && rc.canMove(ref.opposite().rotateLeft()))
+	            			{
+	            				--inici;
+	            				hasMoved = true;
+	            				rc.move(ref.opposite().rotateLeft());
+	            			}
+	            			
+	            			if(rc.isCoreReady() && rc.canMove(ref.opposite().rotateRight()))
+	            			{
+	            				--inici;
+	            				hasMoved = true;
+	            				rc.move(ref.opposite().rotateRight());
+	            			}
+	            		}
+	            		
+	            		if(!hasMoved && diagonal)
 	            		{
 	            			if(!set) tryLeft();
 	            			if(!set) tryRight();
@@ -267,7 +315,33 @@ public class Turret extends RobotPlayer {
 	            			}
 	            		}
 	            		
-	            		if(!diagonal)
+	            		if(!diagonal && !hasMoved)
+	            		{
+		            		boolean count = false;
+		            		for(Direction d : directions)
+		            		{
+		            			if(rc.canSenseLocation(loc.add(d)))
+		            			{
+		            				RobotInfo ri = rc.senseRobotAtLocation(loc.add(d));
+		            				if(ri == null) continue;
+		            				if(!ri.team.equals(myTeam)) continue;
+		            				if(ri.type.equals(RobotType.ARCHON) || ri.type.equals(RobotType.TURRET) || ri.type.equals(TTM))
+		            				{
+		            					count = true;
+		            					break;
+		            				}
+		            			}
+		            		}
+		            		
+		            		if(!count)
+		            		{
+		            			hasMoved = true;
+		            			TTM = false;
+		            			rc.unpack();
+		            		}
+	            		}
+	            		
+	            		if(!hasMoved && !diagonal)
 	            		{
 	            			turretsFound = 0;
 	            			
@@ -348,7 +422,7 @@ public class Turret extends RobotPlayer {
 	            {
 	           		if(primer) 
 	           		{
-	           			++pack;
+	           			//++pack;
 	           			TTM = true;
 	           			rc.pack();
 	           		}
