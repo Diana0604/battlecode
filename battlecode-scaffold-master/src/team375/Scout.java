@@ -374,8 +374,8 @@ public class Scout extends RobotPlayer{
         		//System.out.println("abcd");
         	}
         	//if (ri == null) System.out.println("ri null");
-        	Message m = new Message(rc.getLocation(), Message.SHOOT, 0, Message.ALL, ri.location.x, ri.location.y, 0,0,0,0);
-        	int[] coded = m.encode();
+        	m = new Message(rc.getLocation(), Message.SHOOT, 0, Message.ALL, ri.location.x, ri.location.y, 0,0,0,0);
+        	coded = m.encode();
         	rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
         	sentSignals++;
         	rc.setIndicatorString(1, "Objectiu amb mes prioritat a "+ri.location + " ("+ri.type+")");
