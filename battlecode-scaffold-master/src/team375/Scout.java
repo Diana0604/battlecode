@@ -373,7 +373,7 @@ public class Scout extends RobotPlayer{
         	int[] coded = m.encode();
         	rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
         	sentSignals++;
-        	rc.setIndicatorString(1, "Objectiu amb mes prioritat a "+ri.location);
+        	rc.setIndicatorString(1, "Objectiu amb mes prioritat a "+ri.location + " ("+ri.type+")");
         	priority.remove(ri);
         }
 	}
@@ -496,12 +496,33 @@ public class Scout extends RobotPlayer{
                 	readSignals();
                 	rc.setIndicatorString(0, "");
                 	rc.setIndicatorString(1, "");
+                	Boolean hasMoved = false;
                 	if (rc.isCoreReady()){
 	                	if (rc.getLocation().distanceSquaredTo(targetLocation) > 25){
 	                		rc.setIndicatorString(0, "Va cap al lider - stage 2");
 	                		returnToLeader();
 	                		rc.move(currentDir);
+	                		hasMoved = true;
+	                	}else {
+	                		if (rc.getLocation().distanceSquaredTo(targetLocation) < 25){
+	                			MapLocation corner = getCornerLocation();
+	                			if (corner != null){
+	                				if (rc.canMove(corner.directionTo(rc.getLocation()))){
+	                					rc.move(corner.directionTo(rc.getLocation()));
+	                				}
+	                			}
+	                		}
+	                		
+	                		for (int i = 0; i < 50; i++){
+	                			Direction dir = directions[rand.nextInt(8)];
+	                			if (rc.canMove(dir) && !hasMoved) {
+	                				rc.move(dir);
+	                				hasMoved = false;
+	                				rc.setIndicatorString(0, "Esta a prop del lider i es mou random - stage 2");
+	                			}
+	                		}
 	                	}
+	                	if (!hasMoved) rc.setIndicatorString(0, "No s'ha pogut moure - stage 2");
                 	}
                 }else if (stage == 4){
                 	rc.setIndicatorString(1, "");
