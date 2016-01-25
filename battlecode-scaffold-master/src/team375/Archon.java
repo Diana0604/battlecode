@@ -82,6 +82,7 @@ public class Archon extends RobotPlayer{
 	private static int enCombat = 0, buscantCombat = 0;
 	private static MapLocation ls = null; //location del signal
 	private static boolean molt_aprop, urgencia;
+	private static int num_scouts = 0;
 	
 	private static void addPartsPriority() {
 		if (!urgencia) {
@@ -631,6 +632,34 @@ public class Archon extends RobotPlayer{
             	}
             	else {
             		//MODO TURTLE
+            		num_scouts = 0;
+            		Signal[] signals = rc.emptySignalQueue();
+            		for (Signal s:signals) {
+            			if (s.getTeam() != myTeam) continue;
+                		if (s.getMessage() == null) continue;
+                		int[] coded = s.getMessage();
+                		Message m = new Message(s.getLocation(), coded[0], coded[1]);
+                		int mode = m.getMode();
+                		int object = m.getObject();
+            			int typeControl = m.getTypeControl();
+            			int robotType = m.getRobotType();
+            			int x = m.getX();
+            			int y = m.getY();
+            			int idControl = m.getidControl();
+            			int id = m.getid();
+                		if (typeControl == 1){
+            				if (!m.toArchon()) continue;
+            			}
+            			//Si el signal distingeix per ID del receptor i no esta dirigit a ell, l'ignora
+            			if (idControl == 1 && id != rc.getID()) continue;
+                		
+                		if (m.getSenderArchon() == 0) {
+	            			if (mode == Message.IM_HERE) {
+	            				++num_scouts;
+	            			}
+                		}
+            		}
+            		
             		if (nextRobotType == RobotType.SOLDIER) chooseNextRobotType();
             		if (rc.isCoreReady()) {
             			if (rc.hasBuildRequirements(RobotType.TURRET)) buildTurtle();
