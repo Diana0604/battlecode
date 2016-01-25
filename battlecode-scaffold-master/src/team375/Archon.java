@@ -108,7 +108,10 @@ public class Archon extends RobotPlayer{
     public static void chooseNextRobotType(){
     	int n = rand.nextInt(12); // 1 de cada 12 robots seran scouts
     	if (n == 0) nextRobotType = RobotType.SCOUT;
-    	else nextRobotType = RobotType.SOLDIER;
+    	else {
+    		if (stage < 4) nextRobotType = RobotType.SOLDIER;
+    		else nextRobotType = RobotType.TURRET;
+    	}
     }
     
     //Llegeix les signals que li han arribat
@@ -426,12 +429,12 @@ public class Archon extends RobotPlayer{
         return false;
 	}
 	
-	private static boolean buildTurret() throws GameActionException {
+	private static boolean buildTurtle() throws GameActionException {
 		Direction dirToBuild = directions[rand.nextInt(8)];
         for (int i = 0; i < 8; i++) {
             // If possible, build in this direction
             if (targetLocation.distanceSquaredTo(loc.add(dirToBuild)) > 2 && rc.canBuild(dirToBuild, RobotType.TURRET)) {
-                rc.build(dirToBuild, RobotType.TURRET);
+                rc.build(dirToBuild, nextRobotType);
                 chooseNextRobotType();
             	rc.setIndicatorString(0,"Ha construit un soldat");
 		        rc.broadcastSignal(visionRange);
@@ -638,9 +641,9 @@ public class Archon extends RobotPlayer{
             	}
             	else {
             		//MODO TURTLE
-            		
+            		if (nextRobotType == RobotType.SOLDIER) chooseNextRobotType();
             		if (rc.isCoreReady() && rc.hasBuildRequirements(RobotType.TURRET)) {
-	                	buildTurret();
+	                	buildTurtle();
 	        			if (targetLocation != null) {
 	        				rc.setIndicatorString(2, "Desti: ("+targetLocation.x+","+targetLocation.y+")");
 	        				Direction d = loc.directionTo(targetLocation);
