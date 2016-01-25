@@ -82,6 +82,7 @@ public class Archon extends RobotPlayer{
 	private static int enCombat = 0, buscantCombat = 0;
 	private static MapLocation ls = null; //location del signal
 	private static boolean molt_aprop, urgencia;
+	private static int num_scouts = 0;
 	
 	private static void addPartsPriority() {
 		if (!urgencia) {
@@ -236,12 +237,16 @@ public class Archon extends RobotPlayer{
 	}
 	
 	public static void chooseNextRobotType(){
-    	int n = rand.nextInt(12); // 1 de cada 12 robots seran scouts
-    	if (n == 0) nextRobotType = RobotType.SCOUT;
-    	else {
-    		if (stage < 4) nextRobotType = RobotType.SOLDIER;
-    		else nextRobotType = RobotType.TURRET;
-    	}
+		if (stage < 4) {
+	    	int n = rand.nextInt(12); // 1 de cada 12 robots seran scouts
+	    	if (n == 0) nextRobotType = RobotType.SCOUT;
+	    	else nextRobotType = RobotType.SOLDIER;
+		}
+		else {
+			int n = rand.nextInt(3);
+	    	if (n == 0 && num_scouts < 5) nextRobotType = RobotType.SCOUT;
+	    	else nextRobotType = RobotType.TURRET;
+		}
     }
 	
 	private static void construirArrays() {
@@ -598,16 +603,22 @@ public class Archon extends RobotPlayer{
 	            	
 	                if (rc.isCoreReady()) {
 		            	Boolean hasMoved = false;
-		            	/*RobotInfo[] adjacentNeutrals = rc.senseNearbyRobots(2, Team.NEUTRAL);
+		            	RobotInfo[] adjacentNeutrals = rc.senseNearbyRobots(2, Team.NEUTRAL);
 		            	//Si esta al costat d'un robot neutral, l'activa
 		            	if (adjacentNeutrals.length != 0){
-		                	rc.activate(adjacentNeutrals[0].location);
-		                	rc.setIndicatorString(0,"Ha activat un robot neutral");
-		                	hasMoved = true;
-		                }*/
+		                	for (RobotInfo i:adjacentNeutrals) {
+		                		if (i.type == RobotType.ARCHON) {
+		                			rc.activate(adjacentNeutrals[0].location);
+				                	rc.setIndicatorString(0,"Ha activat un robot neutral");
+				                	hasMoved = true;
+		                		}
+		                	}
+		                }
 		            	//Si pot fabricar un robot, el fabrica
 	                    if (!hasMoved && rc.getRobotCount() < molts_soldats && rc.hasBuildRequirements(nextRobotType)) {
-		                	hasMoved = buildRobot(nextRobotType);
+		                	if ((enCombat == 0 && buscantCombat == 0) || rc.senseNearbyRobots(visionRange, myTeam).length == 0) {
+		                		hasMoved = buildRobot(nextRobotType);
+		                	}
 		                }
 	                    //Es mou (o es queda quiet) a la casella amb mes prioritat
 		            	if (!hasMoved) {
@@ -631,6 +642,34 @@ public class Archon extends RobotPlayer{
             	}
             	else {
             		//MODO TURTLE
+            		num_scouts = 0;
+            		Signal[] signals = rc.emptySignalQueue();
+            		for (Signal s:signals) {
+            			if (s.getTeam() != myTeam) continue;
+                		if (s.getMessage() == null) continue;
+                		int[] coded = s.getMessage();
+                		Message m = new Message(s.getLocation(), coded[0], coded[1]);
+                		int mode = m.getMode();
+                		int object = m.getObject();
+            			int typeControl = m.getTypeControl();
+            			int robotType = m.getRobotType();
+            			int x = m.getX();
+            			int y = m.getY();
+            			int idControl = m.getidControl();
+            			int id = m.getid();
+                		if (typeControl == 1){
+            				if (!m.toArchon()) continue;
+            			}
+            			//Si el signal distingeix per ID del receptor i no esta dirigit a ell, l'ignora
+            			if (idControl == 1 && id != rc.getID()) continue;
+                		
+                		if (m.getSenderArchon() == 0) {
+	            			if (mode == Message.IM_HERE) {
+	            				++num_scouts;
+	            			}
+                		}
+            		}
+            		rc.setIndicatorString(1, "Scouts: "+num_scouts);
             		if (nextRobotType == RobotType.SOLDIER) chooseNextRobotType();
             		if (rc.isCoreReady()) {
             			if (rc.hasBuildRequirements(RobotType.TURRET)) buildTurtle();
