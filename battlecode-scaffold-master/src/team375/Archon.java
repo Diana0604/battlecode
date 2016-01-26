@@ -149,7 +149,8 @@ public class Archon extends RobotPlayer{
 		Direction dirToBuild = directions[rand.nextInt(8)];
         for (int i = 0; i < 8; i++) {
             // If possible, build in this direction
-            if (targetLocation.distanceSquaredTo(loc.add(dirToBuild)) > 2 && rc.canBuild(dirToBuild, RobotType.TURRET)) {
+        	int dist_lloc = targetLocation.distanceSquaredTo(loc.add(dirToBuild));
+            if (dist_lloc >= 2 && rc.canBuild(dirToBuild, RobotType.TURRET)) {
                 rc.build(dirToBuild, nextRobotType);
                 chooseNextRobotType();
             	rc.setIndicatorString(0,"Ha construit un soldat");
@@ -675,9 +676,11 @@ public class Archon extends RobotPlayer{
             		rc.setIndicatorString(1, "Scouts: "+num_scouts);
             		if (nextRobotType == RobotType.SOLDIER) chooseNextRobotType();
             		if (rc.isCoreReady()) {
-            			if (rc.hasBuildRequirements(RobotType.TURRET)) buildTurtle();
+            			if (rc.hasBuildRequirements(RobotType.TURRET)) {
+            				buildTurtle();
+            				rc.setIndicatorString(1, "Turret");
+            			}
             			else {
-            				rc.setIndicatorString(2, "Desti: ("+targetLocation.x+","+targetLocation.y+")");
 	        				Direction d = loc.directionTo(targetLocation);
 	        				if (rc.canMove(d)) {
 	        					rc.move(d);
