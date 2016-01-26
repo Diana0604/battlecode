@@ -48,22 +48,21 @@ public class Turret extends RobotPlayer {
 			}
 			
 			ref = Utils.addDirections(hor, ver);
-			
-			if (!rc.onTheMap(rc.getLocation().add(ref.rotateLeft(), 3))){
-				if (!rc.onTheMap(rc.getLocation().add(ref.rotateRight(), 3))){
-					int xmax = 3, ymax = 3;
-					while (!rc.onTheMap(rc.getLocation().add(ref.rotateLeft(), xmax--)));
-					while (!rc.onTheMap(rc.getLocation().add(ref.rotateRight(), ymax--)));
-					Corner = rc.getLocation().add(ref.rotateLeft(), xmax+1).add(ref.rotateRight(), ymax + 1);
-					}
+			if(ref != null)
+			{
+				if (!rc.onTheMap(rc.getLocation().add(ref.rotateLeft(), 3))){
+					if (!rc.onTheMap(rc.getLocation().add(ref.rotateRight(), 3))){
+						int xmax = 3, ymax = 3;
+						while (!rc.onTheMap(rc.getLocation().add(ref.rotateLeft(), xmax--)));
+						while (!rc.onTheMap(rc.getLocation().add(ref.rotateRight(), ymax--)));
+						Corner = rc.getLocation().add(ref.rotateLeft(), xmax+1).add(ref.rotateRight(), ymax + 1);
+						}
+				}
 			}
 			
 			
 			if(Corner != null)
 			{
-				int x = Corner.x;
-				int y = Corner.y;
-				
 				if(loc.x - loc.y == Corner.x - Corner.y)
 				{
 					d1 = true;
@@ -136,20 +135,6 @@ public class Turret extends RobotPlayer {
             try {
                 if(TTM && rc.isCoreReady())
             	{
-            		if(primer)
-            		{
-            			primer = false;
-            			buscaRef();
-            			if(Corner == null)
-            			{
-            				rc.setIndicatorString(rc.getID(), "no corner");
-            				hasMoved = true;
-            				TTM = false;
-            				rc.unpack();
-            			}
-            		}
-            		
-            		
             		if(dins)
             		{
             			if(!diagonal)
@@ -393,8 +378,13 @@ public class Turret extends RobotPlayer {
 	            {
 	           		if(primer) 
 	           		{
-	           			TTM = true;
-	           			rc.pack();
+	           			buscaRef();
+	           			if(Corner != null)
+	           			{
+	           				TTM = true;
+	           				rc.pack();
+	           			}
+	           			primer = false;
 	           		}
 	           		else 
 	           		{
