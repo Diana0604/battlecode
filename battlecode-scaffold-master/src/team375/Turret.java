@@ -24,6 +24,10 @@ public class Turret extends RobotPlayer {
 	private static boolean dins;
 	static MapLocation Corner;
 	static boolean d1;
+	
+	public static final int LEFT = 0;
+	public static final int RIGHT = 1;
+	public static int ori;
 	//busca on esta l'archon que l'ha creat
 	public static void buscaRef()
 	{
@@ -289,7 +293,9 @@ public class Turret extends RobotPlayer {
 	            					diagonal = false;
 	            					hasMoved = true;
 	            					ref = dir;
+	            					ori = LEFT;
 	            					rc.move(dir);
+	            					
 	            				}
 	            				if(!hasMoved)
 	            				{
@@ -299,6 +305,7 @@ public class Turret extends RobotPlayer {
 	                					ref = dir;
 	                					diagonal = false;
 	                					hasMoved = true;
+	                					ori = RIGHT;
 	                					rc.move(dir);
 	                				}
 	            				}
@@ -312,6 +319,7 @@ public class Turret extends RobotPlayer {
 	            					hasMoved = true;
 	            					ref = dir;
 	            					rc.move(dir);
+	            					ori = RIGHT;
 	            				}
 	            				if(!hasMoved)
 	            				{
@@ -321,6 +329,7 @@ public class Turret extends RobotPlayer {
 	                					ref = dir;
 	                					diagonal = false;
 	                					hasMoved = true;
+	                					ori = LEFT;
 	                					rc.move(dir);
 	                				}
 	            				}
@@ -334,7 +343,38 @@ public class Turret extends RobotPlayer {
             			
             			if(!diagonal && !hasMoved)
             			{
-            				if(rc.canMove(ref))
+            				int x = loc.x - Corner.x;
+            				int y = loc.y - Corner.y;
+            				if(x < 0) x = -x;
+            				if(y < 0) y = -y;
+            				if(ori == LEFT)
+            				{
+            					MapLocation m = loc.add(ref.rotateLeft());
+            					
+            					if(rc.canSenseLocation(m) && ((!d1 && y > 3) || (d1 && x > 3)))
+            					{
+            						if(rc.canMove(ref.rotateLeft()))
+            						{
+            							hasMoved = true;
+            							rc.move(ref.rotateLeft());
+            						}
+            					}
+            				}
+            				else
+            				{
+            					MapLocation m = loc.add(ref.rotateRight());
+            					if(rc.canSenseLocation(m) && (!d1 && x > 3) || (d1 && y > 3))
+            					{
+            						if(rc.canMove(ref.rotateRight()))
+            						{
+            							hasMoved = true;
+            							rc.move(ref.rotateRight());
+            						}
+            					}
+            				}
+            				
+            				
+            				if(!hasMoved && rc.canMove(ref))
             				{
             					hasMoved = true;
             					rc.move(ref);
