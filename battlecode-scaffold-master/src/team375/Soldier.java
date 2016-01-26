@@ -219,7 +219,7 @@ public class Soldier extends RobotPlayer {
             	}
             	if (stage == 4 && desti == cantonada && rc.getHealth() < 20) {
             		int dist = rc.getLocation().distanceSquaredTo(cantonada);
-            		if (80 <= dist && dist <= 90) return;
+            		if (80 <= dist && dist <= 90) rc.disintegrate();
             	}
             	
     			if (nenemies+nzombies > dens && !protegintArchon) {
