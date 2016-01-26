@@ -216,7 +216,7 @@ public class Scout extends RobotPlayer{
 		}
 	}
 	
-	private static void addCorner(int x, int y) throws GameActionException{
+	private static Direction whatCorner(int x, int y) throws GameActionException{
 		Direction d;
 		int dx = x-rc.getLocation().x;
 		int dy = y-rc.getLocation().y;
@@ -240,6 +240,11 @@ public class Scout extends RobotPlayer{
 				d = Direction.NORTH_EAST;
 			}else d = Direction.SOUTH_EAST;
 		}
+		return d;
+	}
+	
+	private static void addCorner(int x, int y) throws GameActionException{
+		Direction d = whatCorner(x,y);
 		//System.out.println("He rebut la direccio " +d);
 		corners.put(d, new MapLocation(x,y));
 	}
@@ -583,57 +588,66 @@ public class Scout extends RobotPlayer{
 	                		continue;
 	                	}
 	                	//System.out.println("La cantonada es " +corner);
-	                	Direction d = rc.getLocation().directionTo(corner);
-	                	Direction[] dirs = {d, d.rotateLeft(), d.rotateRight(), d.rotateLeft().rotateLeft(),
-											d.rotateRight().rotateRight(), d.rotateLeft().rotateLeft().rotateLeft(),
-											d.rotateRight().rotateRight().rotateRight(), d.opposite()};
-	                	if (rc.getLocation().distanceSquaredTo(corner) <= 8){
-	                		rc.setIndicatorString(0, "M'allunyo de la cantonada pq estic molt a prop");
-	                		Direction dir = corner.directionTo(rc.getLocation());
-	                		if (rc.canMove(dir)) rc.move(dir);
-	                		else if (rc.canMove(dir.rotateLeft())) rc.move(dir.rotateLeft());
-	                		else if (rc.canMove(dir.rotateRight())) rc.move(dir.rotateRight());
-	                		else {
-	                			//System.out.println("Em volia allunyar de la cantonada pero no em puc moure");
-	                			rc.setIndicatorString(0, "Em volia allunyar de la cantonada pero no em puc moure");
-	                		}
-	                		hasMoved = true;
-	                	}else if (Math.abs(corner.x-rc.getLocation().x) == Math.abs(corner.y - rc.getLocation().y)){ //si soc a la diagonal m'aparto
-	                		for (int i = 1; i < 8; i++){ //comenca a 1 perque no vagi per la diagonal cap als archons
-	                			if (rc.canMove(dirs[i]) && rc.getLocation().add(dirs[i]).distanceSquaredTo(corner) > 8){
+	                	Direction d = whatCorner(corner.x, corner.y);
+	                	if (rc.getLocation().distanceSquaredTo(corner) <= 24){
+	                		//Dins del quadrat 3x3
+	                		Direction[] dirs = {d.opposite(), d.opposite().rotateLeft(), d.opposite().rotateRight()};
+	                		
+	                		
+	                		for (int i = 0; i < dirs.length; i++){
+	                			if (!hasMoved && rc.canMove(dirs[i])) {
+	                				hasMoved = true;
 	                				rc.move(dirs[i]);
-	                				hasMoved = true;
-	                				rc.setIndicatorString(0, "M'aparto de la diagonal");
-	                				break;
+	                				rc.setIndicatorString(0, "M'allunyo de la cantonada pq estic molt a prop");
 	                			}
+	                			
 	                		}
-	                		if (!hasMoved) {
-	                			rc.setIndicatorString(0, "Em volia apartar de la diagonal pero no puc");
-	                			//System.out.println("Em volia apartar de la diagonal pero no puc");
-	                		}
-	                	}
-	                	if (!hasMoved && countAdjacentTTM() > 0){
-	                		for (int i = 0; i < 50; i++){
-	                			Direction dir = directions[rand.nextInt(8)];
-	                			if (rc.canMove(dir) && rc.getLocation().add(dir).distanceSquaredTo(corner) > 8){
-	                				rc.move(dir);
+	                	}else if (Math.abs(corner.x-rc.getLocation().x) == Math.abs(corner.y - rc.getLocation().y)){ //si soc a la diagonal m'aparto
+		                	if (rand.nextInt(2) == 0){
+		                		Direction[] dirs = {d.rotateLeft(), d.rotateRight(), d.rotateLeft().rotateLeft(),
+												d.rotateRight().rotateRight(), d.rotateLeft().rotateLeft().rotateLeft(),
+												d.rotateRight().rotateRight().rotateRight(), d.opposite()};
+		                		for (int i = 0; i < dirs.length; i++){
+		                			if (!hasMoved && rc.canMove(dirs[i]) && rc.getLocation().add(dirs[i]).distanceSquaredTo(corner) > 24) {
+		                				hasMoved = true;
+		                				rc.move(dirs[i]);
+		                				rc.setIndicatorString(0, "Estic a la diagonal i em moc on puc (antihorari primer)");
+		                			}
+		                			
+		                		}
+		                	}else{
+		                		Direction[] dirs = {d.rotateRight(), d.rotateLeft(), d.rotateRight().rotateRight(),
+										d.rotateLeft().rotateLeft(), d.rotateRight().rotateRight().rotateRight(),
+										d.rotateLeft().rotateLeft().rotateLeft(), d.opposite()};
+		                		for (int i = 0; i < dirs.length; i++){
+		                			if (!hasMoved && rc.canMove(dirs[i]) && rc.getLocation().add(dirs[i]).distanceSquaredTo(corner) > 24) {
+		                				hasMoved = true;
+		                				rc.move(dirs[i]);
+		                				rc.setIndicatorString(0, "Estic a la diagonal i em moc on puc (horari primer)");
+		                			}
+		                		}
+		                	}
+	                	}else{
+	                		//No estic al quadrat 3x3 ni a la diagonal
+	                		Direction[] dirs = {d, d.rotateLeft(), d.rotateRight()};
+	                		for (int i = 0; i < dirs.length; i++){
+	                			if (!hasMoved && rc.canMove(dirs[i]) && rc.getLocation().add(dirs[i]).distanceSquaredTo(corner) > 24) {
 	                				hasMoved = true;
-	                				rc.setIndicatorString(0, "Tinc una TTM al costat, per tant m'aparto");
-	                				break;
+	                				rc.move(dirs[i]);
+	                				rc.setIndicatorString(0, "Estic fora i em coloco en formacio");
 	                			}
 	                		}
 	                	}
 	                	if (!hasMoved){
 	                		for (int i = 0; i < 8; i++){
-	                			if (rc.senseRubble(rc.getLocation().add(dirs[i])) > 0){
-	                				rc.clearRubble(dirs[i]);
+	                			if (rc.senseRubble(rc.getLocation().add(directions[i])) > 0){
+	                				rc.clearRubble(directions[i]);
 	                				hasMoved = true;
 	        	                	rc.setIndicatorString(0, "He netejat rubble");
 	        	                	break;
 	                			}
 	                		}
 	                	}
-	                	rc.setIndicatorString(0, "No molesto per tant no em moc");
                 	}
                 }
                 Clock.yield();
