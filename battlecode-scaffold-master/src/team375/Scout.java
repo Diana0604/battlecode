@@ -351,10 +351,7 @@ public class Scout extends RobotPlayer{
 	}
 	
 	public static void sendSignalsStage4() throws GameActionException{
-		Message m = new Message(rc.getLocation(), Message.IM_HERE, 0, Message.ARCHON, 0, 0, 0,0,0,0);
-    	int[] coded = m.encode();
-    	rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
-    	
+		
 		
 		nearbyEnemies = rc.senseNearbyRobots(visionRange,enemyTeam);
         nearbyZombies = rc.senseNearbyRobots(visionRange,Team.ZOMBIE); 
@@ -381,8 +378,8 @@ public class Scout extends RobotPlayer{
         		//System.out.println("abcd");
         	}
         	//if (ri == null) System.out.println("ri null");
-        	m = new Message(rc.getLocation(), Message.SHOOT, 0, Message.ALL, ri.location.x, ri.location.y, 0,0,0,0);
-        	coded = m.encode();
+        	Message m = new Message(rc.getLocation(), Message.SHOOT, 0, Message.ALL, ri.location.x, ri.location.y, 0,0,0,0);
+        	int[] coded = m.encode();
         	rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
         	sentSignals++;
         	rc.setIndicatorString(1, "Objectiu amb mes prioritat a "+ri.location + " ("+ri.type+")");
@@ -541,13 +538,14 @@ public class Scout extends RobotPlayer{
                 	}
                 }else if (stage == 4){
                 	rc.setIndicatorString(1, "");
+                	Signal[] signals = rc.emptySignalQueue();
+                	
                 	sendSignalsStage4();
                 	Boolean hasMoved = false;
                 	if (rc.isCoreReady()){
 	                	MapLocation corner = getCornerLocation();
 	                	
 	                	if (corner == null) {
-	                		Signal[] signals = rc.emptySignalQueue();
 	                		for (Signal s: signals){
 	                			if (s.getTeam() != myTeam) continue;
 	                    		if (s.getMessage() == null) continue;
@@ -589,6 +587,51 @@ public class Scout extends RobotPlayer{
 	                		stage = 1;
 	                		continue;
 	                	}
+	                	
+	                	int nearbyScouts = 0;
+	                	for (Signal s: signals){
+	                		if (s.getTeam() != myTeam) continue;
+	                		if (s.getMessage() == null) continue;
+	                		if (hasMoved) continue;
+	                		int[] coded = s.getMessage();
+	                		Message m = new Message(s.getLocation(), coded[0], coded[1]);
+	                		int mode = m.getMode();
+	            			int object = m.getObject();
+	            			int typeControl = m.getTypeControl();
+	            			int x = m.getX();
+	            			int y = m.getY();
+	            			int idControl = m.getidControl();
+	            			int id = m.getid();
+	            			//Si el signal distingeix per tipus, i no esta dirigit als archons, l'ignora
+	            			if (typeControl == 1){
+	            				if (!m.toScout()) continue;
+	            			}
+	            			
+	            			//Si el signal distingeix per ID del receptor i no esta dirigit a ell, l'ignora
+	            			if (idControl == 1 && id != rc.getID()) continue;
+	                		
+	            			if (m.getSenderArchon() == 0 && mode == Message.IM_HERE){
+	            				nearbyScouts++;
+	            			}
+	                	}
+	                	if (nearbyScouts > 4){
+	                		rc.disintegrate();
+	                		/*
+	                		Direction d = rc.getLocation().directionTo(corner).opposite();
+	                		if (!rc.canMove(d)) d = d.rotateRight();
+	                		if (!rc.canMove(d)) d = d.rotateLeft().rotateLeft();
+	                		if (rc.canMove(d) && !hasMoved) {
+	                			hasMoved = true;
+	                			rc.move(d);
+	                		}
+	                		stage = 1;*/
+	                	}else{
+	                		Message m = new Message(rc.getLocation(), Message.IM_HERE, 0, Message.ALL, 0, 0, 0,0,0,0);
+	                    	int[] coded = m.encode();
+	                    	rc.broadcastMessageSignal(coded[0], coded[1], 2*rc.getType().sensorRadiusSquared);
+	                	}
+	                	
+	                	
 	                	//System.out.println("La cantonada es " +corner);
 	                	Direction d = whatCorner(corner.x, corner.y);
 	                	if (rc.getLocation().distanceSquaredTo(corner) <= 24){
