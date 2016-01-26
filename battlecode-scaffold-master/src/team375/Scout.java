@@ -540,6 +540,45 @@ public class Scout extends RobotPlayer{
 	                	MapLocation corner = getCornerLocation();
 	                	
 	                	if (corner == null) {
+	                		Signal[] signals = rc.emptySignalQueue();
+	                		for (Signal s: signals){
+	                			if (s.getTeam() != myTeam) continue;
+	                    		if (s.getMessage() == null) continue;
+	                    		if (hasMoved) continue;
+	                    		int[] coded = s.getMessage();
+	                    		Message m = new Message(s.getLocation(), coded[0], coded[1]);
+	                    		int mode = m.getMode();
+	                			int object = m.getObject();
+	                			int typeControl = m.getTypeControl();
+	                			int x = m.getX();
+	                			int y = m.getY();
+	                			int idControl = m.getidControl();
+	                			int id = m.getid();
+	                			
+	                			//Si el signal distingeix per tipus, i no esta dirigit als archons, l'ignora
+	                			if (typeControl == 1){
+	                				if (!m.toScout()) continue;
+	                			}
+	                			
+	                			//Si el signal distingeix per ID del receptor i no esta dirigit a ell, l'ignora
+	                			if (idControl == 1 && id != rc.getID()) continue;
+	                    		
+	                			if (m.getSenderArchon() == 1){
+	                				if (mode == Message.GO_TURTLE){
+	                					MapLocation loc = new MapLocation(x,y);
+	                					Direction dir = rc.getLocation().directionTo(loc);
+	                					if (!rc.canMove(dir)) dir = dir.rotateLeft();
+	                					if (!rc.canMove(dir)) dir = dir.rotateRight().rotateRight();
+	                					if (rc.canMove(dir)) {
+	                						hasMoved = true;
+	                						rc.move(dir);
+	                					}
+	                					
+	                				}
+	                			}
+	                		}
+	                		
+	                		
 	                		stage = 1;
 	                		continue;
 	                	}
