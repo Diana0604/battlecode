@@ -270,6 +270,24 @@ public class Turret extends RobotPlayer {
             					}
             				}
             			}
+            			
+            			if(!hasMoved)
+            			{
+            				if(rc.canMove(ref.rotateRight())) 
+            				{
+            					hasMoved = true;
+            					rc.move(ref.rotateRight());
+            				}
+            				else 
+            				{
+            					
+            					if (rc.canMove(ref.rotateLeft())) 
+            					{
+            						hasMoved = true;
+            						rc.move(ref.rotateLeft());
+            					}
+            				}
+            			}
             		}
             		
             		else 
