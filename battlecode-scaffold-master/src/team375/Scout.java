@@ -183,6 +183,7 @@ public class Scout extends RobotPlayer{
 	}
 	
 	private static void returnToLeader(){
+		if (rc.getLocation().equals(targetLocation)) rc.disintegrate();
 		Direction dirToLeader = rc.getLocation().directionTo(targetLocation);
 		
 		Direction[] dirs = {dirToLeader, dirToLeader.rotateLeft(), dirToLeader.rotateRight(), dirToLeader.rotateLeft().rotateLeft(),
@@ -278,6 +279,7 @@ public class Scout extends RobotPlayer{
 					stage = 2;
 				}
 				if (mode == Message.GO_TURTLE){
+					targetLocation = new MapLocation(x,y);
 					stage = 4;
 				}
 			}else{			
