@@ -243,8 +243,8 @@ public class Archon extends RobotPlayer{
 	    	else nextRobotType = RobotType.SOLDIER;
 		}
 		else {
-			int n = rand.nextInt(3);
-	    	if (n == 0 && num_scouts < 5) nextRobotType = RobotType.SCOUT;
+			int n = rand.nextInt(6);
+	    	if (n == 0) nextRobotType = RobotType.SCOUT;
 	    	else nextRobotType = RobotType.TURRET;
 		}
     }
