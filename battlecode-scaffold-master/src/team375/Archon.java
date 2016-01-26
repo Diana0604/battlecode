@@ -166,7 +166,6 @@ public class Archon extends RobotPlayer{
 	}
 
 	private static void calcDistanciaGran(Object[] archons) {
-    	distancia_gran = 0;
     	for (Object i:archons) {
     		for (Object j:archons) {
     			int dist = ((MapLocation)i).distanceSquaredTo((MapLocation)j);
