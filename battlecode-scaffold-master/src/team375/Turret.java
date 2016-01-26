@@ -288,50 +288,69 @@ public class Turret extends RobotPlayer {
             				if(fate%2 == 0)
             				{
 	            				Direction dir = ref.rotateLeft().rotateLeft().rotateLeft();
-	            				if(rc.canMove(dir)) 
+	            				while(!hasMoved)
 	            				{
-	            					diagonal = false;
-	            					hasMoved = true;
-	            					ref = dir;
-	            					ori = LEFT;
-	            					rc.move(dir);
-	            					
+		            				if(rc.canMove(dir)) 
+		            				{
+		            					diagonal = false;
+		            					hasMoved = true;
+		            					ref = ref.rotateLeft().rotateLeft().rotateLeft();
+		            					ori = LEFT;
+		            					rc.move(dir);
+		            				}
+		            				dir = dir.rotateRight();
+		            				if(dir == ref)break;
 	            				}
 	            				if(!hasMoved)
 	            				{
 	            					dir = ref.rotateRight().rotateRight().rotateRight();
-	                				if(rc.canMove(dir)) 
-	                				{
-	                					ref = dir;
-	                					diagonal = false;
-	                					hasMoved = true;
-	                					ori = RIGHT;
-	                					rc.move(dir);
-	                				}
+	            					while(!hasMoved)
+	            					{
+		                				if(rc.canMove(dir)) 
+		                				{
+		                					ref = ref.rotateRight().rotateRight().rotateRight();
+		                					diagonal = false;
+		                					hasMoved = true;
+		                					ori = RIGHT;
+		                					rc.move(dir);
+		                				}
+		                				dir = dir.rotateLeft();
+		                				if(dir == ref) break;
+	            					}
 	            				}
             				}
             				else
             				{
             					Direction dir = ref.rotateRight().rotateRight().rotateRight();
-	            				if(rc.canMove(dir)) 
-	            				{
-	            					diagonal = false;
-	            					hasMoved = true;
-	            					ref = dir;
-	            					rc.move(dir);
-	            					ori = RIGHT;
-	            				}
+            					while(!hasMoved)
+            					{
+	                				if(rc.canMove(dir)) 
+	                				{
+	                					ref = ref.rotateRight().rotateRight().rotateRight();
+	                					diagonal = false;
+	                					hasMoved = true;
+	                					ori = RIGHT;
+	                					rc.move(dir);
+	                				}
+	                				dir = dir.rotateLeft();
+	                				if(dir == ref) break;
+            					}
 	            				if(!hasMoved)
 	            				{
 	            					dir = ref.rotateLeft().rotateLeft().rotateLeft();
-	                				if(rc.canMove(dir)) 
-	                				{
-	                					ref = dir;
-	                					diagonal = false;
-	                					hasMoved = true;
-	                					ori = LEFT;
-	                					rc.move(dir);
-	                				}
+	            					while(!hasMoved)
+		            				{
+			            				if(rc.canMove(dir)) 
+			            				{
+			            					diagonal = false;
+			            					hasMoved = true;
+			            					ref = ref.rotateLeft().rotateLeft().rotateLeft();
+			            					ori = LEFT;
+			            					rc.move(dir);
+			            				}
+			            				dir = dir.rotateRight();
+			            				if(dir == ref)break;
+		            				}
 	            				}
             				}
             				if(!hasMoved)
